@@ -14,25 +14,24 @@
     <div class="sidebar-logo"><span class="icon"><i data-lucide="gem" style="color: var(--gold);"></i></span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
     <nav class="sidebar-nav">
       <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
-        <a href="index.html" class="sidebar-link"><span class="link-icon">📊</span> Dashboard</a>
-        <a href="products.html" class="sidebar-link"><span class="link-icon">💍</span> Products</a>
-        <a href="inventory.html" class="sidebar-link"><span class="link-icon">📦</span> Inventory <span class="badge">0</span></a>
-        <a href="orders.html" class="sidebar-link"><span class="link-icon">🛒</span> Orders <span class="badge">0</span></a>
+        <a href="index.html" class="sidebar-link"><span class="link-icon"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i></span> Dashboard</a>
+        <a href="products.html" class="sidebar-link"><span class="link-icon"><i data-lucide="gem" style="width: 18px; height: 18px;"></i></span> Products</a>
+        <a href="inventory.html" class="sidebar-link active"><span class="link-icon"><i data-lucide="package" style="width: 18px; height: 18px;"></i></span> Inventory <span class="badge">0</span></a>
+        <a href="orders.html" class="sidebar-link"><span class="link-icon"><i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i></span> Orders <span class="badge">0</span></a>
       </div>
       <div class="sidebar-section"><div class="sidebar-section-title">Management</div>
-        <a href="invoices.html" class="sidebar-link"><span class="link-icon">🧾</span> Invoices</a>
-        <a href="customers.html" class="sidebar-link"><span class="link-icon">👥</span> Customers</a>
-        <a href="settings.html" class="sidebar-link"><span class="link-icon">⚙️</span> Settings</a>
+        <a href="invoices.html" class="sidebar-link"><span class="link-icon"><i data-lucide="receipt" style="width: 18px; height: 18px;"></i></span> Invoices</a>
+        <a href="customers.html" class="sidebar-link"><span class="link-icon"><i data-lucide="users" style="width: 18px; height: 18px;"></i></span> Customers</a>
+        <a href="settings.html" class="sidebar-link"><span class="link-icon"><i data-lucide="settings" style="width: 18px; height: 18px;"></i></span> Settings</a>
       </div>
     </nav>
-    <div class="sidebar-footer"><a href="../index.html">🌐 View Storefront</a></div>
+    <div class="sidebar-footer"><a href="/"><i data-lucide="globe" style="width: 16px; height: 16px; margin-right: 8px;"></i> View Storefront</a></div>
   </aside>
-  <div class="sidebar-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;opacity:0;pointer-events:none;transition:opacity 0.3s;"></div>
 
   <main class="admin-main">
     <div class="topbar">
       <div class="topbar-left">
-        <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i data-lucide="menu"></i></button>
         <div><h1>Inventory</h1><div class="topbar-breadcrumb"><a href="index.html">Dashboard</a> / Inventory</div></div>
       </div>
       <div class="topbar-right"><div class="admin-avatar">A</div></div>
@@ -42,17 +41,17 @@
       <!-- Stock Stats -->
       <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
         <div class="stat-card">
-          <div class="stat-card-header"><div class="stat-card-icon green">✓</div></div>
+          <div class="stat-card-header"><div class="stat-card-icon green"><i data-lucide="check-circle" style="width: 20px; height: 20px;"></i></div></div>
           <div class="stat-card-value" id="inStockCount">0</div>
           <div class="stat-card-label">In Stock</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-header"><div class="stat-card-icon orange">⚠️</div></div>
+          <div class="stat-card-header"><div class="stat-card-icon orange"><i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i></div></div>
           <div class="stat-card-value" id="lowStockCount">0</div>
           <div class="stat-card-label">Low Stock</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-header"><div class="stat-card-icon" style="background:rgba(231,76,60,0.12);color:var(--red);">✕</div></div>
+          <div class="stat-card-header"><div class="stat-card-icon red"><i data-lucide="x-circle" style="width: 20px; height: 20px;"></i></div></div>
           <div class="stat-card-value" id="outStockCount">0</div>
           <div class="stat-card-label">Out of Stock</div>
         </div>
@@ -62,7 +61,7 @@
         <!-- Inventory Table -->
         <div class="table-card">
           <div class="table-header">
-            <div class="table-title">📦 Stock Levels</div>
+            <div class="table-title"><i data-lucide="package" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i> Stock Levels</div>
             <div class="table-actions">
               <button class="btn btn-sm btn-ghost inv-filter-btn active" onclick="filterInventory('')">All</button>
               <button class="btn btn-sm btn-ghost inv-filter-btn" onclick="filterInventory('low')">Low Stock</button>
@@ -80,7 +79,7 @@
         <!-- Stock History -->
         <div class="chart-card">
           <div class="chart-card-header">
-            <div class="chart-card-title">📋 Stock History</div>
+            <div class="chart-card-title"><i data-lucide="history" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i> Stock History</div>
           </div>
           <div class="timeline" id="stockTimeline" style="max-height:400px;overflow-y:auto;"></div>
         </div>

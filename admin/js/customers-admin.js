@@ -104,7 +104,6 @@ function editCustomer(id) {
 
 async function saveCustomer(e) {
   e.preventDefault();
-  const customers = DB.customers();
   const data = {
     name: document.getElementById('cName').value,
     email: document.getElementById('cEmail').value,
@@ -114,16 +113,13 @@ async function saveCustomer(e) {
   };
 
   if (editingCustomerId) {
-    const idx = customers.findIndex(c => c.id === editingCustomerId);
-    if (idx !== -1) customers[idx] = { ...customers[idx], ...data };
-    showToast('Customer updated!');
+    const { error } = await supabase.from('customers').update(data).eq('id', editingCustomerId);
+    if (!error) showToast('Customer updated!');
+    else console.error(error);
   } else {
-    data.id = DB.nextId(customers);
-    data.totalOrders = 0;
-    data.totalSpent = 0;
-    data.joinDate = new Date().toISOString().split('T')[0];
-    customers.push(data);
-    showToast('Customer added!');
+    const { error } = await supabase.from('customers').insert([data]);
+    if (!error) showToast('Customer added!');
+    else console.error(error);
   }
 
   await loadData();

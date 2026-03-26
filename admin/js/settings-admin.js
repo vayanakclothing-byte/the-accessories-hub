@@ -27,18 +27,17 @@ function loadSettings() {
   renderShippingProviders(s.shippingProviders || []);
 }
 
-function saveBusinessSettings(e) {
+async function saveBusinessSettings(e) {
   e.preventDefault();
   const s = DB.settings();
   s.businessName = document.getElementById('bizName').value;
   s.businessAddress = document.getElementById('bizAddress').value;
   s.businessPhone = document.getElementById('bizPhone').value;
   s.businessEmail = document.getElementById('bizEmail').value;
-  DB.saveSettings(s);
-  showToast('Business settings saved!');
+  await DB.saveSettings(s);
 }
 
-function saveWhatsAppSettings(e) {
+async function saveWhatsAppSettings(e) {
   e.preventDefault();
   const s = DB.settings();
   s.whatsappNumber = document.getElementById('waNumber').value;
@@ -47,8 +46,7 @@ function saveWhatsAppSettings(e) {
     shipped: document.getElementById('waShipped').value,
     delivered: document.getElementById('waDelivered').value
   };
-  DB.saveSettings(s);
-  showToast('WhatsApp settings saved!');
+  await DB.saveSettings(s);
 }
 
 function renderShippingProviders(providers) {
@@ -90,7 +88,7 @@ function editShippingProvider(index) {
   openModal('shippingModal');
 }
 
-function saveShippingProvider(e) {
+async function saveShippingProvider(e) {
   e.preventDefault();
   const s = DB.settings();
   const data = {
@@ -105,18 +103,16 @@ function saveShippingProvider(e) {
   } else {
     s.shippingProviders.push(data);
   }
-  DB.saveSettings(s);
+  await DB.saveSettings(s);
   closeAllModals();
   renderShippingProviders(s.shippingProviders);
-  showToast('Shipping provider saved!');
 }
 
-function removeShippingProvider(index) {
+async function removeShippingProvider(index) {
   const s = DB.settings();
   s.shippingProviders.splice(index, 1);
-  DB.saveSettings(s);
+  await DB.saveSettings(s);
   renderShippingProviders(s.shippingProviders);
-  showToast('Shipping provider removed.', 'error');
 }
 
 function testWhatsApp() {

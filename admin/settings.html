@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Settings — Admin | The Accessories Hub</title>
-  <link rel="stylesheet" href="css/admin.css">
-  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 <div class="admin-layout">
@@ -13,20 +14,19 @@
     <div class="sidebar-logo"><span class="icon"><i data-lucide="gem" style="color: var(--gold);"></i></span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
     <nav class="sidebar-nav">
       <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
-        <a href="index.html" class="sidebar-link"><span class="link-icon">📊</span> Dashboard</a>
-        <a href="products.html" class="sidebar-link"><span class="link-icon">💍</span> Products</a>
-        <a href="inventory.html" class="sidebar-link"><span class="link-icon">📦</span> Inventory <span class="badge">0</span></a>
-        <a href="orders.html" class="sidebar-link"><span class="link-icon">🛒</span> Orders <span class="badge">0</span></a>
+        <a href="index.html" class="sidebar-link"><span class="link-icon"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i></span> Dashboard</a>
+        <a href="products.html" class="sidebar-link"><span class="link-icon"><i data-lucide="gem" style="width: 18px; height: 18px;"></i></span> Products</a>
+        <a href="inventory.html" class="sidebar-link"><span class="link-icon"><i data-lucide="package" style="width: 18px; height: 18px;"></i></span> Inventory <span class="badge">0</span></a>
+        <a href="orders.html" class="sidebar-link"><span class="link-icon"><i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i></span> Orders <span class="badge">0</span></a>
       </div>
       <div class="sidebar-section"><div class="sidebar-section-title">Management</div>
-        <a href="invoices.html" class="sidebar-link"><span class="link-icon">🧾</span> Invoices</a>
-        <a href="customers.html" class="sidebar-link"><span class="link-icon">👥</span> Customers</a>
-        <a href="settings.html" class="sidebar-link"><span class="link-icon">⚙️</span> Settings</a>
+        <a href="invoices.html" class="sidebar-link"><span class="link-icon"><i data-lucide="receipt" style="width: 18px; height: 18px;"></i></span> Invoices</a>
+        <a href="customers.html" class="sidebar-link"><span class="link-icon"><i data-lucide="users" style="width: 18px; height: 18px;"></i></span> Customers</a>
+        <a href="settings.html" class="sidebar-link active"><span class="link-icon"><i data-lucide="settings" style="width: 18px; height: 18px;"></i></span> Settings</a>
       </div>
     </nav>
     <div class="sidebar-footer"><a href="/"><i data-lucide="globe" style="width: 16px; height: 16px; margin-right: 8px;"></i> View Storefront</a></div>
   </aside>
-  <div class="sidebar-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;opacity:0;pointer-events:none;transition:opacity 0.3s;"></div>
 
   <main class="admin-main">
     <div class="topbar">
@@ -40,7 +40,7 @@
     <div class="admin-content">
       <!-- Business Information -->
       <div class="settings-section">
-        <h3>🏢 Business Information</h3>
+        <h3><i data-lucide="building-2" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"></i> Business Information</h3>
         <div class="subtitle">Used in invoices and order communications</div>
         <form id="businessForm">
           <div class="form-row">
@@ -51,20 +51,20 @@
             <div class="form-group"><label class="form-label">Address</label><input class="form-input" id="bizAddress" placeholder="Kathmandu, Nepal"></div>
             <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="bizEmail" placeholder="hello@theaccessorieshub.com"></div>
           </div>
-          <button type="submit" class="btn btn-gold" style="margin-top:8px;">💾 Save Business Info</button>
+          <button type="submit" class="btn btn-gold" style="margin-top:8px;"><i data-lucide="save" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Save Business Info</button>
         </form>
       </div>
 
       <!-- WhatsApp -->
       <div class="settings-section">
-        <h3>💬 WhatsApp Notifications</h3>
+        <h3><i data-lucide="message-circle" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"></i> WhatsApp Notifications</h3>
         <div class="subtitle">Configure WhatsApp message templates for order lifecycle</div>
         <form id="whatsappForm">
           <div class="form-group">
             <label class="form-label">WhatsApp Business Number</label>
             <div style="display:flex;gap:10px;">
               <input class="form-input" id="waNumber" placeholder="9779800000000" style="flex:1;">
-              <button type="button" class="wa-btn" onclick="testWhatsApp()">🔗 Test</button>
+              <button type="button" class="wa-btn" onclick="testWhatsApp()"><i data-lucide="send" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: middle;"></i> Test</button>
             </div>
             <div class="form-help">Without + prefix, e.g. 9779800000000</div>
           </div>
@@ -83,13 +83,13 @@
             <textarea class="form-textarea" id="waDelivered" rows="3"></textarea>
             <div class="form-help">Variables: {name}, {orderId}</div>
           </div>
-          <button type="submit" class="btn btn-gold">💾 Save WhatsApp Settings</button>
+          <button type="submit" class="btn btn-gold"><i data-lucide="save" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Save WhatsApp Settings</button>
         </form>
       </div>
 
       <!-- Shipping Providers -->
       <div class="settings-section">
-        <h3>🚚 Shipping Providers</h3>
+        <h3><i data-lucide="truck" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"></i> Shipping Providers</h3>
         <div class="subtitle">Manage local shipping providers and rates</div>
         <div id="shippingProviders"></div>
         <button class="btn btn-outline" onclick="addShippingProvider()" style="margin-top:12px;">+ Add Provider</button>
@@ -97,9 +97,9 @@
 
       <!-- Danger Zone -->
       <div class="settings-section" style="border-color:rgba(231,76,60,0.3);">
-        <h3 style="color:var(--red);">⚠️ Danger Zone</h3>
+        <h3 style="color:var(--red);"><i data-lucide="alert-octagon" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"></i> Danger Zone</h3>
         <div class="subtitle">Irreversible actions</div>
-        <button class="btn btn-danger" onclick="resetData()">🔄 Reset All Data to Defaults</button>
+        <button class="btn btn-danger" onclick="resetData()"><i data-lucide="trash-2" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Reset All Data to Defaults</button>
       </div>
     </div>
   </main>
@@ -129,9 +129,10 @@
   </div>
 </div>
 
-<script src="js/admin-app.js"></script>
-<script src="js/settings-admin.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../js/supabase-client.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/admin/js/admin-app.js"></script>
+  <script src="/admin/js/settings-admin.js"></script>
+  <script>lucide.createIcons();</script>
 </body>
 </html>

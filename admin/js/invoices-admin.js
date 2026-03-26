@@ -41,7 +41,7 @@ function openGenerateInvoice() {
   openModal('generateModal');
 }
 
-function generateInvoice() {
+async function generateInvoice() {
   const orderId = parseInt(document.getElementById('invoiceOrderSelect').value);
   if (!orderId) { showToast('Please select an order', 'error'); return; }
 
@@ -50,15 +50,16 @@ function generateInvoice() {
 
   const invoices = DB.invoices();
   const invId = `INV-${String(invoices.length + 1).padStart(3, '0')}`;
-  invoices.push({
+  const newInv = {
     id: invId,
     orderId: order.id,
     customerName: order.customerName,
     amount: order.total,
     date: new Date().toISOString().split('T')[0],
     status: 'paid'
-  });
-  DB.saveInvoices(invoices);
+  };
+  invoices.push(newInv);
+  await DB.saveInvoices(invoices);
   closeAllModals();
   renderInvoicesTable();
   showToast(`Invoice ${invId} generated!`);

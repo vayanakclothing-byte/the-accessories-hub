@@ -62,7 +62,37 @@ const DB = {
   invoices() { return this._cache.invoices.map(i => ({...i, orderId: i.order_id, customerName: i.customer_name})); },
   stockHistory() { return this._cache.stockHistory.map(h => ({...h, newStock: h.new_stock, change: h.change_amount})); },
   settings() { return this._cache.settings; },
-  nextId(arr) { return arr.length ? Math.max(...arr.map(i => i.id)) + 1 : 1; }
+  nextId(arr) { return arr.length ? Math.max(...arr.map(i => i.id)) + 1 : 1; },
+  async saveSettings(data) {
+    const payload = {
+      id: 1,
+      business_name: data.businessName || data.business_name,
+      business_address: data.businessAddress || data.business_address,
+      business_phone: data.businessPhone || data.business_phone,
+      business_email: data.businessEmail || data.business_email,
+      whatsapp_number: data.whatsappNumber || data.whatsapp_number,
+      whatsapp_templates: data.whatsappTemplates || data.whatsapp_templates,
+      shipping_providers: data.shippingProviders || data.shipping_providers
+    };
+    const { error } = await supabase.from('settings').upsert(payload);
+    if (error) { showToast('Error saving settings', 'error'); console.error(error); }
+    else { await loadData(); showToast('Settings saved successfully!'); }
+  },
+  async saveInvoices(invoices) {
+    // Usually we only save the latest one, but upserting the whole array is safer if needed.
+    // However, Supabase upsert handles array of objects.
+    const payload = invoices.map(inv => ({
+      id: inv.id,
+      order_id: inv.orderId || inv.order_id,
+      customer_name: inv.customerName || inv.customer_name,
+      amount: inv.amount,
+      status: inv.status,
+      date: inv.date
+    }));
+    const { error } = await supabase.from('invoices').upsert(payload);
+    if (error) { showToast('Error saving invoices', 'error'); console.error(error); }
+    else await loadData();
+  }
 };
 
 // ===== TOAST NOTIFICATIONS =====
