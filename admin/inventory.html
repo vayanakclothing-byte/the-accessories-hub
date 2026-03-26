@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inventory — Admin | The Accessories Hub</title>
-  <link rel="stylesheet" href="css/admin.css">
-  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 <div class="admin-layout">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><span class="icon">💎</span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
+    <div class="sidebar-logo"><span class="icon"><i data-lucide="gem" style="color: var(--gold);"></i></span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
     <nav class="sidebar-nav">
       <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
         <a href="index.html" class="sidebar-link"><span class="link-icon">📊</span> Dashboard</a>
@@ -88,8 +89,9 @@
   </main>
 </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/supabase-client.js"></script>
-  <script src="js/admin-app.js"></script>
-<script src="js/inventory-admin.js"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/admin/js/admin-app.js"></script>
+  <script src="/admin/js/inventory-admin.js"></script>
+  <script>lucide.createIcons();</script>
 </body>
 </html>

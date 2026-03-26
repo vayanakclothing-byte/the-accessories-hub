@@ -73,12 +73,16 @@ function showToast(message, type = 'success') {
     container.className = 'toast-container';
     document.body.appendChild(container);
   }
-  const icons = { success: '✓', error: '✕', info: '💎' };
+  const icons = { success: 'check-circle', error: 'x-circle', info: 'info' };
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  toast.innerHTML = `<span>${icons[type] || '💎'}</span> ${message}`;
+  toast.innerHTML = `<i data-lucide="${icons[type] || 'info'}" style="width: 18px; height: 18px;"></i> ${message}`;
   container.appendChild(toast);
-  setTimeout(() => toast.remove(), 4000);
+  if (window.lucide) lucide.createIcons();
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
 }
 
 // ===== SIDEBAR NAVIGATION =====

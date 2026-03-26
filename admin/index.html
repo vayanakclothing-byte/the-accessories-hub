@@ -4,16 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — Admin | The Accessories Hub</title>
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="/admin/css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 <div class="admin-layout">
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <span class="icon">💎</span>
+      <span class="icon"><i data-lucide="gem" style="color: var(--gold);"></i></span>
       <div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div>
     </div>
     <nav class="sidebar-nav">
@@ -31,7 +32,7 @@
         <a href="settings.html" class="sidebar-link"><span class="link-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span> Settings</a>
       </div>
     </nav>
-    <div class="sidebar-footer"><a href="../index.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe" style="margin-right: 8px; vertical-align: middle;"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> View Storefront</a></div>
+    <div class="sidebar-footer"><a href="/"><i data-lucide="globe" style="width: 16px; height: 16px; margin-right: 8px;"></i> View Storefront</a></div>
   </aside>
 
   <div class="sidebar-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;opacity:0;pointer-events:none;transition:opacity 0.3s;"></div>
@@ -41,14 +42,14 @@
     <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-left">
-        <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i data-lucide="menu"></i></button>
         <div>
           <h1>Dashboard</h1>
           <div class="topbar-breadcrumb">Welcome back, Admin</div>
         </div>
       </div>
       <div class="topbar-right">
-        <button class="topbar-btn" title="Notifications">🔔<span class="dot"></span></button>
+        <button class="topbar-btn" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
         <div class="admin-avatar">A</div>
       </div>
     </div>
@@ -58,7 +59,7 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-card-header">
-            <div class="stat-card-icon gold">💰</div>
+            <div class="stat-card-icon gold"><i data-lucide="dollar-sign"></i></div>
             <span class="stat-card-change up">↑ 12%</span>
           </div>
           <div class="stat-card-value" id="statRevenue">Rs. 0</div>
@@ -66,7 +67,7 @@
         </div>
         <div class="stat-card">
           <div class="stat-card-header">
-            <div class="stat-card-icon blue">📋</div>
+            <div class="stat-card-icon blue"><i data-lucide="clipboard-list"></i></div>
             <span class="stat-card-change up">↑ 8%</span>
           </div>
           <div class="stat-card-value" id="statOrders">0</div>
@@ -74,7 +75,7 @@
         </div>
         <div class="stat-card">
           <div class="stat-card-header">
-            <div class="stat-card-icon green">👥</div>
+            <div class="stat-card-icon green"><i data-lucide="users"></i></div>
             <span class="stat-card-change up">↑ 15%</span>
           </div>
           <div class="stat-card-value" id="statCustomers">0</div>
@@ -82,7 +83,7 @@
         </div>
         <div class="stat-card">
           <div class="stat-card-header">
-            <div class="stat-card-icon orange">💍</div>
+            <div class="stat-card-icon orange"><i data-lucide="gem"></i></div>
           </div>
           <div class="stat-card-value" id="statProducts">0</div>
           <div class="stat-card-label">Active Products</div>
@@ -134,8 +135,9 @@
   </main>
 </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/supabase-client.js"></script>
-  <script src="js/admin-app.js"></script>
-<script src="js/dashboard.js"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/admin/js/admin-app.js"></script>
+  <script src="/admin/js/dashboard.js"></script>
+  <script>lucide.createIcons();</script>
 </body>
 </html>

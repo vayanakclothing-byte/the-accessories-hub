@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Products — Admin | The Accessories Hub</title>
-  <link rel="stylesheet" href="css/admin.css">
-  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 <div class="admin-layout">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><span class="icon">💎</span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
+    <div class="sidebar-logo"><span class="icon"><i data-lucide="gem" style="color: var(--gold);"></i></span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
     <nav class="sidebar-nav">
       <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
         <a href="index.html" class="sidebar-link"><span class="link-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg></span> Dashboard</a>
@@ -24,14 +25,14 @@
         <a href="settings.html" class="sidebar-link"><span class="link-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span> Settings</a>
       </div>
     </nav>
-    <div class="sidebar-footer"><a href="../index.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe" style="margin-right: 8px; vertical-align: middle;"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> View Storefront</a></div>
+    <div class="sidebar-footer"><a href="/"><i data-lucide="globe" style="width: 16px; height: 16px; margin-right: 8px;"></i> View Storefront</a></div>
   </aside>
   <div class="sidebar-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;opacity:0;pointer-events:none;transition:opacity 0.3s;"></div>
 
   <main class="admin-main">
     <div class="topbar">
       <div class="topbar-left">
-        <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i data-lucide="menu"></i></button>
         <div><h1>Products</h1><div class="topbar-breadcrumb"><a href="index.html">Dashboard</a> / Products</div></div>
       </div>
       <div class="topbar-right"><div class="admin-avatar">A</div></div>
@@ -40,9 +41,9 @@
     <div class="admin-content">
       <div class="table-card">
         <div class="table-header">
-          <div class="table-title">💍 All Products <span style="font-size:0.8rem;color:var(--white-muted);font-family:var(--font-sans);margin-left:8px;" id="productsCount"></span></div>
+          <div class="table-title"><i data-lucide="gem" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i> All Products <span style="font-size:0.8rem;color:var(--white-muted);font-family:var(--font-sans);margin-left:8px;" id="productsCount"></span></div>
           <div class="table-actions">
-            <div class="table-search"><span class="icon">🔍</span><input type="text" placeholder="Search products..." id="productSearch" oninput="searchProducts()"></div>
+            <div class="table-search"><i data-lucide="search" style="width: 16px; height: 16px; margin-right: 8px; color: var(--white-muted);"></i><input type="text" placeholder="Search products..." id="productSearch" oninput="searchProducts()"></div>
             <button class="btn btn-gold" onclick="openAddProduct()">+ Add Product</button>
           </div>
         </div>
@@ -125,8 +126,9 @@
 </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/supabase-client.js"></script>
-  <script src="js/admin-app.js"></script>
-<script src="js/products-admin.js"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/admin/js/admin-app.js"></script>
+  <script src="/admin/js/products-admin.js"></script>
+  <script>lucide.createIcons();</script>
 </body>
 </html>
