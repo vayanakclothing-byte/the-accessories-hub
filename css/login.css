@@ -1,0 +1,244 @@
+/* ============================================================
+   THE ACCESSORIES HUB — Login & Sign Up
+   Split Screen, Minimal Matte Black styling
+   ============================================================ */
+
+.login-body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: #050505;
+  font-family: 'Outfit', sans-serif;
+  color: #fff;
+}
+
+.split-screen {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* --- Left Side Blur Image --- */
+.split-left {
+  flex: 1;
+  position: relative;
+  background: url('../images/temple-necklace.png') center/cover no-repeat;
+  /* Add artistic blur and dark tint */
+  filter: sepia(30%) hue-rotate(340deg) contrast(120%);
+}
+
+.split-left::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(5,5,5,0.85) 100%);
+  backdrop-filter: blur(8px);
+}
+
+.image-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-4xl);
+  z-index: 2;
+}
+
+.logo-back {
+  display: inline-block;
+}
+
+.quote h2 {
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  color: var(--gold);
+  margin-bottom: var(--space-sm);
+  line-height: 1.1;
+}
+
+.quote p {
+  font-size: 1.1rem;
+  color: var(--white-muted);
+  max-width: 80%;
+}
+
+/* --- Right Side Form --- */
+.split-right {
+  flex: 0 0 500px;
+  background: #0a0a0a; /* Matte Black */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -10px 0 50px rgba(0,0,0,0.5);
+  position: relative;
+  z-index: 5;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-2xl);
+}
+
+.auth-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 500;
+  margin-bottom: var(--space-xs);
+  color: var(--white);
+}
+
+.auth-subtitle {
+  color: var(--white-muted);
+  font-size: 0.95rem;
+  margin-bottom: var(--space-2xl);
+}
+
+/* --- Google Button --- */
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-sm);
+  color: var(--white);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-bottom: var(--space-lg);
+}
+
+.btn-google img {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-google:hover {
+  background: rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+/* --- Divider --- */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin-bottom: var(--space-lg);
+  color: var(--grey-light);
+  font-size: 0.85rem;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--grey-mid);
+}
+
+.divider span {
+  padding: 0 10px;
+}
+
+/* --- Input Fields --- */
+.input-group {
+  margin-bottom: var(--space-lg);
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--white-muted);
+  margin-bottom: var(--space-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-group input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(212, 175, 55, 0.4); /* Thin gold border */
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  color: var(--white);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+}
+
+.input-group input::placeholder {
+  color: #555;
+}
+
+/* --- Form Options --- */
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xl);
+  font-size: 0.85rem;
+}
+
+.forgot-link {
+  color: var(--white-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.forgot-link:hover {
+  color: var(--gold);
+}
+
+/* --- Sign In Button --- */
+.btn-block {
+  width: 100%;
+  padding: 16px;
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+
+/* --- Toggle Text --- */
+.toggle-text {
+  text-align: center;
+  margin-top: var(--space-2xl);
+  font-size: 0.9rem;
+  color: var(--white-muted);
+}
+
+.toggle-text a {
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity var(--transition-fast);
+}
+
+.toggle-text a:hover {
+  opacity: 0.8;
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .split-left {
+    display: none;
+  }
+  .split-right {
+    flex: 1;
+    max-width: none;
+  }
+  .login-body {
+    overflow: auto;
+  }
+}

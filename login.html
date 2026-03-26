@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Sign Up — The Accessories Hub</title>
+  <meta name="description" content="Access your account at The Accessories Hub.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body class="login-body">
+
+  <div class="split-screen">
+    <!-- Left Side: Image -->
+    <div class="split-left">
+      <div class="image-overlay">
+        <a href="index.html" class="logo-back">
+          <img src="images/logo.png" alt="The Accessories Hub" style="height: 60px;">
+        </a>
+        <div class="quote">
+          <h2>Redefining Elegance</h2>
+          <p>Discover hand-crafted jewelry for the modern woman.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side: Form -->
+    <div class="split-right">
+      <div class="form-container">
+        <h1 class="auth-title">Welcome Back</h1>
+        <p class="auth-subtitle">Sign in to access your orders, wishlists, and exclusive offers.</p>
+
+        <button class="btn-google" onclick="handleGoogleSignIn()">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo">
+          CONTINUE WITH GOOGLE
+        </button>
+
+        <div class="divider">
+          <span>or sign in with email</span>
+        </div>
+
+        <form class="auth-form" id="loginForm">
+          <div class="input-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" required placeholder="hello@example.com">
+          </div>
+          <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" required placeholder="••••••••">
+          </div>
+          <div class="form-options">
+            <label class="custom-checkbox">
+              <input type="checkbox">
+              <span class="checkmark"></span>
+              Remember me
+            </label>
+            <a href="#" class="forgot-link">Forgot password?</a>
+          </div>
+          <button type="submit" class="btn btn-gold btn-block">Sign In</button>
+        </form>
+
+        <p class="toggle-text">
+          New to the Hub? <a href="#" id="toggleSignUp">Create an Account</a>
+        </p>
+
+        <!-- Message Container -->
+        <div id="authMessage" style="margin-top: 15px; text-align: center; color: var(--red); display: none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

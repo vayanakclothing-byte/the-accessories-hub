@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop All Collections — The Accessories Hub</title>
+  <meta name="description" content="Browse our complete collection of Korean, Temple, and Oxidized jewelry. Filter by collection, category, price, and more.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/products.css">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header scrolled" id="siteHeader">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="The Accessories Hub" style="height: 55px; width: auto;">
+        <span>THE ACCESSORIES HUB</span>
+      </a>
+      <nav class="nav-desktop">
+        <a href="index.html">Home</a>
+        <div class="mega-menu-trigger">
+          <a href="products.html" class="active">Collections</a>
+          <div class="mega-menu">
+            <div class="mega-menu-col">
+              <h4>By Style</h4>
+              <a href="products.html?collection=korean">Korean Collection</a>
+              <a href="products.html?collection=temple">Temple Collection</a>
+              <a href="products.html?collection=oxidized">Oxidized Collection</a>
+            </div>
+            <div class="mega-menu-col">
+              <h4>By Category</h4>
+              <a href="products.html?category=necklaces">Necklaces</a>
+              <a href="products.html?category=earrings">Earrings</a>
+              <a href="products.html?category=rings">Rings</a>
+              <a href="products.html?category=bracelets">Bracelets</a>
+            </div>
+            <div class="mega-menu-col">
+              <h4>Featured</h4>
+              <a href="products.html?badge=new">New Arrivals</a>
+              <a href="products.html?badge=best">Best Sellers</a>
+              <a href="products.html?badge=trending">Trending Now</a>
+            </div>
+          </div>
+        </div>
+        <a href="products.html">Shop</a>
+        <a href="index.html#story">About</a>
+      </nav>
+      <div class="nav-actions">
+        <button onclick="window.location.href='products.html'" title="Search" aria-label="Search">
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+        <button onclick="window.location.href='login.html'" title="Account" aria-label="Account" class="nav-user-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+        <button onclick="window.location.href='checkout.html'" title="Cart" aria-label="Cart">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="cart-count" style="display:none;">0</span>
+        </button>
+        <div class="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  <div class="nav-overlay"></div>
+  <nav class="mobile-nav">
+    <a href="index.html">Home</a>
+    <a href="products.html">Shop All</a>
+    <a href="products.html?collection=korean">Korean Collection</a>
+    <a href="products.html?collection=temple">Temple Collection</a>
+    <a href="products.html?collection=oxidized">Oxidized Collection</a>
+    <a href="index.html#story">About Us</a>
+    <a href="checkout.html">Cart</a>
+  </nav>
+
+  <!-- ===== PAGE HEADER ===== -->
+  <section class="page-header">
+    <div class="container" id="pageHeaderContainer">
+      <div class="breadcrumbs">
+        <a href="index.html">Home</a>
+        <span class="separator">›</span>
+        <span>Shop</span>
+      </div>
+      <h1>Our Collection</h1>
+      <p>Discover the perfect piece that speaks to your style</p>
+    </div>
+  </section>
+
+  <!-- ===== SHOP LAYOUT ===== -->
+  <section class="container">
+    
+
+    <div class="shop-layout">
+      <!-- Sidebar -->
+      <aside class="shop-sidebar">
+        <div class="filter-group">
+          <h3>Collections</h3>
+          <label class="custom-checkbox">
+            <input type="checkbox" name="collection" value="Korean">
+            <span class="checkmark"></span>
+            Korean
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" name="collection" value="Temple">
+            <span class="checkmark"></span>
+            Temple
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" name="collection" value="Oxidized">
+            <span class="checkmark"></span>
+            Oxidized
+          </label>
+        </div>
+
+        <div class="filter-group">
+          <h3>Categories</h3>
+          <label class="custom-checkbox">
+            <input type="checkbox" name="category" value="Necklaces">
+            <span class="checkmark"></span>
+            Necklaces
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" name="category" value="Earrings">
+            <span class="checkmark"></span>
+            Earrings
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" name="category" value="Rings">
+            <span class="checkmark"></span>
+            Rings
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" name="category" value="Bracelets">
+            <span class="checkmark"></span>
+            Bracelets
+          </label>
+        </div>
+      </aside>
+
+      <!-- Products -->
+      <main>
+        <div class="products-header">
+          <span class="products-count" id="productsCount">Loading...</span>
+          <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+            <div class="sort-select">
+              <label for="sortSelect">Sort:</label>
+              <select id="sortSelect">
+                <option value="featured">Featured</option>
+                <option value="newest">Newest</option>
+                <option value="price-low">Price: Low → High</option>
+                <option value="price-high">Price: High → Low</option>
+                <option value="name">Name: A → Z</option>
+              </select>
+            </div>
+            <div class="view-toggle">
+              <button data-view="grid" class="active" title="Grid View">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grid-2x2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 12h18"/><path d="M12 3v18"/></svg>
+              </button>
+              <button data-view="list" title="List View">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        
+
+        <div class="products-grid" id="productsGrid">
+          <!-- Populated by JS -->
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer" id="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>The Accessories Hub</h4>
+          <p>Your destination for premium handcrafted jewelry. From Korean minimalism to Temple grandeur, we bring you
+            collections that celebrate beauty and craftsmanship.</p>
+          <div class="footer-social">
+            <a href="https://www.instagram.com/theaccessorieshub2025/" title="Instagram" aria-label="Instagram">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-instagram">
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+              </svg>
+            </a>
+            <a href="https://wa.me/9779805659501" title="WhatsApp" aria-label="WhatsApp">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-message-circle">
+                <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+              </svg>
+            </a>
+            <a href="https://www.tiktok.com/@the.accessories.h6?is_from_webapp=1&sender_device=pc" title="TikTok"
+              aria-label="TikTok">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-music">
+                <path d="M9 18V5l12-2v13" />
+                <circle cx="6" cy="18" r="3" />
+                <circle cx="18" cy="16" r="3" />
+              </svg>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61581145049725" title="Facebook" aria-label="Facebook">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-facebook">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <a href="products.html">Shop All</a>
+          <a href="products.html?collection=korean">Korean</a>
+          <a href="products.html?collection=temple">Temple</a>
+          <a href="products.html?collection=oxidized">Oxidized</a>
+          <a href="index.html#story">About Us</a>
+        </div>
+        <div class="footer-col">
+          <h4>Help</h4>
+          <a href="#">Shipping Policy</a>
+          <a href="#">Return & Exchange</a>
+          <a href="#">FAQs</a>
+          <a href="#">Contact Us</a>
+          <a href="#">Track Order</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <p>📍 Birgunj, Nepal</p>
+          <p>📞 +977 9805659501</p>
+          <p>✉️ theaccessorieshub2530@gmail.com</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 The Accessories Hub. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Quick View Modal -->
+  <div class="quick-view-modal" id="quickViewModal" onclick="if(event.target===this)closeQuickView()">
+    <div class="quick-view-content">
+      <button class="quick-view-close" onclick="closeQuickView()">✕</button>
+      <div class="quick-view-image"></div>
+      <div class="quick-view-details"></div>
+    </div>
+  </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/products.js"></script>
+
+</body>
+</html>

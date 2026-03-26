@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Accessories Hub — Redefining Elegance | Premium Jewelry</title>
+  <meta name="description"
+    content="Discover exquisite handcrafted jewelry at The Accessories Hub. Shop Korean, Temple, and Oxidized collections. Tarnish-free, premium quality accessories.">
+  <link rel="stylesheet" href="css/style.css?v=1.1">
+  <link rel="stylesheet" href="css/landing.css?v=1.1">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header transparent" data-transparent="true" id="siteHeader">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="The Accessories Hub" style="height: 55px; width: auto;">
+        <span>THE ACCESSORIES HUB</span>
+      </a>
+
+      <nav class="nav-desktop">
+        <a href="index.html" class="active">Home</a>
+        <div class="mega-menu-trigger">
+          <a href="products.html">Collections</a>
+          <div class="mega-menu">
+            <div class="mega-menu-col">
+              <h4>By Style</h4>
+              <a href="products.html?collection=korean">Korean Collection</a>
+              <a href="products.html?collection=temple">Temple Collection</a>
+              <a href="products.html?collection=oxidized">Oxidized Collection</a>
+            </div>
+            <div class="mega-menu-col">
+              <h4>By Category</h4>
+              <a href="products.html?category=necklaces">Necklaces</a>
+              <a href="products.html?category=earrings">Earrings</a>
+              <a href="products.html?category=rings">Rings</a>
+              <a href="products.html?category=bracelets">Bracelets</a>
+            </div>
+            <div class="mega-menu-col">
+              <h4>Featured</h4>
+              <a href="products.html?badge=new">New Arrivals</a>
+              <a href="products.html?badge=best">Best Sellers</a>
+              <a href="products.html?badge=trending">Trending Now</a>
+            </div>
+          </div>
+        </div>
+        <a href="products.html">Shop</a>
+        <a href="#story">About</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button onclick="window.location.href='products.html'" title="Search" aria-label="Search">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-search">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+        </button>
+        <button onclick="window.location.href='login.html'" title="Account" aria-label="Account" class="nav-user-btn"
+          id="navUserBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-user">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </button>
+        <button onclick="window.location.href='checkout.html'" title="Cart" aria-label="Cart">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-shopping-bag">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+            <path d="M3 6h18" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          <span class="cart-count" style="display:none;">0</span>
+        </button>
+        <div class="hamburger" aria-label="Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  <div class="nav-overlay"></div>
+  <nav class="mobile-nav">
+    <a href="index.html">Home</a>
+    <a href="products.html">Shop All</a>
+    <a href="products.html?collection=korean">Korean Collection</a>
+    <a href="products.html?collection=temple">Temple Collection</a>
+    <a href="products.html?collection=oxidized">Oxidized Collection</a>
+    <a href="#story">About Us</a>
+    <a href="checkout.html">Cart</a>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="hero">
+    <div class="hero-bg">
+      <img src="images/hero.png" alt="Luxury Gold Jewelry">
+    </div>
+    <div class="hero-content">
+      <h1 class="hero-title">
+        GLAMOR IN Every
+        <span class="gold"> DETAILS </span>
+      </h1>
+      <p class="hero-subtitle">
+        Discover our curated collections of exquisite Korean, Temple, and Oxidized jewelry — handcrafted for the modern
+        woman who values timeless beauty.
+      </p>
+      <div class="hero-actions">
+        <a href="products.html" class="btn btn-gold btn-lg">Shop the Collection</a>
+        <a href="#collections" class="btn btn-outline btn-lg">Explore Styles</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <div class="arrow"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- ===== MARQUEE ===== -->
+  <div class="marquee-bar">
+    <div class="marquee-track">
+      <span>✦ FREE SHIPPING ON ORDERS ABOVE RS. 2000</span>
+      <span>✦ 100% TARNISH-FREE GUARANTEE</span>
+      <span>✦ HANDCRAFTED WITH LOVE</span>
+      <span>✦ EASY RETURNS & EXCHANGES</span>
+      <span>✦ FREE SHIPPING ON ORDERS ABOVE RS. 2000</span>
+      <span>✦ 100% TARNISH-FREE GUARANTEE</span>
+      <span>✦ HANDCRAFTED WITH LOVE</span>
+      <span>✦ EASY RETURNS & EXCHANGES</span>
+    </div>
+  </div>
+
+  <!-- ===== CATEGORIES ===== -->
+  <section class="categories-section section-padding" id="categories">
+    <div class="container">
+      <h2 class="section-title animate-on-scroll">Shop by Category</h2>
+      <div class="gold-divider animate-on-scroll"></div>
+      <p class="section-subtitle animate-on-scroll">Find your perfect piece from our carefully curated collections</p>
+
+      <div class="categories-grid">
+        <a href="products.html?category=necklaces" class="category-card animate-on-scroll">
+          <div class="category-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-gem">
+              <path d="M6 3h12l4 6-10 13L2 9Z" />
+              <path d="M11 3 8 9l4 13 4-13-3-6" />
+              <path d="M2 9h20" />
+            </svg>
+          </div>
+          <span class="category-name">Necklaces</span>
+        </a>
+        <a href="products.html?category=earrings" class="category-card animate-on-scroll">
+          <div class="category-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-sparkles">
+              <path
+                d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+              <path d="M5 3v4" />
+              <path d="M19 17v4" />
+              <path d="M3 5h4" />
+              <path d="M17 19h4" />
+            </svg>
+          </div>
+          <span class="category-name">Earrings</span>
+        </a>
+        <a href="products.html?category=rings" class="category-card animate-on-scroll">
+          <div class="category-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-circle-dot">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </div>
+          <span class="category-name">Rings</span>
+        </a>
+        <a href="products.html?category=bracelets" class="category-card animate-on-scroll">
+          <div class="category-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-watch">
+              <circle cx="12" cy="12" r="7" />
+              <polyline points="12 9 12 12 13.5 13.5" />
+              <path d="M16.51 17.35 15.5 22H8.5l-1.01-4.65" />
+              <path d="m7.49 6.65 1.01-4.65h7l1.01 4.65" />
+            </svg>
+          </div>
+          <span class="category-name">Bracelets</span>
+        </a>
+        <a href="products.html?collection=oxidized" class="category-card animate-on-scroll">
+          <div class="category-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-moon-star">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+              <path d="M19 3v4" />
+              <path d="M21 5h-4" />
+            </svg>
+          </div>
+          <span class="category-name">Oxidized</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURED PRODUCTS ===== -->
+  <section class="featured-section section-padding" id="featured">
+    <div class="container">
+      <h2 class="section-title animate-on-scroll">Best Sellers</h2>
+      <div class="gold-divider animate-on-scroll"></div>
+      <p class="section-subtitle animate-on-scroll">Our most loved pieces, chosen by thousands of happy customers</p>
+
+      <div class="featured-grid" id="featuredGrid">
+        <!-- Populated by JS -->
+      </div>
+
+      <div style="text-align:center; margin-top: 3rem;" class="animate-on-scroll">
+        <a href="products.html" class="btn btn-outline">View All Products →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COLLECTIONS ===== -->
+  <section class="collections-section section-padding" id="collections">
+    <div class="container">
+      <h2 class="section-title animate-on-scroll">Our Collections</h2>
+      <div class="gold-divider animate-on-scroll"></div>
+      <p class="section-subtitle animate-on-scroll">Three distinct styles, one shared promise of quality</p>
+
+      <div class="collections-grid">
+        <a href="products.html?collection=korean" class="collection-card animate-on-scroll">
+          <img src="images/korean-earrings.png" alt="Korean Collection">
+          <div class="collection-card-overlay">
+            <h3>Korean Collection</h3>
+            <p>Minimalist elegance for the modern woman</p>
+            <span class="explore-link">Explore →</span>
+          </div>
+        </a>
+        <a href="products.html?collection=temple" class="collection-card animate-on-scroll">
+          <img src="images/temple-necklace.png" alt="Temple Collection">
+          <div class="collection-card-overlay">
+            <h3>Temple Collection</h3>
+            <p>Grand heritage pieces for special occasions</p>
+            <span class="explore-link">Explore →</span>
+          </div>
+        </a>
+        <a href="products.html?collection=oxidized" class="collection-card animate-on-scroll">
+          <img src="images/oxidized-necklace.png" alt="Oxidized Collection">
+          <div class="collection-card-overlay">
+            <h3>Oxidized Collection</h3>
+            <p>Vintage charm with a bohemian soul</p>
+            <span class="explore-link">Explore →</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STORY / ABOUT ===== -->
+  <section class="story-section section-padding" id="story">
+    <div class="container">
+      <div class="story-grid">
+        <div class="story-image animate-on-scroll">
+          <img src="images/gold-bracelet.png" alt="Our Craftsmanship">
+        </div>
+        <div class="story-content animate-on-scroll">
+          <h2>Our Story</h2>
+          <p>Born from a passion for exceptional craftsmanship, The Accessories Hub curates only the finest jewelry from
+            across Asia. Every piece in our collection is handpicked for its quality, design, and ability to make you
+            feel extraordinary.</p>
+          <p>From the intricate artistry of South Indian temple jewelry to the sleek minimalism of Korean fashion, we
+            bring you collections that celebrate diverse beauty traditions.</p>
+          <div class="story-stats">
+            <div class="stat">
+              <span class="number">5K+</span>
+              <span class="label">Happy Customers</span>
+            </div>
+            <div class="stat">
+              <span class="number">200+</span>
+              <span class="label">Unique Designs</span>
+            </div>
+            <div class="stat">
+              <span class="number">100%</span>
+              <span class="label">Quality Promise</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TRUST BADGES ===== -->
+  <section class="trust-section section-padding bg-grey" id="trust">
+    <div class="container">
+      <h2 class="section-title animate-on-scroll">Why Choose Us</h2>
+      <div class="gold-divider animate-on-scroll"></div>
+      <br>
+      <div class="trust-badges animate-on-scroll">
+        <div class="trust-badge">
+          <div class="badge-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-check-circle">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          </div>
+          <span>100% Quality</span>
+        </div>
+        <div class="trust-badge">
+          <div class="badge-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-shield-check">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+              <path d="m9 12 2 2 4-4" />
+            </svg>
+          </div>
+          <span>Tarnish-Free</span>
+        </div>
+        <div class="trust-badge">
+          <div class="badge-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-truck">
+              <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+              <path d="M15 18H9" />
+              <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-2.235-2.767A.5.5 0 0 0 17.17 10h-3.17" />
+              <circle cx="7" cy="18" r="2" />
+              <circle cx="17" cy="18" r="2" />
+            </svg>
+          </div>
+          <span>Fast Shipping</span>
+        </div>
+        <div class="trust-badge">
+          <div class="badge-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-refresh-cw">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+              <path d="M3 21v-5h5" />
+            </svg>
+          </div>
+          <span>Easy Returns</span>
+        </div>
+        <div class="trust-badge">
+          <div class="badge-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-message-circle">
+              <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+            </svg>
+          </div>
+          <span>24/7 Support</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer" id="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>The Accessories Hub</h4>
+          <p>Your destination for premium handcrafted jewelry. From Korean minimalism to Temple grandeur, we bring you
+            collections that celebrate beauty and craftsmanship.</p>
+          <div class="footer-social">
+            <a href="https://www.instagram.com/theaccessorieshub2025/" title="Instagram" aria-label="Instagram">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-instagram">
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+              </svg>
+            </a>
+            <a href="https://wa.me/9779805659501" title="WhatsApp" aria-label="WhatsApp">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-message-circle">
+                <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+              </svg>
+            </a>
+            <a href="https://www.tiktok.com/@the.accessories.h6?is_from_webapp=1&sender_device=pc" title="TikTok"
+              aria-label="TikTok">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-music">
+                <path d="M9 18V5l12-2v13" />
+                <circle cx="6" cy="18" r="3" />
+                <circle cx="18" cy="16" r="3" />
+              </svg>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61581145049725" title="Facebook" aria-label="Facebook">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-facebook">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <a href="products.html">Shop All</a>
+          <a href="products.html?collection=korean">Korean</a>
+          <a href="products.html?collection=temple">Temple</a>
+          <a href="products.html?collection=oxidized">Oxidized</a>
+          <a href="#story">About Us</a>
+        </div>
+        <div class="footer-col">
+          <h4>Help</h4>
+          <a href="#">Shipping Policy</a>
+          <a href="#">Return & Exchange</a>
+          <a href="#">FAQs</a>
+          <a href="#">Contact Us</a>
+          <a href="#">Track Order</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <p>📍 Birgunj, Nepal</p>
+          <p>📞 +977 9805659501</p>
+          <p>✉️ theaccessorieshub2530@gmail.com</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 The Accessories Hub. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== NEWSLETTER POPUP ===== -->
+  <div class="popup-overlay"></div>
+  <div class="popup">
+    <button class="popup-close">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+        <path d="M18 6 6 18" />
+        <path d="m6 6 12 12" />
+      </svg>
+    </button>
+    <div class="popup-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+        class="lucide lucide-gem">
+        <path d="M6 3h12l4 6-10 13L2 9Z" />
+        <path d="M11 3 8 9l4 13 4-13-3-6" />
+        <path d="M2 9h20" />
+      </svg>
+    </div>
+    <h3>Get 10% Off</h3>
+    <p>Subscribe to our newsletter and get 10% off your first order. Be the first to know about new arrivals and
+      exclusive offers.</p>
+    <form class="popup-form">
+      <input type="email" placeholder="Enter your email" required>
+      <button type="submit" class="btn btn-gold btn-sm">Subscribe</button>
+    </form>
+  </div>
+
+  <!-- ===== QUICK VIEW MODAL ===== -->
+  <div class="quick-view-modal" id="quickViewModal" onclick="if(event.target===this)closeQuickView()">
+    <div class="quick-view-content">
+      <button class="quick-view-close" onclick="closeQuickView()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </svg>
+      </button>
+      <div class="quick-view-image"></div>
+      <div class="quick-view-details"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Load featured products (Best Sellers)
+    document.addEventListener('DOMContentLoaded', async () => {
+      const products = await loadProducts();
+      const featured = products.filter(p => p.badge === 'Best Seller' || p.badge === 'New Arrival').slice(0, 4);
+      const grid = document.getElementById('featuredGrid');
+      if (grid) {
+        grid.innerHTML = featured.map(p => renderProductCard(p)).join('');
+        // Re-initialize scroll animations for dynamically added cards
+        initScrollAnimations();
+      }
+    });
+  </script>
+
+</body>
+
+</html>

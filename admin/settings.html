@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="icon" type="image/png" href="../images/favicon.png">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><span class="icon">💎</span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
+        <a href="index.html" class="sidebar-link"><span class="link-icon">📊</span> Dashboard</a>
+        <a href="products.html" class="sidebar-link"><span class="link-icon">💍</span> Products</a>
+        <a href="inventory.html" class="sidebar-link"><span class="link-icon">📦</span> Inventory <span class="badge">0</span></a>
+        <a href="orders.html" class="sidebar-link"><span class="link-icon">🛒</span> Orders <span class="badge">0</span></a>
+      </div>
+      <div class="sidebar-section"><div class="sidebar-section-title">Management</div>
+        <a href="invoices.html" class="sidebar-link"><span class="link-icon">🧾</span> Invoices</a>
+        <a href="customers.html" class="sidebar-link"><span class="link-icon">👥</span> Customers</a>
+        <a href="settings.html" class="sidebar-link"><span class="link-icon">⚙️</span> Settings</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer"><a href="../index.html">🌐 View Storefront</a></div>
+  </aside>
+  <div class="sidebar-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;opacity:0;pointer-events:none;transition:opacity 0.3s;"></div>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <div><h1>Settings</h1><div class="topbar-breadcrumb"><a href="index.html">Dashboard</a> / Settings</div></div>
+      </div>
+      <div class="topbar-right"><div class="admin-avatar">A</div></div>
+    </div>
+
+    <div class="admin-content">
+      <!-- Business Information -->
+      <div class="settings-section">
+        <h3>🏢 Business Information</h3>
+        <div class="subtitle">Used in invoices and order communications</div>
+        <form id="businessForm">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Business Name</label><input class="form-input" id="bizName" placeholder="The Accessories Hub"></div>
+            <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="bizPhone" placeholder="+977 9800000000"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Address</label><input class="form-input" id="bizAddress" placeholder="Kathmandu, Nepal"></div>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="bizEmail" placeholder="hello@theaccessorieshub.com"></div>
+          </div>
+          <button type="submit" class="btn btn-gold" style="margin-top:8px;">💾 Save Business Info</button>
+        </form>
+      </div>
+
+      <!-- WhatsApp -->
+      <div class="settings-section">
+        <h3>💬 WhatsApp Notifications</h3>
+        <div class="subtitle">Configure WhatsApp message templates for order lifecycle</div>
+        <form id="whatsappForm">
+          <div class="form-group">
+            <label class="form-label">WhatsApp Business Number</label>
+            <div style="display:flex;gap:10px;">
+              <input class="form-input" id="waNumber" placeholder="9779800000000" style="flex:1;">
+              <button type="button" class="wa-btn" onclick="testWhatsApp()">🔗 Test</button>
+            </div>
+            <div class="form-help">Without + prefix, e.g. 9779800000000</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Order Confirmation Template</label>
+            <textarea class="form-textarea" id="waOrderConfirm" rows="3"></textarea>
+            <div class="form-help">Variables: {name}, {orderId}, {total}</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Shipped Template</label>
+            <textarea class="form-textarea" id="waShipped" rows="3"></textarea>
+            <div class="form-help">Variables: {name}, {orderId}, {tracking}</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Delivered Template</label>
+            <textarea class="form-textarea" id="waDelivered" rows="3"></textarea>
+            <div class="form-help">Variables: {name}, {orderId}</div>
+          </div>
+          <button type="submit" class="btn btn-gold">💾 Save WhatsApp Settings</button>
+        </form>
+      </div>
+
+      <!-- Shipping Providers -->
+      <div class="settings-section">
+        <h3>🚚 Shipping Providers</h3>
+        <div class="subtitle">Manage local shipping providers and rates</div>
+        <div id="shippingProviders"></div>
+        <button class="btn btn-outline" onclick="addShippingProvider()" style="margin-top:12px;">+ Add Provider</button>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="settings-section" style="border-color:rgba(231,76,60,0.3);">
+        <h3 style="color:var(--red);">⚠️ Danger Zone</h3>
+        <div class="subtitle">Irreversible actions</div>
+        <button class="btn btn-danger" onclick="resetData()">🔄 Reset All Data to Defaults</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" onclick="closeAllModals()"></div>
+
+<!-- Add/Edit Shipping Provider Modal -->
+<div class="modal" id="shippingModal" style="width:480px;">
+  <div class="modal-header"><h3 id="shippingModalTitle">Add Shipping Provider</h3><span class="modal-close" onclick="closeAllModals()">✕</span></div>
+  <div class="modal-body">
+    <form onsubmit="saveShippingProvider(event)">
+      <input type="hidden" id="spEditIndex" value="-1">
+      <div class="form-group"><label class="form-label">Provider Name *</label><input class="form-input" id="spName" required placeholder="e.g. Pathao Courier"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Type</label>
+          <select class="form-select" id="spType"><option value="standard">Standard</option><option value="express">Express</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Rate (Rs.)</label><input class="form-input" type="number" id="spRate" placeholder="150"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Free Shipping Above (Rs.)</label><input class="form-input" type="number" id="spFreeAbove" placeholder="2000"></div>
+      <div class="modal-footer" style="padding:0;border:none;margin-top:18px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button type="submit" class="btn btn-gold">Save Provider</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/admin-app.js"></script>
+<script src="js/settings-admin.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-client.js"></script>
+</body>
+</html>

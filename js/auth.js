@@ -1,0 +1,87 @@
+// js/auth.js
+document.addEventListener('DOMContentLoaded', () => {
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const isSignUp = document.getElementById('toggleSignUp').textContent.includes('Sign In');
+      
+      const msg = document.getElementById('authMessage');
+      msg.style.display = 'none';
+
+      try {
+        let authResult;
+        if (isSignUp) {
+          authResult = await supabase.auth.signUp({ email, password });
+        } else {
+          authResult = await supabase.auth.signInWithPassword({ email, password });
+        }
+
+        if (authResult.error) throw authResult.error;
+
+        // Success - redirect to intended page or index
+        const returnUrl = sessionStorage.getItem('tah_return_url') || 'index.html';
+        window.location.href = returnUrl;
+
+      } catch (err) {
+        msg.textContent = err.message;
+        msg.style.display = 'block';
+      }
+    });
+  }
+
+  // Toggle Login / Signup UI
+  const toggleBtn = document.getElementById('toggleSignUp');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const title = document.querySelector('.auth-title');
+      const submitBtn = document.querySelector('button[type="submit"]');
+      const isLogin = title.textContent === 'Welcome Back';
+
+      if (isLogin) {
+        title.textContent = 'Create Account';
+        submitBtn.textContent = 'Sign Up';
+        toggleBtn.previousSibling.textContent = 'Already have an account? ';
+        toggleBtn.textContent = 'Sign In';
+      } else {
+        title.textContent = 'Welcome Back';
+        submitBtn.textContent = 'Sign In';
+        toggleBtn.previousSibling.textContent = 'New to the Hub? ';
+        toggleBtn.textContent = 'Create an Account';
+      }
+    });
+  }
+
+  // Check if we just returned from OAuth and have a session
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+      const returnUrl = sessionStorage.getItem('tah_return_url') || 'index.html';
+      sessionStorage.removeItem('tah_return_url');
+      if (window.location.pathname.includes('login.html')) {
+        window.location.href = returnUrl;
+      }
+    }
+  });
+});
+
+async function handleGoogleSignIn() {
+  const returnUrl = sessionStorage.getItem('tah_return_url') || window.location.origin + '/index.html';
+  
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: returnUrl
+    }
+  });
+
+  if (error) {
+    const msg = document.getElementById('authMessage');
+    if (msg) {
+      msg.textContent = error.message;
+      msg.style.display = 'block';
+    }
+  }
+}

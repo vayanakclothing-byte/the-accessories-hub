@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="icon" type="image/png" href="../images/favicon.png">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><span class="icon">💎</span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
+        <a href="index.html" class="sidebar-link"><span class="link-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg></span> Dashboard</a>
+        <a href="products.html" class="sidebar-link"><span class="link-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gem"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg></span> Products</a>
+        <a href="inventory.html" class="sidebar-link"><span class="link-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></span> Inventory <span class="badge">0</span></a>
+        <a href="orders.html" class="sidebar-link"><span class="link-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span> Orders <span class="badge">0</span></a>
+      </div>
+      <div class="sidebar-section"><div class="sidebar-section-title">Management</div>
+        <a href="invoices.html" class="sidebar-link"><span class="link-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-receipt"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M16 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg></span> Invoices</a>
+        <a href="customers.html" class="sidebar-link"><span class="link-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Customers</a>
+        <a href="settings.html" class="sidebar-link"><span class="link-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span> Settings</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer"><a href="../index.html"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe" style="margin-right: 8px; vertical-align: middle;"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> View Storefront</a></div>
+  </aside>
+  <div class="sidebar-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;opacity:0;pointer-events:none;transition:opacity 0.3s;"></div>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <div><h1>Products</h1><div class="topbar-breadcrumb"><a href="index.html">Dashboard</a> / Products</div></div>
+      </div>
+      <div class="topbar-right"><div class="admin-avatar">A</div></div>
+    </div>
+
+    <div class="admin-content">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">💍 All Products <span style="font-size:0.8rem;color:var(--white-muted);font-family:var(--font-sans);margin-left:8px;" id="productsCount"></span></div>
+          <div class="table-actions">
+            <div class="table-search"><span class="icon">🔍</span><input type="text" placeholder="Search products..." id="productSearch" oninput="searchProducts()"></div>
+            <button class="btn btn-gold" onclick="openAddProduct()">+ Add Product</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Product</th><th>Collection</th><th>Category</th><th>Price</th><th>Stock</th><th>Badge</th><th>Actions</th></tr></thead>
+          <tbody id="productsBody"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" onclick="closeAllModals()"></div>
+
+<!-- Add/Edit Product Modal -->
+<div class="modal wide" id="productModal">
+  <div class="modal-header"><h3 id="modalTitle">Add New Product</h3><span class="modal-close" onclick="closeAllModals()">✕</span></div>
+  <div class="modal-body">
+    <form id="productForm">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Product Name *</label><input class="form-input" id="pName" required placeholder="e.g. Korean Dainty Earrings"></div>
+        <div class="form-group"><label class="form-label">SKU</label><input class="form-input" id="pSku" placeholder="e.g. TAH-KE002"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Price (Rs.) *</label><input class="form-input" type="number" id="pPrice" required placeholder="1200"></div>
+        <div class="form-group"><label class="form-label">Original Price (Rs.)</label><input class="form-input" type="number" id="pOriginalPrice" placeholder="1500"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Collection *</label>
+          <select class="form-select" id="pCollection" required><option value="korean">Korean</option><option value="temple">Temple</option><option value="oxidized">Oxidized</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Category *</label>
+          <select class="form-select" id="pCategory" required><option value="necklaces">Necklaces</option><option value="earrings">Earrings</option><option value="rings">Rings</option><option value="bracelets">Bracelets</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Material</label><input class="form-input" id="pMaterial" placeholder="e.g. Gold Plated"></div>
+        <div class="form-group"><label class="form-label">Badge</label>
+          <select class="form-select" id="pBadge"><option value="">None</option><option value="Best Seller">Best Seller</option><option value="New Arrival">New Arrival</option><option value="Trending">Trending</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="pDescription" placeholder="Product description..."></textarea></div>
+      <div class="form-group"><label class="form-label">Features</label><input class="form-input" id="pFeatures" placeholder="Tarnish-Free, Handcrafted, Hypoallergenic"><div class="form-help">Comma-separated list of features</div></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Stock Quantity *</label><input class="form-input" type="number" id="pStock" required placeholder="25" value="25"></div>
+        <div class="form-group"><label class="form-label">Reorder Level</label><input class="form-input" type="number" id="pReorderLevel" placeholder="5" value="5"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Product Images</label>
+        <div class="image-upload-zone" id="imageUploadZone">
+          <div class="upload-icon">📷</div>
+          <p>Drag & drop images here or <span>click to browse</span></p>
+        </div>
+        <input type="file" id="imageFileInput" accept="image/*" multiple style="display:none;">
+        <div class="image-preview-grid" id="imagePreviewGrid"></div>
+      </div>
+      <div class="modal-footer" style="padding:0;border:none;margin-top:18px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button type="submit" class="btn btn-gold">Save Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteModal" style="width:420px;">
+  <div class="modal-header"><h3>Confirm Delete</h3><span class="modal-close" onclick="closeAllModals()">✕</span></div>
+  <div class="modal-body" style="text-align:center;padding:30px;">
+    <div style="font-size:2.5rem;margin-bottom:12px;">🗑️</div>
+    <p>Are you sure you want to delete<br><strong id="deleteProductName" style="color:var(--gold);"></strong>?</p>
+    <p style="font-size:0.8rem;color:var(--white-muted);margin-top:8px;">This action cannot be undone.</p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+    <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+  </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="js/admin-app.js"></script>
+<script src="js/products-admin.js"></script>
+</body>
+</html>
