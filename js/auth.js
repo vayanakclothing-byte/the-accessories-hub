@@ -20,9 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (authResult.error) throw authResult.error;
-
-        // Success - redirect to intended page or index
-        const returnUrl = sessionStorage.getItem('tah_return_url') || 'index.html';
+        
+        const session = authResult.data.session;
+        const adminEmail = 'theaccessorieshub2530@gmail.com';
+        const isAuthAdmin = session?.user?.email === adminEmail;
+        
+        // Success - redirect to intended page or index (or admin if authorized)
+        const returnUrl = isAuthAdmin ? '/admin/index.html' : (sessionStorage.getItem('tah_return_url') || 'index.html');
         window.location.href = returnUrl;
 
       } catch (err) {
@@ -58,8 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check if we just returned from OAuth and have a session
   supabase.auth.getSession().then(({ data: { session } }) => {
     if (session) {
-      const returnUrl = sessionStorage.getItem('tah_return_url') || 'index.html';
+      const adminEmail = 'theaccessorieshub2530@gmail.com';
+      const isAuthAdmin = session.user.email === adminEmail;
+      
+      const returnUrl = isAuthAdmin ? '/admin/index.html' : (sessionStorage.getItem('tah_return_url') || 'index.html');
       sessionStorage.removeItem('tah_return_url');
+      
       if (window.location.pathname.includes('login.html')) {
         window.location.href = returnUrl;
       }

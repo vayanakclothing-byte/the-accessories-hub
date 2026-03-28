@@ -295,11 +295,57 @@ fadeStyle.textContent = `
 `;
 document.head.appendChild(fadeStyle);
 
+// --- Auth Status Header ---
+async function initAuthStatus() {
+  const userBtn = document.getElementById('navUserBtn');
+  if (!userBtn) return;
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const adminEmail = 'theaccessorieshub2530@gmail.com';
+      const isAuthAdmin = session.user.email === adminEmail;
+      
+      if (isAuthAdmin) {
+        // Change icon and add badge
+        userBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-shield-check">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+          <span style="position:absolute; top:-5px; right:-5px; width:10px; height:10px; background:var(--gold); border-radius:50%; box-shadow:0 0 5px var(--gold);"></span>
+        `;
+        userBtn.title = 'Admin Dashboard';
+        userBtn.onclick = (e) => {
+          e.preventDefault();
+          window.location.href = '/admin/index.html';
+        };
+      } else {
+        // Logged in user but not admin
+        userBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-user">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        `;
+        userBtn.title = 'My Account';
+      }
+    }
+  } catch (e) {
+    console.warn('Auth status check failed', e);
+  }
+}
+
 // --- Initialize Everything ---
 document.addEventListener('DOMContentLoaded', () => {
   initHeader();
   initMobileNav();
   initPopup();
   initScrollAnimations();
+  initAuthStatus();
   Cart.updateUI();
 });

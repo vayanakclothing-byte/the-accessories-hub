@@ -9,8 +9,14 @@
     async function checkAdminAuth() {
         // Wait for supabase to be defined if needed
         if (typeof supabase === 'undefined') {
-            // If supabase script hasn't loaded (unlikely if script order is right), we wait
             setTimeout(checkAdminAuth, 100);
+            return;
+        }
+
+        // Check if we are in the middle of an auth redirect
+        if (window.location.hash.includes('access_token=')) {
+            // Give Supabase a moment to process the hash
+            setTimeout(checkAdminAuth, 500);
             return;
         }
 
@@ -22,12 +28,11 @@
             return;
         }
 
-        const userEmail = session.user.email;
-        const isAuthorized = AUTHORIZED_ADMIN.includes(userEmail);
+        const userEmail = session.user.email.toLowerCase();
+        const isAuthorized = AUTHORIZED_ADMIN.some(email => email.toLowerCase() === userEmail);
 
         if (!isAuthorized) {
             console.error('Unauthorized access attempt by:', userEmail);
-            // Sign out the current session and redirect
             await supabase.auth.signOut();
             window.location.href = '/admin-login.html?error=Unauthorized. Restricted Access: Authorized Personnel Only.';
         }
