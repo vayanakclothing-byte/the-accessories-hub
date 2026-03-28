@@ -14,6 +14,7 @@
     { "source": "/admin/customers", "destination": "/admin/customers.html" },
     { "source": "/admin/invoices", "destination": "/admin/invoices.html" },
     { "source": "/admin/settings", "destination": "/admin/settings.html" },
-    { "source": "/admin-login", "destination": "/admin-login.html" }
+    { "source": "/admin-login", "destination": "/admin-login.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

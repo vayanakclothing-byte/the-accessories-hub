@@ -226,64 +226,17 @@ function initZoom() {
 async function handleBuyNow() {
   if (!currentProduct) return;
 
-  // Step 1: Check if user is logged in
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (!session) {
-    // Save the current page URL so we can return after login
-    sessionStorage.setItem('tah_return_url', window.location.href);
-    window.location.href = 'login.html';
-    return;
-  }
-
-  // Step 2: Gather order data matching existing orders table schema
   const qty = parseInt(document.getElementById('qtyInput')?.value) || 1;
-  const subtotal = currentProduct.price * qty;
-  const shipping = subtotal >= 2000 ? 0 : 100; // Free shipping above Rs. 2000
-  const total = subtotal + shipping;
-
-  const orderData = {
-    customer_name: session.user.user_metadata?.full_name || session.user.email,
-    subtotal: subtotal,
-    shipping: shipping,
-    total: total,
-    status: 'pending',
-    payment: 'COD',
-    date: new Date().toISOString().split('T')[0],
-    shipping_address: ''
-  };
-
-  // Step 3: Insert order into Supabase
-  try {
-    const { data, error } = await supabase.from('orders').insert([orderData]).select();
-
-    if (error) {
-      console.error('Order error:', error);
-      // Fallback: add to cart + checkout
-      Cart.add({
-        id: currentProduct.id,
-        name: currentProduct.name,
-        price: currentProduct.price,
-        image: currentProduct.image
-      }, qty);
-      window.location.href = 'checkout.html';
-      return;
-    }
-
-    // Step 4: Show success notification
-    showOrderConfirmation({ total_price: total });
-
-  } catch (err) {
-    console.error('Buy Now failed:', err);
-    // Graceful fallback: add to cart and go to checkout
-    Cart.add({
-      id: currentProduct.id,
-      name: currentProduct.name,
-      price: currentProduct.price,
-      image: currentProduct.image
-    }, qty);
-    window.location.href = 'checkout.html';
-  }
+  
+  // Add to cart and immediately go to checkout
+  Cart.add({
+    id: currentProduct.id,
+    name: currentProduct.name,
+    price: currentProduct.price,
+    image: currentProduct.image
+  }, qty);
+  
+  window.location.href = 'checkout.html';
 }
 
 function showOrderConfirmation(order) {

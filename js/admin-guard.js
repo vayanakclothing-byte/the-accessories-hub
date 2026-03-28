@@ -2,7 +2,7 @@
 (function() {
     // List of authorized emails
     const AUTHORIZED_ADMIN = [
-        'your-email@gmail.com', // Replace with David's actual email as per prompt
+        'theaccessorieshub2530@gmail.com', 
         // Add more admin emails here
     ];
 
