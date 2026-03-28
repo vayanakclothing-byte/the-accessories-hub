@@ -131,10 +131,10 @@ function initSidebar() {
   });
 
   // Mark active link
-  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+  const path = window.location.pathname;
   document.querySelectorAll('.sidebar-link').forEach(link => {
     const href = link.getAttribute('href');
-    if (href === currentPage || (currentPage === '' && href === 'index.html')) {
+    if (path === href || (path === '/admin' && href === '/admin/index.html') || path === href.replace('.html', '')) {
       link.classList.add('active');
     }
   });
@@ -149,9 +149,16 @@ function initSidebar() {
   // Pending orders badge
   const orders = DB.orders();
   const pending = orders.filter(o => o.status === 'pending' || o.status === 'processing').length;
-  const ordersBadge = document.querySelector('.sidebar-link[href="orders.html"] .badge');
+  // Match both 'orders.html' and 'Sales' text
+  const ordersBadge = document.querySelector('.sidebar-link[href*="orders.html"] .badge');
   if (ordersBadge) ordersBadge.textContent = pending;
   if (ordersBadge && pending === 0) ordersBadge.style.display = 'none';
+}
+
+async function handleLogout() {
+  const { error } = await supabase.auth.signOut();
+  if (error) showToast('Logout failed', 'error');
+  else window.location.href = '/admin-login.html';
 }
 
 // ===== MODAL HELPERS =====

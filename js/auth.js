@@ -73,7 +73,7 @@ async function handleGoogleSignIn() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: returnUrl
+      redirectTo: window.location.origin
     }
   });
 

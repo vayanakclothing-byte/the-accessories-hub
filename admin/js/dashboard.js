@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   initCharts();
   renderRecentOrders();
   renderLowStockAlerts();
+  
+  // Real-time integration (simplified for demo, usually via Supabase Realtime)
+  setupRealtimeSimulation();
 });
 
 function renderStatCards() {
@@ -51,6 +54,7 @@ function initCharts() {
 
   const ctx1 = document.getElementById('salesChart')?.getContext('2d');
   if (ctx1) {
+    if (salesChart) salesChart.destroy();
     salesChart = new Chart(ctx1, {
       type: 'line',
       data: {
@@ -59,7 +63,7 @@ function initCharts() {
           label: 'Revenue (Rs.)',
           data: revenue,
           borderColor: '#D4AF37',
-          backgroundColor: 'rgba(212, 175, 55, 0.08)',
+          backgroundColor: 'rgba(212, 175, 55, 0.1)',
           fill: true,
           tension: 0.4,
           pointBackgroundColor: '#D4AF37',
@@ -67,6 +71,7 @@ function initCharts() {
           pointBorderWidth: 2,
           pointRadius: 5,
           pointHoverRadius: 7,
+          borderWidth: 3
         }]
       },
       options: {
@@ -75,10 +80,10 @@ function initCharts() {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#1A1A1A',
+            backgroundColor: '#111',
             titleColor: '#D4AF37',
             bodyColor: '#FAFAFA',
-            borderColor: 'rgba(212,175,55,0.2)',
+            borderColor: '#D4AF37',
             borderWidth: 1,
             padding: 12,
             cornerRadius: 8,
@@ -86,8 +91,8 @@ function initCharts() {
           }
         },
         scales: {
-          x: { grid: { color: 'rgba(42,42,42,0.5)' }, ticks: { color: '#999', font: { size: 11 } } },
-          y: { grid: { color: 'rgba(42,42,42,0.5)' }, ticks: { color: '#999', font: { size: 11 }, callback: v => `Rs. ${(v/1000).toFixed(0)}k` } }
+          x: { grid: { color: 'rgba(212, 175, 55, 0.05)' }, ticks: { color: '#999', font: { size: 11 } } },
+          y: { grid: { color: 'rgba(212, 175, 55, 0.05)' }, ticks: { color: '#999', font: { size: 11 }, callback: v => `Rs. ${(v/1000).toFixed(0)}k` } }
         }
       }
     });
@@ -107,6 +112,7 @@ function initCharts() {
 
   const ctx2 = document.getElementById('collectionChart')?.getContext('2d');
   if (ctx2) {
+    if (collectionChart) collectionChart.destroy();
     collectionChart = new Chart(ctx2, {
       type: 'doughnut',
       data: {
@@ -149,6 +155,11 @@ function renderRecentOrders() {
       <td><strong>${formatPrice(o.total)}</strong></td>
       <td>${statusBadge(o.status)}</td>
       <td>${formatDate(o.date)}</td>
+      <td>
+        ${o.status === 'pending' ? `<button onclick="toggleOrderStatus(${o.id}, 'shipped')" class="quick-action-btn">Ship Now</button>` : ''}
+        ${o.status === 'processing' ? `<button onclick="toggleOrderStatus(${o.id}, 'shipped')" class="quick-action-btn">Ship Now</button>` : ''}
+        ${o.status === 'shipped' ? `<button onclick="toggleOrderStatus(${o.id}, 'delivered')" class="quick-action-btn">Delivered</button>` : ''}
+      </td>
     </tr>
   `).join('');
 }
@@ -167,10 +178,59 @@ function renderLowStockAlerts() {
     <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(42,42,42,0.5);">
       <div class="table-img"><img src="${p.image}" alt="${p.name}"></div>
       <div style="flex:1;">
-        <div style="font-size:0.85rem;font-weight:500;">${p.name}</div>
+        <div style="font-size:0.85rem;font-weight:500; display: flex; align-items: center; gap: 8px;">
+            ${p.name} 
+            ${p.stock === 0 ? '<span class="flash-alert"><i data-lucide="alert-triangle" style="width:14px;height:14px;"></i> OUT</span>' : ''}
+        </div>
         <div style="font-size:0.75rem;color:var(--red);">Only ${p.stock} left (min: ${p.reorderLevel})</div>
       </div>
-      <a href="inventory.html" class="btn btn-sm btn-outline">Restock</a>
+      <div>
+        <button onclick="quickStockUpdate(${p.id}, 10)" class="quick-action-btn">+10</button>
+      </div>
     </div>
   `).join('');
+  lucide.createIcons();
+}
+
+async function toggleOrderStatus(orderId, newStatus) {
+    showToast(`Updating order #${orderId}...`, 'info');
+    const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
+    if (error) {
+        showToast('Failed to update order', 'error');
+    } else {
+        showToast(`Order #${orderId} marked as ${newStatus}!`);
+        await loadData();
+        renderRecentOrders();
+    }
+}
+
+async function quickStockUpdate(productId, amount) {
+    const product = DB.products().find(p => p.id === productId);
+    if (!product) return;
+    
+    const newStock = product.stock + amount;
+    showToast(`Adding stock to ${product.name}...`, 'info');
+    
+    const { error } = await supabase.from('products').update({ stock: newStock }).eq('id', productId);
+    if (error) {
+        showToast('Failed to update stock', 'error');
+    } else {
+        showToast(`Added ${amount} units to ${product.name}!`);
+        await loadData();
+        renderLowStockAlerts();
+        renderStatCards();
+    }
+}
+
+function setupRealtimeSimulation() {
+    // Listen for changes in orders table if the project supports it
+    supabase.channel('custom-all-channel')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async (payload) => {
+        console.log('Change received!', payload);
+        await loadData();
+        renderRecentOrders();
+        renderStatCards();
+        initCharts();
+    })
+    .subscribe();
 }

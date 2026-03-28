@@ -7,6 +7,11 @@
     { "source": "/checkout", "destination": "/checkout.html" },
     { "source": "/login", "destination": "/login.html" },
     { "source": "/admin", "destination": "/admin/index.html" },
-    { "source": "/admin/products", "destination": "/admin/products.html" }
+    { "source": "/admin/products", "destination": "/admin/products.html" },
+    { "source": "/admin/inventory", "destination": "/admin/inventory.html" },
+    { "source": "/admin/orders", "destination": "/admin/orders.html" },
+    { "source": "/admin/customers", "destination": "/admin/customers.html" },
+    { "source": "/admin/invoices", "destination": "/admin/invoices.html" },
+    { "source": "/admin/settings", "destination": "/admin/settings.html" }
   ]
 }
