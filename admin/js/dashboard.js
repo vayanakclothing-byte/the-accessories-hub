@@ -226,7 +226,6 @@ function setupRealtimeSimulation() {
     // Listen for changes in orders table if the project supports it
     supabase.channel('custom-all-channel')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async (payload) => {
-        console.log('Change received!', payload);
         await loadData();
         renderRecentOrders();
         renderStatCards();

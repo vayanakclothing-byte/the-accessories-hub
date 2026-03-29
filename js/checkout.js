@@ -283,7 +283,6 @@ async function placeOrder() {
     if (paymentMethod === 'esewa' || paymentMethod === 'khalti' || paymentMethod === 'fonepay') {
       // For digital wallets, show success first then would redirect to gateway
       // In production, these would redirect to the actual payment API
-      console.log(`Payment gateway: ${paymentMethod} — Order #TAH-${orderId.toString().padStart(5, '0')}`);
     }
 
     // 7. Show Success UI
