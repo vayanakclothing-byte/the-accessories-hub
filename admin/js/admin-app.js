@@ -198,8 +198,44 @@ function sendWhatsApp(phone, message) {
   window.open(`https://wa.me/${cleanPhone}?text=${encoded}`, '_blank');
 }
 
+// ===== INFO & AUTH =====
+async function initAdminAuth() {
+  const avatarEl = document.getElementById('adminAvatar');
+  const nameEl = document.getElementById('adminName');
+  const breadcrumbEl = document.querySelector('.topbar-breadcrumb');
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const user = session.user;
+      const adminEmail = 'theaccessorieshub2530@gmail.com';
+      
+      // Secondary check in JS (already covered by guard but good for UI)
+      if (user.email !== adminEmail) {
+        await supabase.auth.signOut();
+        window.location.href = '/admin-login.html?error=Unauthorized';
+        return;
+      }
+
+      const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+      const fullName = user.user_metadata?.full_name || 'Admin';
+
+      if (avatarEl && avatarUrl) {
+        avatarEl.innerHTML = `<img src="${avatarUrl}" alt="Admin" style="width:100%; height:100%; object-fit:cover;">`;
+      }
+      if (nameEl) nameEl.textContent = fullName;
+      if (breadcrumbEl) breadcrumbEl.textContent = `Welcome back, ${fullName.split(' ')[0]}`;
+      
+    } else {
+        window.location.href = '/admin-login.html';
+    }
+  } catch (e) {
+    console.warn('Admin auth init failed', e);
+  }
+}
+
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
-  
+  initAdminAuth();
   initSidebar();
 });

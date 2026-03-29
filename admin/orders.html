@@ -37,7 +37,12 @@
         <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i data-lucide="menu"></i></button>
         <div><h1>Orders Management</h1><div class="topbar-breadcrumb"><a href="index.html">Dashboard</a> / Orders</div></div>
       </div>
-      <div class="topbar-right"><div class="admin-avatar">A</div></div>
+      <div class="topbar-right">
+          <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+              <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+              <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+          </div>
+      </div>
     </div>
 
     <div class="admin-content">

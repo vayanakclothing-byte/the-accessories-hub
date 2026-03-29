@@ -141,7 +141,6 @@
         <p class="footer-note">Restricted Access: Authorized Personnel Only</p>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/supabase-client.js"></script>
     <script>
@@ -150,24 +149,40 @@
         const loginBtn = document.getElementById('adminLoginBtn');
         const errorMsg = document.getElementById('errorMessage');
 
-        // Check for error in URL (e.g. from redirect)
+        // Check for error in URL
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('error')) {
             errorMsg.textContent = urlParams.get('error');
             errorMsg.style.display = 'block';
         }
 
+        // --- Automatic Smooth Transition ---
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const adminEmail = 'theaccessorieshub2530@gmail.com';
+                if (session.user.email === adminEmail) {
+                    loginBtn.innerHTML = '<span class="loading-spinner"></span> Redircting to Dashboard...';
+                    window.location.href = '/admin/index.html';
+                } else {
+                    errorMsg.textContent = "Your account is not authorized to access the Admin Panel.";
+                    errorMsg.style.display = 'block';
+                }
+            }
+        }
+
+        // Run session check on load
+        checkSession();
+
+        // Listener for login button
         loginBtn.addEventListener('click', async () => {
             loginBtn.disabled = true;
-            loginBtn.innerHTML = '<span class="loading-spinner"></span> Signing in...';
-            
-            // Set return URL to admin dashboard
-            sessionStorage.setItem('tah_admin_redirect', 'true');
+            loginBtn.innerHTML = '<span class="loading-spinner"></span> Authenticating...';
             
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin + '/admin/index.html'
+                    redirectTo: window.location.origin + '/admin-login.html'
                 }
             });
 

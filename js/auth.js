@@ -60,15 +60,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Check if we just returned from OAuth and have a session
-  supabase.auth.getSession().then(({ data: { session } }) => {
-    if (session) {
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
       const adminEmail = 'theaccessorieshub2530@gmail.com';
       const isAuthAdmin = session.user.email === adminEmail;
       
       const returnUrl = isAuthAdmin ? '/admin/index.html' : (sessionStorage.getItem('tah_return_url') || 'index.html');
       sessionStorage.removeItem('tah_return_url');
       
-      if (window.location.pathname.includes('login.html')) {
+      if (window.location.pathname.includes('login.html') || window.location.pathname.includes('admin-login.html')) {
         window.location.href = returnUrl;
       }
     }
@@ -76,12 +76,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function handleGoogleSignIn() {
-  const returnUrl = sessionStorage.getItem('tah_return_url') || window.location.origin + '/index.html';
-  
+  // Store the current page as return URL if not on login pages
+  if (!window.location.pathname.includes('login.html') && !window.location.pathname.includes('admin-login.html')) {
+      sessionStorage.setItem('tah_return_url', window.location.href);
+  }
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin
+      redirectTo: window.location.origin + '/login.html', // Redirect to login page to handle the session transition
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
+      },
     }
   });
 
@@ -90,6 +97,8 @@ async function handleGoogleSignIn() {
     if (msg) {
       msg.textContent = error.message;
       msg.style.display = 'block';
+    } else {
+        alert('Authentication Error: ' + error.message);
     }
   }
 }

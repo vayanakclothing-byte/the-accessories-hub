@@ -303,11 +303,14 @@ async function initAuthStatus() {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
+      const user = session.user;
+      const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
       const adminEmail = 'theaccessorieshub2530@gmail.com';
-      const isAuthAdmin = session.user.email === adminEmail;
+      const isAuthAdmin = user.email === adminEmail;
       
-      if (isAuthAdmin) {
-        // Change icon and add badge
+      if (avatarUrl) {
+          userBtn.innerHTML = `<img src="${avatarUrl}" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--gold); object-fit: cover;">`;
+      } else if (isAuthAdmin) {
         userBtn.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -315,25 +318,74 @@ async function initAuthStatus() {
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
             <path d="m9 12 2 2 4-4" />
           </svg>
-          <span style="position:absolute; top:-5px; right:-5px; width:10px; height:10px; background:var(--gold); border-radius:50%; box-shadow:0 0 5px var(--gold);"></span>
         `;
-        userBtn.title = 'Admin Dashboard';
-        userBtn.onclick = (e) => {
-          e.preventDefault();
-          window.location.href = '/admin/index.html';
-        };
-      } else {
-        // Logged in user but not admin
-        userBtn.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-user">
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
-        `;
-        userBtn.title = 'My Account';
       }
+      
+      userBtn.title = isAuthAdmin ? 'Admin Dashboard' : 'My Account';
+      
+      // Add a simple dropdown on click
+      userBtn.onclick = (e) => {
+          e.preventDefault();
+          const existingDropdown = document.getElementById('userDropdown');
+          if (existingDropdown) {
+              existingDropdown.remove();
+              return;
+          }
+          
+          const dropdown = document.createElement('div');
+          dropdown.id = 'userDropdown';
+          dropdown.style.cssText = `
+              position: absolute;
+              top: 100%;
+              right: 0;
+              width: 200px;
+              background: #111;
+              border: 1px solid var(--gold);
+              border-radius: 8px;
+              padding: 12px;
+              box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+              z-index: 1000;
+              margin-top: 10px;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+          `;
+          
+          const greeting = document.createElement('div');
+          greeting.style.cssText = 'font-size: 0.75rem; color: #999; margin-bottom: 4px; padding: 0 8px;';
+          greeting.textContent = `Hello, ${user.user_metadata?.full_name?.split(' ')[0] || 'User'}`;
+          dropdown.appendChild(greeting);
+          
+          if (isAuthAdmin) {
+              const adminLink = document.createElement('a');
+              adminLink.href = '/admin/index.html';
+              adminLink.style.cssText = 'color: var(--gold); font-size: 0.85rem; padding: 8px; text-decoration: none; border-radius: 4px; display: flex; align-items: center; gap: 8px;';
+              adminLink.innerHTML = '🛡️ Admin Panel';
+              dropdown.appendChild(adminLink);
+          }
+          
+          const logoutBtn = document.createElement('button');
+          logoutBtn.style.cssText = 'background: transparent; border: none; color: var(--red); font-size: 0.85rem; padding: 8px; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: inherit; width: 100%;';
+          logoutBtn.innerHTML = '🚪 Sign Out';
+          logoutBtn.onclick = async () => {
+              await supabase.auth.signOut();
+              window.location.reload();
+          };
+          dropdown.appendChild(logoutBtn);
+          
+          userBtn.parentElement.style.position = 'relative';
+          userBtn.parentElement.appendChild(dropdown);
+          
+          document.addEventListener('click', function closeDropdown(ev) {
+              if (!userBtn.contains(ev.target) && !dropdown.contains(ev.target)) {
+                  dropdown.remove();
+                  document.removeEventListener('click', closeDropdown);
+              }
+          });
+      };
+    } else {
+        // Not logged in - default login link
+        userBtn.onclick = () => window.location.href = 'login.html';
     }
   } catch (e) {
     console.warn('Auth status check failed', e);
