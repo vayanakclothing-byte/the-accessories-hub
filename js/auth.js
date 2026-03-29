@@ -81,10 +81,13 @@ async function handleGoogleSignIn() {
       sessionStorage.setItem('tah_return_url', window.location.href);
   }
 
+  const redirectTo = CONFIG.getRedirectURL('/login.html');
+  console.log('Initiating Google Sign-In. Redirect destination:', redirectTo);
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + '/login.html', 
+      redirectTo: CONFIG.getRedirectURL('/login.html'), 
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',
