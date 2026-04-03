@@ -142,17 +142,6 @@
 
   <script src="/admin/js/admin-app.js"></script>
   <script src="/admin/js/orders-admin.js"></script>
-  <script>
-    lucide.createIcons();
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            const loader = document.getElementById('adminLoader');
-            if (loader) {
-                loader.style.opacity = '0';
-                setTimeout(() => loader.style.display = 'none', 500);
-            }
-        }, 800);
-    });
-  </script>
+  <script>lucide.createIcons();</script>
 </body>
 </html>

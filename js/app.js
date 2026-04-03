@@ -194,7 +194,7 @@ function renderProductCard(product) {
     <div class="product-card animate-on-scroll" data-id="${product.id}" data-collection="${product.collection}" data-category="${product.category}" data-price="${product.price}">
       <div class="product-card-image">
         ${badgeHTML}
-        <img src="${product.image}" alt="${product.name}" loading="lazy" onerror="this.onerror=null; this.src='images/placeholder.png'; this.style.objectFit='contain';">
+        <img src="${product.image}" alt="${product.name}" loading="lazy" decoding="async" width="400" height="400" onerror="this.onerror=null; this.src='images/placeholder.png'; this.style.objectFit='contain';">
         <div class="product-card-overlay">
           <button class="quick-view-btn" onclick="openQuickView(${product.id})">Quick View</button>
         </div>
@@ -215,12 +215,12 @@ async function loadProducts() {
   try {
     const cacheKey = 'tah_products_cache';
     const cacheTimeKey = 'tah_products_cache_time';
-    const cacheExp = 5 * 60 * 1000; // 5 minutes
+    const cacheExp = 3 * 60 * 1000; // 3 minutes
 
     const cachedData = localStorage.getItem(cacheKey);
     const cachedTime = localStorage.getItem(cacheTimeKey);
 
-    // If cache is valid and NOT empty, return it instantly
+    // If cache is valid and NOT empty, return instantly
     if (cachedData && cachedTime && (Date.now() - parseInt(cachedTime)) < cacheExp) {
       const parsed = JSON.parse(cachedData);
       if (parsed && parsed.length > 0) {
@@ -229,25 +229,49 @@ async function loadProducts() {
       }
     }
 
-    // Otherwise, fetch fresh data from Supabase
-    const { data, error } = await supabase.from('products').select('*').order('id', { ascending: true });
+    // Show skeleton loading while fetching
+    showSkeletonLoading();
+
+    // Fetch only the columns needed for listing + detail views
+    const { data, error } = await supabase
+      .from('products')
+      .select('id, name, price, original_price, collection, category, material, badge, image, images, description, features, stock, reorder_level, in_stock')
+      .order('id', { ascending: true });
     if (error) throw error;
-    
-    allProducts = data;
-    
-    // Save to cache for subsequent page loads
+
+    allProducts = data || [];
+
+    // Save to cache
     try {
-      localStorage.setItem(cacheKey, JSON.stringify(data));
+      localStorage.setItem(cacheKey, JSON.stringify(allProducts));
       localStorage.setItem(cacheTimeKey, Date.now().toString());
-    } catch(e) {
-      console.warn("Could not cache products:", e);
+    } catch (e) {
+      console.warn('Could not cache products:', e);
     }
-    
+
     return allProducts;
   } catch (err) {
     console.error('Failed to load products:', err);
     return [];
   }
+}
+
+// --- Skeleton Loading Screen ---
+function showSkeletonLoading() {
+  const grid = document.getElementById('productsGrid');
+  if (!grid) return;
+
+  const skeletonCount = 6;
+  grid.innerHTML = Array.from({ length: skeletonCount }, () => `
+    <div class="product-card skeleton-card">
+      <div class="product-card-image skeleton-shimmer" style="aspect-ratio:1;background:var(--grey,#1A1A1A);border-radius:12px;"></div>
+      <div class="product-card-info" style="padding:14px;">
+        <div class="skeleton-shimmer" style="height:12px;width:60%;border-radius:6px;margin-bottom:8px;background:var(--grey,#1A1A1A);"></div>
+        <div class="skeleton-shimmer" style="height:16px;width:80%;border-radius:6px;margin-bottom:10px;background:var(--grey,#1A1A1A);"></div>
+        <div class="skeleton-shimmer" style="height:14px;width:40%;border-radius:6px;background:var(--grey,#1A1A1A);"></div>
+      </div>
+    </div>
+  `).join('');
 }
 
 function openQuickView(productId) {
@@ -305,9 +329,20 @@ async function initAuthStatus() {
     if (session) {
       const user = session.user;
       const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
-      const adminEmail = 'theaccessorieshub2530@gmail.com';
-      const isAuthAdmin = user.email === adminEmail;
-      
+
+      // Check admin role from profiles table (non-blocking)
+      let isAuthAdmin = false;
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        isAuthAdmin = profile?.role === 'admin';
+      } catch (e) {
+        // Silently fail — just won't show admin link
+      }
+
       if (avatarUrl) {
           userBtn.innerHTML = `<img src="${avatarUrl}" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--gold); object-fit: cover;">`;
       } else if (isAuthAdmin) {
@@ -320,9 +355,9 @@ async function initAuthStatus() {
           </svg>
         `;
       }
-      
+
       userBtn.title = isAuthAdmin ? 'Admin Dashboard' : 'My Account';
-      
+
       // Add a simple dropdown on click
       userBtn.onclick = (e) => {
           e.preventDefault();
@@ -331,7 +366,7 @@ async function initAuthStatus() {
               existingDropdown.remove();
               return;
           }
-          
+
           const dropdown = document.createElement('div');
           dropdown.id = 'userDropdown';
           dropdown.style.cssText = `
@@ -350,12 +385,12 @@ async function initAuthStatus() {
               flex-direction: column;
               gap: 8px;
           `;
-          
+
           const greeting = document.createElement('div');
           greeting.style.cssText = 'font-size: 0.75rem; color: #999; margin-bottom: 4px; padding: 0 8px;';
           greeting.textContent = `Hello, ${user.user_metadata?.full_name?.split(' ')[0] || 'User'}`;
           dropdown.appendChild(greeting);
-          
+
           if (isAuthAdmin) {
               const adminLink = document.createElement('a');
               adminLink.href = '/admin/index.html';
@@ -363,7 +398,7 @@ async function initAuthStatus() {
               adminLink.innerHTML = '🛡️ Admin Panel';
               dropdown.appendChild(adminLink);
           }
-          
+
           const logoutBtn = document.createElement('button');
           logoutBtn.style.cssText = 'background: transparent; border: none; color: var(--red); font-size: 0.85rem; padding: 8px; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: inherit; width: 100%;';
           logoutBtn.innerHTML = '🚪 Sign Out';
@@ -372,10 +407,10 @@ async function initAuthStatus() {
               window.location.reload();
           };
           dropdown.appendChild(logoutBtn);
-          
+
           userBtn.parentElement.style.position = 'relative';
           userBtn.parentElement.appendChild(dropdown);
-          
+
           document.addEventListener('click', function closeDropdown(ev) {
               if (!userBtn.contains(ev.target) && !dropdown.contains(ev.target)) {
                   dropdown.remove();

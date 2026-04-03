@@ -174,15 +174,6 @@
   <script src="/admin/js/dashboard.js"></script>
   <script>
     lucide.createIcons();
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            const loader = document.getElementById('adminLoader');
-            if (loader) {
-                loader.style.opacity = '0';
-                setTimeout(() => loader.style.display = 'none', 500);
-            }
-        }, 1000); // Artificial delay to WOW the user with the spinner
-    });
   </script>
 </body>
 </html>
