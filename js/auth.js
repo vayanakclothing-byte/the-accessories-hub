@@ -1,6 +1,18 @@
 // js/auth.js
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
+
+  // Show error from URL params (e.g. unauthorized admin access)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('error')) {
+    const msg = document.getElementById('authMessage');
+    if (msg) {
+      msg.textContent = urlParams.get('error');
+      msg.style.display = 'block';
+      msg.style.color = 'var(--red, #E74C3C)';
+    }
+  }
+
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -26,12 +38,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const isAuthAdmin = session?.user?.email === adminEmail;
         
         // Success - redirect to intended page or index (or admin if authorized)
-        const returnUrl = isAuthAdmin ? '/admin/index.html' : (sessionStorage.getItem('tah_return_url') || 'index.html');
+        const storedReturn = sessionStorage.getItem('tah_return_url');
+        let returnUrl;
+        
+        if (isAuthAdmin) {
+          // If admin had a stored return URL within admin section, use that; otherwise default to dashboard
+          returnUrl = (storedReturn && storedReturn.includes('/admin')) ? storedReturn : '/admin/index.html';
+        } else {
+          returnUrl = storedReturn || 'index.html';
+        }
+        
+        sessionStorage.removeItem('tah_return_url');
         window.location.href = returnUrl;
 
       } catch (err) {
         msg.textContent = err.message;
         msg.style.display = 'block';
+        msg.style.color = 'var(--red, #E74C3C)';
       }
     });
   }
@@ -59,16 +82,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Check if we just returned from OAuth and have a session
+  // Handle OAuth redirect — check if we just returned from Google sign-in with a session
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) {
       const adminEmail = 'theaccessorieshub2530@gmail.com';
       const isAuthAdmin = session.user.email === adminEmail;
       
-      const returnUrl = isAuthAdmin ? '/admin/index.html' : (sessionStorage.getItem('tah_return_url') || 'index.html');
+      const storedReturn = sessionStorage.getItem('tah_return_url');
+      let returnUrl;
+      
+      if (isAuthAdmin) {
+        returnUrl = (storedReturn && storedReturn.includes('/admin')) ? storedReturn : '/admin/index.html';
+      } else {
+        returnUrl = storedReturn || 'index.html';
+      }
+      
       sessionStorage.removeItem('tah_return_url');
       
-      if (window.location.pathname.includes('login.html') || window.location.pathname.includes('admin-login.html')) {
+      // Only redirect if we are currently on the login page
+      if (window.location.pathname.includes('login.html')) {
         window.location.href = returnUrl;
       }
     }
@@ -77,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function handleGoogleSignIn() {
   // Store the current page as return URL if not on login pages
-  if (!window.location.pathname.includes('login.html') && !window.location.pathname.includes('admin-login.html')) {
+  if (!window.location.pathname.includes('login.html')) {
       sessionStorage.setItem('tah_return_url', window.location.href);
   }
 

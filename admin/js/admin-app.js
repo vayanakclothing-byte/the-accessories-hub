@@ -158,7 +158,7 @@ function initSidebar() {
 async function handleLogout() {
   const { error } = await supabase.auth.signOut();
   if (error) showToast('Logout failed', 'error');
-  else window.location.href = '/admin-login.html';
+  else window.location.href = '/login.html';
 }
 
 // ===== MODAL HELPERS =====
@@ -213,7 +213,7 @@ async function initAdminAuth() {
       // Secondary check in JS (already covered by guard but good for UI)
       if (user.email !== adminEmail) {
         await supabase.auth.signOut();
-        window.location.href = '/admin-login.html?error=Unauthorized';
+        window.location.href = '/login.html?error=Unauthorized. Restricted Access: Authorized Personnel Only.';
         return;
       }
 
@@ -227,7 +227,8 @@ async function initAdminAuth() {
       if (breadcrumbEl) breadcrumbEl.textContent = `Welcome back, ${fullName.split(' ')[0]}`;
       
     } else {
-        window.location.href = '/admin-login.html';
+        sessionStorage.setItem('tah_return_url', window.location.href);
+        window.location.href = '/login.html';
     }
   } catch (e) {
     console.warn('Admin auth init failed', e);

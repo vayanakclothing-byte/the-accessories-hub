@@ -23,8 +23,9 @@
         const { data: { session } } = await supabase.auth.getSession();
 
         if (!session) {
-            // Not logged in at all
-            window.location.href = '/admin-login.html';
+            // Not logged in — redirect to main login page with admin return URL
+            sessionStorage.setItem('tah_return_url', window.location.href);
+            window.location.href = '/login.html';
             return;
         }
 
@@ -34,7 +35,7 @@
         if (!isAuthorized) {
             console.error('Unauthorized access attempt by:', userEmail);
             await supabase.auth.signOut();
-            window.location.href = '/admin-login.html?error=Unauthorized. Restricted Access: Authorized Personnel Only.';
+            window.location.href = '/login.html?error=Unauthorized. Restricted Access: Authorized Personnel Only.';
         }
     }
 
