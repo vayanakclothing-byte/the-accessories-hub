@@ -208,12 +208,18 @@ async function initAdminAuth() {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       const user = session.user;
-      const adminEmail = 'theaccessorieshub2530@gmail.com';
-      
-      // Secondary check in JS (already covered by guard but good for UI)
-      if (user.email !== adminEmail) {
-        await supabase.auth.signOut();
-        window.location.href = '/login.html?error=Unauthorized. Restricted Access: Authorized Personnel Only.';
+
+      // Verify admin role from profiles table (secondary check — guard already ran)
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (error || !profile || profile.role !== 'admin') {
+        // Guard should have caught this, but just in case
+        const params = new URLSearchParams({ uid: user.id, email: user.email });
+        window.location.href = '/request-access.html?' + params.toString();
         return;
       }
 

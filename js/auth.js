@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const isSignUp = document.getElementById('toggleSignUp').textContent.includes('Sign In');
-      
+
       const msg = document.getElementById('authMessage');
       msg.style.display = 'none';
 
@@ -33,9 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (authResult.error) throw authResult.error;
-        
+
         const session = authResult.data.session;
-        handleSuccessfulAuth(session);
+        await handleSuccessfulAuth(session);
 
       } catch (err) {
         msg.textContent = err.message;
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Only auto-redirect if we are on the login page
       const path = window.location.pathname;
       const isOnLogin = path.includes('login') || path === '/login' || path === '/login.html';
-      
+
       if (isOnLogin) {
         handleSuccessfulAuth(session);
       }
@@ -83,21 +83,34 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── Shared redirect logic after successful auth ──
-function handleSuccessfulAuth(session) {
+// Now checks the profiles table for the user's role instead of hardcoded email
+async function handleSuccessfulAuth(session) {
   if (!session) return;
-  
-  const adminEmail = 'theaccessorieshub2530@gmail.com';
-  const isAuthAdmin = session.user?.email === adminEmail;
-  
+
+  const user = session.user;
   const storedReturn = sessionStorage.getItem('tah_return_url');
-  let returnUrl;
-  
-  if (isAuthAdmin) {
-    returnUrl = (storedReturn && storedReturn.includes('/admin')) ? storedReturn : '/admin/index.html';
-  } else {
+  let returnUrl = storedReturn || '/';
+
+  try {
+    // Query the profiles table for the user's role
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (!error && profile && profile.role === 'admin') {
+      // Admin user — go to admin or the stored return URL (if it was an admin page)
+      returnUrl = (storedReturn && storedReturn.includes('/admin')) ? storedReturn : '/admin/index.html';
+    } else {
+      // Regular user — go to storefront
+      returnUrl = (storedReturn && !storedReturn.includes('/admin')) ? storedReturn : '/';
+    }
+  } catch (e) {
+    console.warn('[Auth] Could not verify role, defaulting to storefront:', e);
     returnUrl = storedReturn || '/';
   }
-  
+
   sessionStorage.removeItem('tah_return_url');
   window.location.href = returnUrl;
 }

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Required — The Accessories Hub</title>
+  <meta name="description" content="Admin access is required to view this page.">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #000000;
+      --black-light: #0A0A0A;
+      --grey-dark: #111111;
+      --grey: #1A1A1A;
+      --grey-mid: #2A2A2A;
+      --gold: #D4AF37;
+      --gold-light: #E8C84A;
+      --white: #FAFAFA;
+      --white-dim: #CCCCCC;
+      --white-muted: #999999;
+      --red: #E74C3C;
+      --font-serif: 'Playfair Display', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: var(--font-sans);
+      background: var(--black-light);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    /* Animated background particles */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(212,175,55,0.06) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(212,175,55,0.04) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(212,175,55,0.02) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .access-card {
+      position: relative;
+      z-index: 1;
+      background: var(--grey-dark);
+      border: 1px solid rgba(212,175,55,0.12);
+      border-radius: 20px;
+      padding: 48px 44px;
+      max-width: 520px;
+      width: 92%;
+      text-align: center;
+      box-shadow: 
+        0 25px 60px rgba(0,0,0,0.5),
+        0 0 80px rgba(212,175,55,0.04);
+      animation: cardEntry 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: translateY(20px) scale(0.97);
+    }
+
+    @keyframes cardEntry {
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .shield-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 28px;
+      background: rgba(212,175,55,0.08);
+      border: 2px solid rgba(212,175,55,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(212,175,55,0.1); }
+      50% { box-shadow: 0 0 35px rgba(212,175,55,0.2); }
+    }
+
+    .shield-icon svg {
+      width: 32px;
+      height: 32px;
+      color: var(--gold);
+    }
+
+    .access-title {
+      font-family: var(--font-serif);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .access-subtitle {
+      font-size: 0.95rem;
+      color: var(--white-muted);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .info-box {
+      background: var(--grey);
+      border: 1px solid var(--grey-mid);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 28px;
+      text-align: left;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(42,42,42,0.8);
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--white-muted);
+    }
+
+    .info-value {
+      font-size: 0.82rem;
+      color: var(--gold);
+      font-weight: 500;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      word-break: break-all;
+      max-width: 280px;
+      text-align: right;
+    }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 8px;
+      background: rgba(212,175,55,0.1);
+      border: 1px solid rgba(212,175,55,0.2);
+      color: var(--gold);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--font-sans);
+    }
+
+    .copy-btn:hover {
+      background: rgba(212,175,55,0.2);
+    }
+
+    .copy-btn.copied {
+      background: rgba(46,204,113,0.15);
+      color: #2ECC71;
+      border-color: rgba(46,204,113,0.3);
+    }
+
+    .help-text {
+      font-size: 0.82rem;
+      color: var(--white-muted);
+      line-height: 1.7;
+      margin-bottom: 28px;
+      padding: 16px;
+      background: rgba(212,175,55,0.04);
+      border-radius: 10px;
+      border-left: 3px solid var(--gold);
+      text-align: left;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 28px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      border: none;
+      font-family: var(--font-sans);
+      text-decoration: none;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--black);
+    }
+
+    .btn-gold:hover {
+      box-shadow: 0 0 25px rgba(212,175,55,0.35);
+      transform: translateY(-2px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--white-dim);
+      border: 1px solid var(--grey-mid);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(212,175,55,0.06);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="access-card">
+    <div class="shield-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+    </div>
+
+    <h1 class="access-title">Admin Access Required</h1>
+    <p class="access-subtitle">
+      You're signed in, but your account doesn't have administrator privileges for The Accessories Hub.
+    </p>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">Email</span>
+        <span class="info-value" id="userEmail">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">User ID</span>
+        <span class="info-value">
+          <span id="userId">—</span>
+          <button class="copy-btn" id="copyBtn" onclick="copyUserId()">Copy</button>
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Role</span>
+        <span class="info-value" style="color: var(--red);">user</span>
+      </div>
+    </div>
+
+    <div class="help-text">
+      <strong>How to get access:</strong> Share your User ID with the site administrator. They will update your role to <code style="color: var(--gold); background: rgba(212,175,55,0.1); padding: 2px 6px; border-radius: 4px;">admin</code> in the database.
+    </div>
+
+    <div class="btn-group">
+      <a href="/" class="btn btn-gold">← Back to Store</a>
+      <button class="btn btn-ghost" id="signOutBtn" onclick="handleSignOut()">Sign Out</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script>
+    // Parse URL params for user info
+    const params = new URLSearchParams(window.location.search);
+    const uid = params.get('uid') || '—';
+    const email = params.get('email') || '—';
+
+    document.getElementById('userId').textContent = uid;
+    document.getElementById('userEmail').textContent = email;
+
+    function copyUserId() {
+      const userId = document.getElementById('userId').textContent;
+      if (userId && userId !== '—') {
+        navigator.clipboard.writeText(userId).then(() => {
+          const btn = document.getElementById('copyBtn');
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      }
+    }
+
+    async function handleSignOut() {
+      if (typeof supabase !== 'undefined') {
+        await supabase.auth.signOut();
+      }
+      window.location.href = '/login.html';
+    }
+  </script>
+</body>
+</html>
