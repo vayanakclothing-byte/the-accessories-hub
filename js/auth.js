@@ -1,4 +1,4 @@
-// js/auth.js
+// js/auth.js — Unified Authentication Handler
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
 
@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ── Email/Password Login ──
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -34,22 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (authResult.error) throw authResult.error;
         
         const session = authResult.data.session;
-        const adminEmail = 'theaccessorieshub2530@gmail.com';
-        const isAuthAdmin = session?.user?.email === adminEmail;
-        
-        // Success - redirect to intended page or index (or admin if authorized)
-        const storedReturn = sessionStorage.getItem('tah_return_url');
-        let returnUrl;
-        
-        if (isAuthAdmin) {
-          // If admin had a stored return URL within admin section, use that; otherwise default to dashboard
-          returnUrl = (storedReturn && storedReturn.includes('/admin')) ? storedReturn : '/admin/index.html';
-        } else {
-          returnUrl = storedReturn || 'index.html';
-        }
-        
-        sessionStorage.removeItem('tah_return_url');
-        window.location.href = returnUrl;
+        handleSuccessfulAuth(session);
 
       } catch (err) {
         msg.textContent = err.message;
@@ -59,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Toggle Login / Signup UI
+  // ── Toggle Login / Signup UI ──
   const toggleBtn = document.getElementById('toggleSignUp');
   if (toggleBtn) {
     toggleBtn.addEventListener('click', (e) => {
@@ -82,44 +68,50 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Handle OAuth redirect — check if we just returned from Google sign-in with a session
+  // ── Handle OAuth redirect (SIGNED_IN after Google callback) ──
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) {
-      const adminEmail = 'theaccessorieshub2530@gmail.com';
-      const isAuthAdmin = session.user.email === adminEmail;
+      // Only auto-redirect if we are on the login page
+      const path = window.location.pathname;
+      const isOnLogin = path.includes('login') || path === '/login' || path === '/login.html';
       
-      const storedReturn = sessionStorage.getItem('tah_return_url');
-      let returnUrl;
-      
-      if (isAuthAdmin) {
-        returnUrl = (storedReturn && storedReturn.includes('/admin')) ? storedReturn : '/admin/index.html';
-      } else {
-        returnUrl = storedReturn || 'index.html';
-      }
-      
-      sessionStorage.removeItem('tah_return_url');
-      
-      // Only redirect if we are currently on the login page
-      if (window.location.pathname.includes('login.html')) {
-        window.location.href = returnUrl;
+      if (isOnLogin) {
+        handleSuccessfulAuth(session);
       }
     }
   });
 });
 
-async function handleGoogleSignIn() {
-  // Store the current page as return URL if not on login pages
-  if (!window.location.pathname.includes('login.html')) {
-      sessionStorage.setItem('tah_return_url', window.location.href);
+// ── Shared redirect logic after successful auth ──
+function handleSuccessfulAuth(session) {
+  if (!session) return;
+  
+  const adminEmail = 'theaccessorieshub2530@gmail.com';
+  const isAuthAdmin = session.user?.email === adminEmail;
+  
+  const storedReturn = sessionStorage.getItem('tah_return_url');
+  let returnUrl;
+  
+  if (isAuthAdmin) {
+    returnUrl = (storedReturn && storedReturn.includes('/admin')) ? storedReturn : '/admin/index.html';
+  } else {
+    returnUrl = storedReturn || '/';
   }
+  
+  sessionStorage.removeItem('tah_return_url');
+  window.location.href = returnUrl;
+}
 
-  const redirectTo = CONFIG.getRedirectURL('/login.html');
-  console.log('Initiating Google Sign-In. Redirect destination:', redirectTo);
+// ── Google OAuth Sign-In ──
+async function handleGoogleSignIn() {
+  // Use window.location.origin so it always matches production or local
+  const redirectTo = window.location.origin + '/login';
+  console.log('[Auth] Initiating Google Sign-In. Redirect:', redirectTo);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: CONFIG.getRedirectURL('/login.html'), 
+      redirectTo: redirectTo,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',
@@ -133,7 +125,7 @@ async function handleGoogleSignIn() {
       msg.textContent = error.message;
       msg.style.display = 'block';
     } else {
-        alert('Authentication Error: ' + error.message);
+      alert('Authentication Error: ' + error.message);
     }
   }
 }

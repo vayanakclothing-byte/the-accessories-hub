@@ -1,3 +1,17 @@
+// === BigInt Serialization Fix (prevents JSON.stringify crash) ===
+if (typeof BigInt !== 'undefined' && !BigInt.prototype.toJSON) {
+  BigInt.prototype.toJSON = function() { return this.toString(); };
+}
+
+// === Supabase Client ===
 const supabaseUrl = 'https://hefijdydpibqbubjrnli.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlZmlqZHlkcGlicWJ1YmpybmxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNTQ3NDcsImV4cCI6MjA4OTkzMDc0N30.ogYSnS7w-b5XW9i3TqS6vh7tnuy2ICisJ6D7ExvPdBw';
-window.supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+window.supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,   // Critical: lets Supabase pick up ?code= from OAuth callback
+    flowType: 'pkce'            // Use PKCE flow (Supabase v2 default for browser)
+  }
+});
