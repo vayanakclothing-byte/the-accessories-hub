@@ -158,19 +158,24 @@ function validateForm() {
   return valid;
 }
 
-// --- Stock Validation ---
 async function validateStock() {
-  for (const item of Cart.items) {
-    try {
-      const { data: product } = await supabase.from('products').select('stock, name').eq('id', item.id).single();
-      if (product && product.stock !== null && product.stock < item.qty) {
-        alert(`Sorry, "${product.name}" only has ${product.stock} left in stock. Please adjust your quantity.`);
-        return false;
+  const itemIds = Cart.items.map(item => item.id);
+  
+  if (itemIds.length === 0) return true;
+
+  try {
+    const { data: products } = await supabase.from('products').select('id, stock, name').in('id', itemIds);
+    if (products) {
+      for (const item of Cart.items) {
+        const product = products.find(p => p.id === item.id);
+        if (product && product.stock !== null && product.stock < item.qty) {
+          alert(`Sorry, "${product.name}" only has ${product.stock} left in stock. Please adjust your quantity.`);
+          return false;
+        }
       }
-    } catch (e) {
-      // If stock check fails, continue — don't block the order
-      console.warn('Stock check failed for item', item.id, e);
     }
+  } catch (e) {
+    console.warn('Stock check failed', e);
   }
   return true;
 }
@@ -253,29 +258,49 @@ async function placeOrder() {
     const orderId = newOrder[0].id;
 
     // 5. Insert Order Items & Update Stock
-    for (const item of Cart.items) {
-      await supabase.from('order_items').insert([{
+    if (Cart.items.length > 0) {
+      // A. Batch Insert order items
+      const orderItemsData = Cart.items.map(item => ({
         order_id: orderId,
         product_id: item.id,
         name: item.name,
         price: item.price,
         qty: item.qty,
         image: item.image
-      }]);
+      }));
+      await supabase.from('order_items').insert(orderItemsData);
 
-      // Update inventory
-      const { data: pData } = await supabase.from('products').select('stock').eq('id', item.id).single();
-      if (pData && pData.stock !== null) {
-        const newStock = Math.max(0, pData.stock - item.qty);
-        await supabase.from('products').update({ stock: newStock }).eq('id', item.id);
+      // B. Batch fetching of current stock
+      const itemIds = Cart.items.map(i => i.id);
+      const { data: productsData } = await supabase.from('products').select('id, stock, name').in('id', itemIds);
 
-        await supabase.from('stock_history').insert([{
-          product: item.name,
-          type: 'Sold',
-          change_amount: -item.qty,
-          new_stock: newStock,
-          date: new Date().toLocaleDateString('en-GB')
-        }]);
+      if (productsData) {
+        const stockHistoryData = [];
+        const updatePromises = [];
+
+        for (const item of Cart.items) {
+          const pData = productsData.find(p => p.id === item.id);
+          if (pData && pData.stock !== null) {
+            const newStock = Math.max(0, pData.stock - item.qty);
+            
+            // Queue update promise
+            updatePromises.push(supabase.from('products').update({ stock: newStock }).eq('id', item.id));
+            
+            // Queue history insert
+            stockHistoryData.push({
+              product: item.name,
+              type: 'Sold',
+              change_amount: -item.qty,
+              new_stock: newStock,
+              date: new Date().toLocaleDateString('en-GB')
+            });
+          }
+        }
+
+        // Execute all updates in parallel
+        if (updatePromises.length > 0) await Promise.all(updatePromises);
+        // Execute batched history insert
+        if (stockHistoryData.length > 0) await supabase.from('stock_history').insert(stockHistoryData);
       }
     }
 

@@ -18,10 +18,8 @@
     const isOAuthCallback = urlParams.has('code') || hashParams.has('access_token');
 
     if (isOAuthCallback) {
-      console.log('[AdminGuard] OAuth callback detected, waiting for session...');
       supabase.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN' && session) {
-          console.log('[AdminGuard] Session established after OAuth callback');
           verifyAdminRole(session.user);
         }
       });
@@ -39,7 +37,6 @@
       }
 
       if (!session) {
-        console.log('[AdminGuard] No session found, redirecting to login');
         redirectToLogin();
         return;
       }
@@ -59,8 +56,6 @@
    */
   async function verifyAdminRole(user) {
     try {
-      console.log('[AdminGuard] Verifying admin role for user:', user.id);
-
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
@@ -82,7 +77,6 @@
       }
 
       // ✅ User is authorized admin
-      console.log('[AdminGuard] ✅ Admin access granted for:', user.email);
       document.documentElement.style.visibility = 'visible';
 
     } catch (e) {

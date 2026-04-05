@@ -145,11 +145,24 @@ function initGallery() {
   const mainImg = document.getElementById('galleryMain');
 
   if (mainContainer && mainImg) {
+    let ticking = false;
+    let rect;
+    
+    mainContainer.addEventListener('mouseenter', () => {
+      rect = mainContainer.getBoundingClientRect();
+    });
+
     mainContainer.addEventListener('mousemove', (e) => {
-      const rect = mainContainer.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      mainImg.style.transformOrigin = `${x}% ${y}%`;
+      if (!rect) rect = mainContainer.getBoundingClientRect();
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          const y = ((e.clientY - rect.top) / rect.height) * 100;
+          mainImg.style.transformOrigin = `${x}% ${y}%`;
+          ticking = false;
+        });
+        ticking = true;
+      }
     });
 
     mainContainer.addEventListener('mouseleave', () => {

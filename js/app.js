@@ -82,15 +82,22 @@ function initHeader() {
   const header = document.querySelector('.site-header');
   if (!header) return;
 
+  let ticking = false;
   const handleScroll = () => {
-    if (window.scrollY > 50) {
-      header.classList.add('scrolled');
-      header.classList.remove('transparent');
-    } else {
-      header.classList.remove('scrolled');
-      if (header.dataset.transparent === 'true') {
-        header.classList.add('transparent');
-      }
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        if (window.scrollY > 50) {
+          header.classList.add('scrolled');
+          header.classList.remove('transparent');
+        } else {
+          header.classList.remove('scrolled');
+          if (header.dataset.transparent === 'true') {
+            header.classList.add('transparent');
+          }
+        }
+        ticking = false;
+      });
+      ticking = true;
     }
   };
 
@@ -309,15 +316,7 @@ function closeQuickView() {
   document.body.style.overflow = '';
 }
 
-// --- Fade animation keyframes (added dynamically) ---
-const fadeStyle = document.createElement('style');
-fadeStyle.textContent = `
-  @keyframes fadeOut {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(10px); }
-  }
-`;
-document.head.appendChild(fadeStyle);
+// --- Fade animation keyframes moved to style.css ---
 
 // --- Auth Status Header ---
 async function initAuthStatus() {

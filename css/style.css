@@ -506,6 +506,7 @@ h4 { font-size: 1.25rem; }
   transition: all var(--transition-base);
   position: relative;
   cursor: pointer;
+  will-change: transform, box-shadow;
 }
 
 .product-card:hover {
@@ -526,6 +527,7 @@ h4 { font-size: 1.25rem; }
   height: 100%;
   object-fit: cover;
   transition: transform var(--transition-slow);
+  will-change: transform;
 }
 
 .product-card:hover .product-card-image img {
@@ -865,6 +867,11 @@ h4 { font-size: 1.25rem; }
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(10px); }
 }
 
 @keyframes shimmer {

@@ -6,7 +6,6 @@ const CONFIG = {
       // Normalizes the redirect path to avoid double slashes and ensure correctness
       const cleanPath = path.startsWith('/') ? path : `/${path}`;
       const url = `${origin}${cleanPath}`;
-      console.log(`[CONFIG] Redirect set to: ${url}`);
       return url;
   },
   

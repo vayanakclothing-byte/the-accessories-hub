@@ -119,7 +119,6 @@ async function handleSuccessfulAuth(session) {
 async function handleGoogleSignIn() {
   // Use window.location.origin so it always matches production or local
   const redirectTo = window.location.origin + '/login';
-  console.log('[Auth] Initiating Google Sign-In. Redirect:', redirectTo);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',

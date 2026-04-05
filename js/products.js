@@ -111,35 +111,22 @@ function updatePageHeader() {
 
 
 function applyFilters(products) {
+  const isColActive = state.collection.length > 0;
+  const isCatActive = state.category.length > 0;
+  const isMatActive = state.material.length > 0;
+  
+  const activeCol = state.collection.map(c => c.toLowerCase());
+  const activeCat = state.category.map(c => c.toLowerCase());
+  const activeMat = state.material.map(c => c.toLowerCase());
+  const activeBadge = state.badge ? state.badge.toLowerCase() : null;
+  const activeSearch = state.search ? state.search.toLowerCase() : null;
+
   filteredProducts = products.filter(p => {
-    // Case-insensitive matching for collection
-    if (state.collection.length) {
-      const match = state.collection.some(c => (p.collection || '').toLowerCase() === c.toLowerCase());
-      if (!match) return false;
-    }
-    
-    // Case-insensitive matching for category
-    if (state.category.length) {
-      const match = state.category.some(c => (p.category || '').toLowerCase() === c.toLowerCase());
-      if (!match) return false;
-    }
-    
-    // Case-insensitive matching for material
-    if (state.material.length) {
-      const match = state.material.some(c => (p.material || '').toLowerCase() === c.toLowerCase());
-      if (!match) return false;
-    }
-    
-    // Partial case-insensitive match for badge
-    if (state.badge && !(p.badge || '').toLowerCase().includes(state.badge.toLowerCase())) {
-        return false;
-    }
-    
-    // Case-insensitive search 
-    if (state.search && !(p.name || '').toLowerCase().includes(state.search.toLowerCase())) {
-        return false;
-    }
-    
+    if (isColActive && !activeCol.includes((p.collection || '').toLowerCase())) return false;
+    if (isCatActive && !activeCat.includes((p.category || '').toLowerCase())) return false;
+    if (isMatActive && !activeMat.includes((p.material || '').toLowerCase())) return false;
+    if (activeBadge && !(p.badge || '').toLowerCase().includes(activeBadge)) return false;
+    if (activeSearch && !(p.name || '').toLowerCase().includes(activeSearch)) return false;
     return true;
   });
 
