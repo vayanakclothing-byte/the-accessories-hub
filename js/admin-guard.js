@@ -12,20 +12,6 @@
       return;
     }
 
-    // ── Detect OAuth callback (PKCE uses ?code= in query params) ──
-    const urlParams = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const isOAuthCallback = urlParams.has('code') || hashParams.has('access_token');
-
-    if (isOAuthCallback) {
-      supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          verifyAdminRole(session.user);
-        }
-      });
-      return; // Don't redirect — wait for session
-    }
-
     // ── Normal page load: retrieve existing session ──
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -36,13 +22,39 @@
         return;
       }
 
-      if (!session) {
-        redirectToLogin();
+      if (session) {
+        // We have a valid session — verify role immediately
+        await verifyAdminRole(session.user);
         return;
       }
 
-      // We have a valid session — now verify the role in profiles table
-      await verifyAdminRole(session.user);
+      // ── Detect OAuth callback if no session yet ──
+      const urlParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const hasCode = urlParams.has('code');
+      const hasToken = hashParams.has('access_token');
+
+      if (hasCode || hasToken) {
+        console.log('[AdminGuard] OAuth callback detected, waiting for session...');
+        // Wait for onAuthStateChange to pick up the hash/code
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          if (event === 'SIGNED_IN' && session) {
+            subscription.unsubscribe();
+            await verifyAdminRole(session.user);
+          }
+        });
+        
+        // Safety timeout to prevent infinite hidden screen
+        setTimeout(() => {
+            if (document.documentElement.style.visibility === 'hidden') {
+                console.warn('[AdminGuard] OAuth callback timed out.');
+                redirectToLogin();
+            }
+        }, 5000);
+      } else {
+        // No session and not a callback
+        redirectToLogin();
+      }
 
     } catch (e) {
       console.error('[AdminGuard] Unexpected error:', e);

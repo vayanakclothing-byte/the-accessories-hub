@@ -117,27 +117,39 @@ async function handleSuccessfulAuth(session) {
 
 // ── Google OAuth Sign-In ──
 async function handleGoogleSignIn() {
-  // Use window.location.origin so it always matches production or local
-  const redirectTo = window.location.origin + '/login';
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: redirectTo,
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'consent',
-      },
-    }
-  });
-
-  if (error) {
+  try {
+    // Show a small loader or feedback
     const msg = document.getElementById('authMessage');
     if (msg) {
-      msg.textContent = error.message;
+        msg.textContent = 'Connecting to Google...';
+        msg.style.display = 'block';
+        msg.style.color = 'var(--gold)';
+    }
+
+    // Use normalized redirect URL from config
+    const redirectTo = CONFIG.getRedirectURL('login');
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectTo,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      }
+    });
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('[Auth] Google Sign-In Error:', err);
+    const msg = document.getElementById('authMessage');
+    if (msg) {
+      msg.textContent = err.message || 'Failed to connect to Google';
       msg.style.display = 'block';
+      msg.style.color = 'var(--red, #E74C3C)';
     } else {
-      alert('Authentication Error: ' + error.message);
+      alert('Authentication Error: ' + err.message);
     }
   }
 }

@@ -222,44 +222,66 @@ async function loadProducts() {
   try {
     const cacheKey = 'tah_products_cache';
     const cacheTimeKey = 'tah_products_cache_time';
-    const cacheExp = 3 * 60 * 1000; // 3 minutes
+    const cacheExp = 5 * 60 * 1000; // Increase to 5 minutes for performance
 
     const cachedData = localStorage.getItem(cacheKey);
     const cachedTime = localStorage.getItem(cacheTimeKey);
 
-    // If cache is valid and NOT empty, return instantly
-    if (cachedData && cachedTime && (Date.now() - parseInt(cachedTime)) < cacheExp) {
+    // Immediate UI Update from Cache (Stale-While-Revalidate pattern)
+    if (cachedData) {
       const parsed = JSON.parse(cachedData);
       if (parsed && parsed.length > 0) {
         allProducts = parsed;
+        // If cache is fresh, return directly
+        if (cachedTime && (Date.now() - parseInt(cachedTime)) < cacheExp) {
+          return allProducts;
+        }
+        // If stale, return it now but fetch in background
+        console.log('[App] Using stale cache, updating in background...');
+        fetchAndUpdateProducts(cacheKey, cacheTimeKey);
         return allProducts;
       }
     }
 
-    // Show skeleton loading while fetching
-    showSkeletonLoading();
+    return await fetchAndUpdateProducts(cacheKey, cacheTimeKey);
+  } catch (err) {
+    console.error('Failed to load products:', err);
+    return [];
+  }
+}
 
-    // Fetch only the columns needed for listing + detail views
+async function fetchAndUpdateProducts(cacheKey, cacheTimeKey) {
+  try {
+    showSkeletonLoading();
+    
+    // Use select matching the needed columns for smaller payload
     const { data, error } = await supabase
       .from('products')
       .select('id, name, price, original_price, collection, category, material, badge, image, images, description, features, stock, reorder_level, in_stock')
       .order('id', { ascending: true });
+      
     if (error) throw error;
 
     allProducts = data || [];
+    
+    // Save to cache asynchronously
+    setTimeout(() => {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(allProducts));
+        localStorage.setItem(cacheTimeKey, Date.now().toString());
+      } catch (e) {}
+    }, 0);
 
-    // Save to cache
-    try {
-      localStorage.setItem(cacheKey, JSON.stringify(allProducts));
-      localStorage.setItem(cacheTimeKey, Date.now().toString());
-    } catch (e) {
-      console.warn('Could not cache products:', e);
+    // Refresh UI if on products grid
+    const grid = document.getElementById('productsGrid');
+    if (grid && grid.innerHTML.includes('skeleton-card')) {
+       renderProducts?.(); // Call render if on products page
     }
 
     return allProducts;
   } catch (err) {
-    console.error('Failed to load products:', err);
-    return [];
+    console.warn('[App] Background fetch failed:', err);
+    return allProducts || [];
   }
 }
 

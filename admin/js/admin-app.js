@@ -24,9 +24,17 @@ window.addEventListener('unhandledrejection', function (e) {
 // ===== DATA HELPERS =====
 
 let _dataLoaded = false;
+let _lastDataLoad = 0;
+const DATA_CACHE_EXPIRY = 60000; // 1 minute session cache
 
-async function loadData() {
+async function loadData(force = false) {
+  // Return early if data is fresh enough (prevents multiple fetches in same session)
+  if (_dataLoaded && !force && (Date.now() - _lastDataLoad < DATA_CACHE_EXPIRY)) {
+    return;
+  }
+
   try {
+    const fetchStart = Date.now();
     const [
       {data: products, error: e1},
       {data: customers, error: e2},
@@ -44,6 +52,8 @@ async function loadData() {
       supabase.from('stock_history').select('*').order('id', {ascending:false}),
       supabase.from('settings').select('*').single()
     ]);
+
+    console.log(`[Admin] Data loaded in ${Date.now() - fetchStart}ms`);
 
     // Log any errors but don't crash
     [e1,e2,e3,e4,e5,e6,e7].forEach((err, i) => {
