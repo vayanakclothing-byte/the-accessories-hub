@@ -99,13 +99,78 @@ async function loadData(force = false) {
   }
 }
 
+function normalizeToYYYYMMDD(dateStr) {
+  if (!dateStr) return '';
+  if (typeof dateStr !== 'string') dateStr = String(dateStr);
+  if (dateStr.includes('-')) {
+    return dateStr.split('T')[0];
+  }
+  if (dateStr.includes('/')) {
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+      } else {
+        return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      }
+    }
+  }
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      return d.toISOString().split('T')[0];
+    }
+  } catch (e) {}
+  return dateStr;
+}
+
 const DB = {
   _cache: { products: [], customers: [], orders: [], invoices: [], stockHistory: [], settings: {} },
   products() { return (this._cache.products || []).map(p => ({...p, originalPrice: p.original_price, inStock: p.in_stock, reorderLevel: p.reorder_level})); },
   customers() { return (this._cache.customers || []).map(c => ({...c, totalOrders: c.total_orders, totalSpent: c.total_spent, joinDate: c.join_date})); },
-  orders() { return (this._cache.orders || []).map(o => ({...o, customerId: o.customer_id, customerName: o.customer_name, trackingId: o.tracking_id, shippingAddress: o.shipping_address, items: o.items || []})); },
-  invoices() { return (this._cache.invoices || []).map(i => ({...i, orderId: i.order_id, customerName: i.customer_name})); },
-  stockHistory() { return (this._cache.stockHistory || []).map(h => ({...h, newStock: h.new_stock, change: h.change_amount})); },
+  orders() { 
+    return (this._cache.orders || []).map(o => {
+      const rawDate = o.date || o.created_at;
+      return {
+        ...o,
+        date: normalizeToYYYYMMDD(rawDate),
+        customerId: o.customer_id,
+        customerName: o.customer_name,
+        trackingId: o.tracking_id,
+        shippingAddress: o.shipping_address,
+        items: o.items || []
+      };
+    });
+  },
+  invoices() { 
+    return (this._cache.invoices || []).map(i => ({
+      ...i, 
+      date: normalizeToYYYYMMDD(i.date || i.created_at),
+      orderId: i.order_id, 
+      customerName: i.customer_name
+    })); 
+  },
+  stockHistory() { 
+    return (this._cache.stockHistory || []).map(h => {
+      const rawDate = h.date || h.created_at;
+      let formattedDate = '';
+      if (rawDate) {
+        const d = new Date(rawDate);
+        if (!isNaN(d.getTime())) {
+          formattedDate = `${d.toISOString().split('T')[0]} ${d.toTimeString().slice(0,5)}`;
+        } else {
+          formattedDate = rawDate;
+        }
+      }
+      return {
+        ...h,
+        product: h.product || h.product_name,
+        date: formattedDate,
+        newStock: h.new_stock,
+        change: h.change_amount
+      };
+    });
+  },
   settings() { return this._cache.settings || {}; },
   nextId(arr) { return arr.length ? Math.max(...arr.map(i => i.id)) + 1 : 1; },
   async saveSettings(data) {
