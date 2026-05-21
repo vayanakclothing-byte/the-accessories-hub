@@ -30,115 +30,123 @@ function renderStatCards() {
 }
 
 function initCharts() {
-  const orders = DB.orders();
-  // Sales over time (last 7 days)
-  const days = [];
-  const revenue = [];
-  const orderCounts = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const key = d.toISOString().split('T')[0];
-    days.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-    const dayOrders = orders.filter(o => o.date === key);
-    revenue.push(dayOrders.reduce((s, o) => s + o.total, 0));
-    orderCounts.push(dayOrders.length);
+  if (typeof Chart === 'undefined') {
+    console.warn('[Dashboard] Chart.js is not loaded. Skipping chart rendering.');
+    return;
   }
+  try {
+    const orders = DB.orders();
+    // Sales over time (last 7 days)
+    const days = [];
+    const revenue = [];
+    const orderCounts = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().split('T')[0];
+      days.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      const dayOrders = orders.filter(o => o.date === key);
+      revenue.push(dayOrders.reduce((s, o) => s + o.total, 0));
+      orderCounts.push(dayOrders.length);
+    }
 
-  // Add some sample data if all zeros
-  if (revenue.every(v => v === 0)) {
-    const sampleRevenue = [4500, 6200, 3800, 8600, 2600, 10850, 5350];
-    const sampleOrders = [1, 2, 1, 2, 1, 2, 2];
-    sampleRevenue.forEach((v, i) => { revenue[i] = v; orderCounts[i] = sampleOrders[i]; });
-  }
+    // Add some sample data if all zeros
+    if (revenue.every(v => v === 0)) {
+      const sampleRevenue = [4500, 6200, 3800, 8600, 2600, 10850, 5350];
+      const sampleOrders = [1, 2, 1, 2, 1, 2, 2];
+      sampleRevenue.forEach((v, i) => { revenue[i] = v; orderCounts[i] = sampleOrders[i]; });
+    }
 
-  const ctx1 = document.getElementById('salesChart')?.getContext('2d');
-  if (ctx1) {
-    if (salesChart) salesChart.destroy();
-    salesChart = new Chart(ctx1, {
-      type: 'line',
-      data: {
-        labels: days,
-        datasets: [{
-          label: 'Revenue (Rs.)',
-          data: revenue,
-          borderColor: '#D4AF37',
-          backgroundColor: 'rgba(212, 175, 55, 0.1)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#D4AF37',
-          pointBorderColor: '#000',
-          pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          borderWidth: 3
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#111',
-            titleColor: '#D4AF37',
-            bodyColor: '#FAFAFA',
+    const ctx1 = document.getElementById('salesChart')?.getContext('2d');
+    if (ctx1) {
+      if (salesChart) salesChart.destroy();
+      salesChart = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: days,
+          datasets: [{
+            label: 'Revenue (Rs.)',
+            data: revenue,
             borderColor: '#D4AF37',
-            borderWidth: 1,
-            padding: 12,
-            cornerRadius: 8,
-            callbacks: { label: ctx => `Rs. ${ctx.parsed.y.toLocaleString()}` }
-          }
+            backgroundColor: 'rgba(212, 175, 55, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#D4AF37',
+            pointBorderColor: '#000',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            borderWidth: 3
+          }]
         },
-        scales: {
-          x: { grid: { color: 'rgba(212, 175, 55, 0.05)' }, ticks: { color: '#999', font: { size: 11 } } },
-          y: { grid: { color: 'rgba(212, 175, 55, 0.05)' }, ticks: { color: '#999', font: { size: 11 }, callback: v => `Rs. ${(v/1000).toFixed(0)}k` } }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#111',
+              titleColor: '#D4AF37',
+              bodyColor: '#FAFAFA',
+              borderColor: '#D4AF37',
+              borderWidth: 1,
+              padding: 12,
+              cornerRadius: 8,
+              callbacks: { label: ctx => `Rs. ${ctx.parsed.y.toLocaleString()}` }
+            }
+          },
+          scales: {
+            x: { grid: { color: 'rgba(212, 175, 55, 0.05)' }, ticks: { color: '#999', font: { size: 11 } } },
+            y: { grid: { color: 'rgba(212, 175, 55, 0.05)' }, ticks: { color: '#999', font: { size: 11 }, callback: v => `Rs. ${(v/1000).toFixed(0)}k` } }
+          }
         }
-      }
-    });
-  }
+      });
+    }
 
-  // Collection breakdown
-  const collections = { korean: 0, temple: 0, oxidized: 0 };
-  orders.forEach(o => {
-    o.items.forEach(item => {
-      const product = DB.products().find(p => p.id === item.productId);
-      if (product) collections[product.collection] = (collections[product.collection] || 0) + (item.price * item.qty);
+    // Collection breakdown
+    const collections = { korean: 0, temple: 0, oxidized: 0 };
+    orders.forEach(o => {
+      o.items.forEach(item => {
+        const product = DB.products().find(p => p.id === item.productId);
+        if (product) collections[product.collection] = (collections[product.collection] || 0) + (item.price * item.qty);
+      });
     });
-  });
-  if (Object.values(collections).every(v => v === 0)) {
-    collections.korean = 8400; collections.temple = 24700; collections.oxidized = 5200;
-  }
+    if (Object.values(collections).every(v => v === 0)) {
+      collections.korean = 8400; collections.temple = 24700; collections.oxidized = 5200;
+    }
 
-  const ctx2 = document.getElementById('collectionChart')?.getContext('2d');
-  if (ctx2) {
-    if (collectionChart) collectionChart.destroy();
-    collectionChart = new Chart(ctx2, {
-      type: 'doughnut',
-      data: {
-        labels: ['Korean', 'Temple', 'Oxidized'],
-        datasets: [{
-          data: [collections.korean, collections.temple, collections.oxidized],
-          backgroundColor: ['#3498DB', '#D4AF37', '#E74C3C'],
-          borderColor: '#111',
-          borderWidth: 3,
-          hoverOffset: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom', labels: { color: '#CCC', padding: 16, font: { size: 12 }, usePointStyle: true, pointStyle: 'circle' } },
-          tooltip: {
-            backgroundColor: '#1A1A1A', titleColor: '#D4AF37', bodyColor: '#FAFAFA',
-            borderColor: 'rgba(212,175,55,0.2)', borderWidth: 1, padding: 12, cornerRadius: 8,
-            callbacks: { label: ctx => `Rs. ${ctx.parsed.toLocaleString()}` }
-          }
+    const ctx2 = document.getElementById('collectionChart')?.getContext('2d');
+    if (ctx2) {
+      if (collectionChart) collectionChart.destroy();
+      collectionChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['Korean', 'Temple', 'Oxidized'],
+          datasets: [{
+            data: [collections.korean, collections.temple, collections.oxidized],
+            backgroundColor: ['#3498DB', '#D4AF37', '#E74C3C'],
+            borderColor: '#111',
+            borderWidth: 3,
+            hoverOffset: 6
+          }]
         },
-        cutout: '65%'
-      }
-    });
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#CCC', padding: 16, font: { size: 12 }, usePointStyle: true, pointStyle: 'circle' } },
+            tooltip: {
+              backgroundColor: '#1A1A1A', titleColor: '#D4AF37', bodyColor: '#FAFAFA',
+              borderColor: 'rgba(212,175,55,0.2)', borderWidth: 1, padding: 12, cornerRadius: 8,
+              callbacks: { label: ctx => `Rs. ${ctx.parsed.toLocaleString()}` }
+            }
+          },
+          cutout: '65%'
+        }
+      });
+    }
+  } catch (e) {
+    console.error('[Dashboard] Error rendering charts:', e);
   }
 }
 
@@ -223,6 +231,10 @@ async function quickStockUpdate(productId, amount) {
 }
 
 function setupRealtimeSimulation() {
+    if (typeof supabase === 'undefined' || !supabase.channel) {
+        console.warn('[Dashboard] Supabase client or channel API is not available.');
+        return;
+    }
     // Listen for changes in orders table if the project supports it
     supabase.channel('custom-all-channel')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async (payload) => {

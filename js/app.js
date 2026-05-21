@@ -5,7 +5,10 @@
 
 // --- Cart State ---
 const Cart = {
-  items: JSON.parse(localStorage.getItem('tah_cart') || '[]'),
+  items: JSON.parse(localStorage.getItem('tah_cart') || '[]').map(item => {
+    if (item.image) item.image = item.image.replace(/\.(png|jpe?g)$/i, '.webp');
+    return item;
+  }),
 
   save() {
     localStorage.setItem('tah_cart', JSON.stringify(this.items));
@@ -197,11 +200,13 @@ function renderProductCard(product) {
     ? `<span class="product-card-price">Rs. ${product.price.toLocaleString()} <span class="original">Rs. ${product.originalPrice.toLocaleString()}</span></span>`
     : `<span class="product-card-price">Rs. ${product.price.toLocaleString()}</span>`;
 
+  const imageUrl = product.image ? product.image.replace(/\.(png|jpe?g)$/i, '.webp') : 'images/placeholder.webp';
+
   return `
     <div class="product-card animate-on-scroll" data-id="${product.id}" data-collection="${product.collection}" data-category="${product.category}" data-price="${product.price}">
       <div class="product-card-image">
         ${badgeHTML}
-        <img src="${product.image}" alt="${product.name}" loading="lazy" decoding="async" width="400" height="400" onerror="this.onerror=null; this.src='images/placeholder.png'; this.style.objectFit='contain';">
+        <img src="${imageUrl}" alt="${product.name}" loading="lazy" decoding="async" width="400" height="400" onerror="this.onerror=null; this.src='images/placeholder.png'; this.style.objectFit='contain';">
         <div class="product-card-overlay">
           <button class="quick-view-btn" onclick="openQuickView(${product.id})">Quick View</button>
         </div>
@@ -231,7 +236,11 @@ async function loadProducts() {
     if (cachedData) {
       const parsed = JSON.parse(cachedData);
       if (parsed && parsed.length > 0) {
-        allProducts = parsed;
+        allProducts = parsed.map(p => {
+          if (p.image) p.image = p.image.replace(/\.(png|jpe?g)$/i, '.webp');
+          if (p.images) p.images = p.images.map(img => img.replace(/\.(png|jpe?g)$/i, '.webp'));
+          return p;
+        });
         // If cache is fresh, return directly
         if (cachedTime && (Date.now() - parseInt(cachedTime)) < cacheExp) {
           return allProducts;
@@ -262,7 +271,11 @@ async function fetchAndUpdateProducts(cacheKey, cacheTimeKey) {
       
     if (error) throw error;
 
-    allProducts = data || [];
+    allProducts = (data || []).map(p => {
+      if (p.image) p.image = p.image.replace(/\.(png|jpe?g)$/i, '.webp');
+      if (p.images) p.images = p.images.map(img => img.replace(/\.(png|jpe?g)$/i, '.webp'));
+      return p;
+    });
     
     // Save to cache asynchronously
     setTimeout(() => {

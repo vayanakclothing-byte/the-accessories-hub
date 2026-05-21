@@ -60,7 +60,7 @@ async function loadData(force = false) {
       if (err) console.warn(`[LoadData] Query ${i} error:`, err.message);
     });
 
-    if(orders && orderItems) {
+    if (orders) {
       orders.forEach(o => {
         o.items = (orderItems || []).filter(i => i.order_id === o.id).map(i => ({
           productId: i.product_id, name: i.name, price: i.price, qty: i.qty, image: i.image
@@ -103,7 +103,7 @@ const DB = {
   _cache: { products: [], customers: [], orders: [], invoices: [], stockHistory: [], settings: {} },
   products() { return (this._cache.products || []).map(p => ({...p, originalPrice: p.original_price, inStock: p.in_stock, reorderLevel: p.reorder_level})); },
   customers() { return (this._cache.customers || []).map(c => ({...c, totalOrders: c.total_orders, totalSpent: c.total_spent, joinDate: c.join_date})); },
-  orders() { return (this._cache.orders || []).map(o => ({...o, customerId: o.customer_id, customerName: o.customer_name, trackingId: o.tracking_id, shippingAddress: o.shipping_address})); },
+  orders() { return (this._cache.orders || []).map(o => ({...o, customerId: o.customer_id, customerName: o.customer_name, trackingId: o.tracking_id, shippingAddress: o.shipping_address, items: o.items || []})); },
   invoices() { return (this._cache.invoices || []).map(i => ({...i, orderId: i.order_id, customerName: i.customer_name})); },
   stockHistory() { return (this._cache.stockHistory || []).map(h => ({...h, newStock: h.new_stock, change: h.change_amount})); },
   settings() { return this._cache.settings || {}; },
@@ -303,3 +303,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     dismissLoader();
   }
 });
+
+// Safety timeout to guarantee loader is dismissed
+setTimeout(() => {
+  const loader = document.getElementById('adminLoader');
+  if (loader && loader.style.display !== 'none') {
+    console.warn('[Admin] Safety timeout: forcing loader dismissal.');
+    dismissLoader();
+  }
+}, 4000);

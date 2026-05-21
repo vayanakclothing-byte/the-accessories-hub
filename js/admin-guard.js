@@ -5,9 +5,16 @@
   // Hide page content until authorized (prevents flash)
   document.documentElement.style.visibility = 'hidden';
 
+  let initRetries = 0;
   async function checkAdminAuth() {
     // Wait for supabase client to be initialized
-    if (typeof supabase === 'undefined') {
+    if (typeof supabase === 'undefined' || !supabase.auth) {
+      initRetries++;
+      if (initRetries > 30) { // 3 seconds max wait
+        console.error('[AdminGuard] Supabase failed to initialize after 3 seconds.');
+        redirectToLogin();
+        return;
+      }
       setTimeout(checkAdminAuth, 100);
       return;
     }

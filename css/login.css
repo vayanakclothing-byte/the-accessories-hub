@@ -23,7 +23,7 @@
 .split-left {
   flex: 1;
   position: relative;
-  background: url('../images/temple-necklace.png') center/cover no-repeat;
+  background: url('../images/temple-necklace.webp') center/cover no-repeat;
   /* Add artistic blur and dark tint */
   filter: sepia(30%) hue-rotate(340deg) contrast(120%);
 }
