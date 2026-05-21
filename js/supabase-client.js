@@ -10,10 +10,9 @@ const supabaseUrl = 'https://hefijdydpibqbubjrnli.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlZmlqZHlkcGlicWJ1YmpybmxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNTQ3NDcsImV4cCI6MjA4OTkzMDc0N30.ogYSnS7w-b5XW9i3TqS6vh7tnuy2ICisJ6D7ExvPdBw';
 
 // Determine if we should run in Mock Mode (if cached, forced by URL, or remote fails)
-const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const mockForced = window.location.search.includes('mock=true');
 const mockCached = localStorage.getItem('supabase_fallback_mock') === 'true';
-const useMockMode = mockForced || (isLocal && mockCached);
+const useMockMode = mockForced || mockCached;
 
 if (useMockMode) {
   console.log('[SupabaseClient] Initializing in MOCK mode...');
@@ -31,36 +30,34 @@ if (useMockMode) {
     });
     console.log('[SupabaseClient] Initialized real Supabase client.');
     
-    // Check connectivity asynchronously if running locally
-    if (isLocal) {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+    // Check connectivity asynchronously to activate fallback if remote is offline
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
 
-      fetch(`${supabaseUrl}/rest/v1/`, { 
-        method: 'GET', 
-        headers: { apikey: supabaseKey },
-        signal: controller.signal
-      })
-      .then(res => {
-        clearTimeout(timeoutId);
-        if (res.ok) {
-          console.log('[SupabaseClient] Connectivity check passed. Online.');
-          if (mockCached) {
-            localStorage.removeItem('supabase_fallback_mock');
-          }
-        } else {
-          console.warn('[SupabaseClient] API returned non-OK status:', res.status);
+    fetch(`${supabaseUrl}/rest/v1/`, { 
+      method: 'GET', 
+      headers: { apikey: supabaseKey },
+      signal: controller.signal
+    })
+    .then(res => {
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        console.log('[SupabaseClient] Connectivity check passed. Online.');
+        if (mockCached) {
+          localStorage.removeItem('supabase_fallback_mock');
         }
-      })
-      .catch(err => {
-        clearTimeout(timeoutId);
-        console.warn('[SupabaseClient] Connection check failed. Activating mock fallback:', err.message);
-        localStorage.setItem('supabase_fallback_mock', 'true');
-        // Reload to let mock mode initialize cleanly for all files
-        console.log('[SupabaseClient] Reloading page to apply mock fallback...');
-        window.location.reload();
-      });
-    }
+      } else {
+        console.warn('[SupabaseClient] API returned non-OK status:', res.status);
+      }
+    })
+    .catch(err => {
+      clearTimeout(timeoutId);
+      console.warn('[SupabaseClient] Connection check failed. Activating mock fallback:', err.message);
+      localStorage.setItem('supabase_fallback_mock', 'true');
+      // Reload to let mock mode initialize cleanly for all files
+      console.log('[SupabaseClient] Reloading page to apply mock fallback...');
+      window.location.reload();
+    });
   } catch (err) {
     console.error('[SupabaseClient] Error initializing real client, falling back to mock:', err);
     initMockSupabase();
