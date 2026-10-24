@@ -1,6 +1,9 @@
 /* ============================================================
    THE ACCESSORIES HUB — Checkout Logic (Single-Page Flow)
-   Auth check, stock validation, order creation, inventory sync
+
+   The browser only sends product ids and quantities. Prices, stock and the
+   final total are resolved by public.place_order() inside the database (see
+   supabase/schema.sql), so a tampered cart cannot change what is charged.
    ============================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initGiftOption();
   checkAuthStatus();
 });
+
+// escapeHtml() and safeImageUrl() come from js/app.js, which loads first.
 
 // --- Render Order Summary (Left Side) ---
 function renderOrderSummary() {
@@ -30,14 +35,14 @@ function renderOrderSummary() {
     itemsContainer.innerHTML = Cart.items.map(item => `
       <div class="order-item">
         <div class="order-item-img">
-          <img src="${item.image}" alt="${item.name}" onerror="this.src='images/placeholder.png'">
+          <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" onerror="this.onerror=null;this.src='images/placeholder.png'">
         </div>
         <div class="order-item-info">
-          <div class="order-item-name">${item.name}</div>
-          <div class="order-item-qty">Qty: ${item.qty}</div>
+          <div class="order-item-name">${escapeHtml(item.name)}</div>
+          <div class="order-item-qty">Qty: ${Number(item.qty) || 1}</div>
         </div>
-        <div class="order-item-price">Rs. ${(item.price * item.qty).toLocaleString()}</div>
-        <span class="order-item-remove" onclick="removeCartItem(${item.id})">✕</span>
+        <div class="order-item-price">Rs. ${(Number(item.price) * (Number(item.qty) || 1)).toLocaleString()}</div>
+        <span class="order-item-remove" onclick="removeCartItem(${Number(item.id)})">✕</span>
       </div>
     `).join('');
   }
@@ -45,19 +50,15 @@ function renderOrderSummary() {
   updateTotals();
 }
 
+function deliveryFeeFor(subtotal, method) {
+  if (subtotal >= 2000) return 0;
+  return method === 'express' ? 250 : 150;
+}
+
 function updateTotals() {
   const subtotal = Cart.getTotal();
   const deliveryMethod = document.querySelector('input[name="delivery"]:checked')?.value || 'standard';
-  
-  let shipping;
-  if (subtotal >= 2000) {
-    shipping = 0;
-  } else if (deliveryMethod === 'express') {
-    shipping = 250;
-  } else {
-    shipping = 150;
-  }
-
+  const shipping = deliveryFeeFor(subtotal, deliveryMethod);
   const total = subtotal + shipping;
 
   const subtotalEl = document.getElementById('orderSubtotal');
@@ -82,7 +83,7 @@ function initDeliveryToggle() {
       option.classList.add('selected');
       const radio = option.querySelector('input[type="radio"]');
       if (radio) radio.checked = true;
-      updateTotals(); // Recalculate when delivery changes
+      updateTotals();
     });
   });
 }
@@ -124,7 +125,6 @@ async function checkAuthStatus() {
       if (authText) authText.textContent = `✓ Logged in as ${name}`;
       if (authEl) authEl.style.borderColor = 'rgba(39, 174, 96, 0.4)';
 
-      // Pre-fill name
       const nameField = document.getElementById('fullName');
       if (nameField && !nameField.value) nameField.value = name;
     } else {
@@ -158,182 +158,125 @@ function validateForm() {
   return valid;
 }
 
-async function validateStock() {
-  const itemIds = Cart.items.map(item => item.id);
-  
-  if (itemIds.length === 0) return true;
-
-  try {
-    const { data: products } = await supabase.from('products').select('id, stock, name').in('id', itemIds);
-    if (products) {
-      for (const item of Cart.items) {
-        const product = products.find(p => p.id === item.id);
-        if (product && product.stock !== null && product.stock < item.qty) {
-          alert(`Sorry, "${product.name}" only has ${product.stock} left in stock. Please adjust your quantity.`);
-          return false;
-        }
-      }
-    }
-  } catch (e) {
-    console.warn('Stock check failed', e);
-  }
-  return true;
-}
-
 // --- Place Order (Main Function) ---
 async function placeOrder() {
   if (!validateForm()) return;
 
   const btn = document.getElementById('confirmOrderBtn');
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = 'PROCESSING...';
+  const setBusy = (busy) => {
+    if (!btn) return;
+    btn.disabled = busy;
+    btn.textContent = busy ? 'PROCESSING...' : 'CONFIRM ORDER';
+  };
+
+  if (Cart.items.length === 0) {
+    alert('Your cart is empty.');
+    return;
   }
 
-  try {
-    // 1. Validate stock
-    const stockOk = await validateStock();
-    if (!stockOk) {
-      if (btn) { btn.disabled = false; btn.textContent = 'CONFIRM ORDER'; }
-      return;
-    }
+  setBusy(true);
 
-    // 2. Collect form data
-    const name = document.getElementById('fullName')?.value || '';
-    const whatsapp = document.getElementById('whatsapp')?.value || '';
+  try {
+    const name = document.getElementById('fullName')?.value.trim() || '';
+    const whatsapp = document.getElementById('whatsapp')?.value.trim() || '';
     const city = document.getElementById('city')?.value || '';
-    const landmark = document.getElementById('landmark')?.value || '';
-    const address = document.getElementById('address')?.value || '';
-    const fullAddress = `${address}, ${landmark}, ${city}`;
+    const landmark = document.getElementById('landmark')?.value.trim() || '';
+    const address = document.getElementById('address')?.value.trim() || '';
+    const fullAddress = [address, landmark, city].filter(Boolean).join(', ');
     const deliveryMethod = document.querySelector('input[name="delivery"]:checked')?.value || 'standard';
     const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || 'cod';
     const isGift = document.getElementById('isGift')?.checked || false;
-    const giftNote = document.getElementById('giftNote')?.value || '';
+    const giftNote = isGift ? (document.getElementById('giftNote')?.value.trim() || '') : '';
 
-    const subtotal = Cart.getTotal();
-    let shipping;
-    if (subtotal >= 2000) {
-      shipping = 0;
-    } else if (deliveryMethod === 'express') {
-      shipping = 250;
-    } else {
-      shipping = 150;
-    }
-    const total = subtotal + shipping;
+    // Only ids and quantities travel to the database.
+    const items = Cart.items.map(item => ({
+      product_id: item.id,
+      qty: Math.max(1, parseInt(item.qty, 10) || 1)
+    }));
 
-    // 3. Upsert Customer
-    let customerId;
-    const { data: existingCustomers } = await supabase.from('customers').select('*').eq('phone', whatsapp);
-    if (existingCustomers && existingCustomers.length > 0) {
-      customerId = existingCustomers[0].id;
-      await supabase.from('customers').update({
-        total_orders: existingCustomers[0].total_orders + 1,
-        total_spent: existingCustomers[0].total_spent + total,
+    const { data, error } = await supabase.rpc('place_order', {
+      p_customer: {
+        name: name || 'Guest',
+        phone: whatsapp,
         address: fullAddress,
-        phone: whatsapp
-      }).eq('id', customerId);
-    } else {
-      const { data: newCustomer, error: cErr } = await supabase.from('customers').insert([{
-        name, email: '', phone: whatsapp, address: fullAddress,
-        notes: isGift ? `🎁 Gift: ${giftNote}` : '',
-        total_orders: 1, total_spent: total
-      }]).select();
-      if (cErr) throw cErr;
-      customerId = newCustomer[0].id;
-    }
+        notes: giftNote ? `🎁 Gift: ${giftNote}` : ''
+      },
+      p_items: items,
+      p_delivery: deliveryMethod,
+      p_payment: paymentMethod,
+      p_gift_note: giftNote ? `🎁 Gift: ${giftNote}` : null
+    });
 
-    // 4. Insert Order
-    const { data: newOrder, error: oErr } = await supabase.from('orders').insert([{
-      customer_id: customerId,
-      customer_name: name,
-      subtotal,
-      shipping,
-      total,
-      status: 'Pending',
-      payment: paymentMethod,
-      shipping_address: fullAddress,
-      date: new Date().toLocaleDateString('en-GB')
-    }]).select();
-    if (oErr) throw oErr;
-    const orderId = newOrder[0].id;
+    if (error) throw new Error(error.message || 'Could not place the order.');
 
-    // 5. Insert Order Items & Update Stock
-    if (Cart.items.length > 0) {
-      // A. Batch Insert order items
-      const orderItemsData = Cart.items.map(item => ({
-        order_id: orderId,
-        product_id: item.id,
-        name: item.name,
-        price: item.price,
-        qty: item.qty,
-        image: item.image
-      }));
-      await supabase.from('order_items').insert(orderItemsData);
+    const result = data || {};
+    const orderNumber = result.order_number || (result.order_id ? 'TAH-' + String(result.order_id).padStart(5, '0') : 'TAH-?????');
 
-      // B. Batch fetching of current stock
-      const itemIds = Cart.items.map(i => i.id);
-      const { data: productsData } = await supabase.from('products').select('id, stock, name').in('id', itemIds);
-
-      if (productsData) {
-        const stockHistoryData = [];
-        const updatePromises = [];
-
-        for (const item of Cart.items) {
-          const pData = productsData.find(p => p.id === item.id);
-          if (pData && pData.stock !== null) {
-            const newStock = Math.max(0, pData.stock - item.qty);
-            
-            // Queue update promise
-            updatePromises.push(supabase.from('products').update({ stock: newStock }).eq('id', item.id));
-            
-            // Queue history insert
-            stockHistoryData.push({
-              product: item.name,
-              type: 'Sold',
-              change_amount: -item.qty,
-              new_stock: newStock,
-              date: new Date().toLocaleDateString('en-GB')
-            });
-          }
-        }
-
-        // Execute all updates in parallel
-        if (updatePromises.length > 0) await Promise.all(updatePromises);
-        // Execute batched history insert
-        if (stockHistoryData.length > 0) await supabase.from('stock_history').insert(stockHistoryData);
-      }
-    }
-
-    // 6. Handle Payment Method Redirect
-    if (paymentMethod === 'esewa' || paymentMethod === 'khalti' || paymentMethod === 'fonepay') {
-      // For digital wallets, show success first then would redirect to gateway
-      // In production, these would redirect to the actual payment API
-    }
-
-    // 7. Show Success UI
-    const orderNumber = 'TAH-' + orderId.toString().padStart(5, '0');
-    const confirmation = document.getElementById('orderConfirmation');
-    const content = document.getElementById('checkoutContent');
-
-    if (confirmation) {
-      const orderNumEl = confirmation.querySelector('.order-number');
-      if (orderNumEl) orderNumEl.textContent = `Order #${orderNumber}`;
-      confirmation.style.display = 'block';
-    }
-    if (content) content.style.display = 'none';
-
-    // Clear cart
     Cart.items = [];
     Cart.save();
 
+    showConfirmation(orderNumber, result);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
   } catch (err) {
     console.error('Checkout error:', err);
-    alert('There was an error processing your order. Please try again.');
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = 'CONFIRM ORDER';
+    alert(friendlyOrderError(err));
+    setBusy(false);
+  }
+}
+
+// Turn Postgres/PostgREST failures into something a shopper can act on.
+function friendlyOrderError(err) {
+  const message = String((err && err.message) || '');
+
+  if (/place_order/i.test(message) && /(does not exist|could not find|schema cache)/i.test(message)) {
+    return 'Ordering is not switched on yet: the place_order function is missing from the database.\n\n'
+      + 'Run supabase/schema.sql in the Supabase SQL editor, then try again.';
+  }
+  if (/only \d+ left in stock/i.test(message) || /no longer available/i.test(message)) {
+    return message;
+  }
+  if (/row-level security|permission denied/i.test(message)) {
+    return 'The shop could not save this order (permission denied). Please contact us on WhatsApp.';
+  }
+  return message || 'There was an error processing your order. Please try again.';
+}
+
+function showConfirmation(orderNumber, result) {
+  const confirmation = document.getElementById('orderConfirmation');
+  const content = document.getElementById('checkoutContent');
+  if (!confirmation) return;
+
+  const orderNumEl = confirmation.querySelector('.order-number');
+  const titleEl = confirmation.querySelector('h2');
+  const textEl = confirmation.querySelector('p');
+
+  if (orderNumEl) orderNumEl.textContent = orderNumber;
+
+  if (window.TAH_DEMO_MODE) {
+    if (titleEl) titleEl.textContent = 'Demo order — not sent to the shop';
+    if (textEl) {
+      textEl.textContent = 'This site is running without a database, so this order was NOT saved and no one was notified. '
+        + 'Please send your order on WhatsApp instead.';
+    }
+    if (!document.getElementById('demoWhatsappLink')) {
+      const link = document.createElement('a');
+      link.id = 'demoWhatsappLink';
+      link.href = 'https://wa.me/9779805659501?text=' + encodeURIComponent(`Hi! I'd like to order (${orderNumber}).`);
+      link.className = 'btn btn-gold';
+      link.textContent = 'Order on WhatsApp';
+      link.style.marginBottom = '12px';
+      link.style.display = 'inline-block';
+      confirmation.insertBefore(link, orderNumEl || null);
+    }
+  } else {
+    if (titleEl) titleEl.textContent = 'Order Placed Successfully!';
+    if (textEl && result && result.total != null) {
+      textEl.textContent = 'Thank you for shopping with The Accessories Hub. '
+        + `Your total is Rs. ${Number(result.total).toLocaleString()} and you will receive a confirmation on WhatsApp shortly.`;
     }
   }
+
+  confirmation.style.display = 'block';
+  if (content) content.style.display = 'none';
 }

@@ -17,32 +17,37 @@ function renderOrderStats() {
 
 function renderOrdersTable(filterStatus = '') {
   let orders = DB.orders().sort((a, b) => new Date(b.date) - new Date(a.date));
-  if (filterStatus) orders = orders.filter(o => o.status === filterStatus);
+  if (filterStatus) orders = orders.filter(o => o.status === String(filterStatus).toLowerCase());
 
   const tbody = document.getElementById('ordersBody');
   if (!tbody) return;
 
+  if (orders.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--white-muted);padding:24px;">No orders yet.</td></tr>';
+    return;
+  }
+
   tbody.innerHTML = orders.map(o => `
     <tr>
-      <td><strong style="color:var(--gold)">#${o.id}</strong></td>
-      <td>${o.customerName}</td>
+      <td><strong style="color:var(--gold)">#${escapeHtml(o.id)}</strong></td>
+      <td>${escapeHtml(o.customerName)}</td>
       <td>
-        ${o.items.map(i => `
+        ${(o.items || []).map(i => `
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-            <div class="table-img" style="width:32px;height:32px;"><img src="${i.image}" alt="${i.name}"></div>
-            <span style="font-size:0.8rem;">${i.name} × ${i.qty}</span>
+            <div class="table-img" style="width:32px;height:32px;"><img src="${escapeHtml(i.image)}" alt="${escapeHtml(i.name)}"></div>
+            <span style="font-size:0.8rem;">${escapeHtml(i.name)} × ${Number(i.qty) || 0}</span>
           </div>
-        `).join('')}
+        `).join('') || '<span style="color:var(--white-muted);font-size:0.8rem;">—</span>'}
       </td>
       <td><strong>${formatPrice(o.total)}</strong></td>
       <td>${statusBadge(o.status)}</td>
-      <td><span class="badge badge-gold">${o.payment}</span></td>
+      <td><span class="badge badge-gold">${escapeHtml(o.payment)}</span></td>
       <td>${formatDate(o.date)}</td>
       <td>
         <div style="display:flex;gap:4px;">
-          <button class="btn btn-sm btn-ghost" onclick="viewOrder(${o.id})" title="View">👁️</button>
-          <button class="btn btn-sm btn-ghost" onclick="openStatusUpdate(${o.id})" title="Update Status">📝</button>
-          <button class="wa-btn" style="padding:5px 8px;font-size:0.7rem;" onclick="sendOrderWhatsApp(${o.id})" title="WhatsApp">💬</button>
+          <button class="btn btn-sm btn-ghost" onclick="viewOrder(${Number(o.id)})" title="View">👁️</button>
+          <button class="btn btn-sm btn-ghost" onclick="openStatusUpdate(${Number(o.id)})" title="Update Status">📝</button>
+          <button class="wa-btn" style="padding:5px 8px;font-size:0.7rem;" onclick="sendOrderWhatsApp(${Number(o.id)})" title="WhatsApp">💬</button>
         </div>
       </td>
     </tr>
@@ -56,23 +61,23 @@ function viewOrder(id) {
   const content = document.getElementById('orderDetailContent');
   content.innerHTML = `
     <div class="detail-grid">
-      <div class="detail-item"><div class="label">Order ID</div><div class="value">#${o.id}</div></div>
+      <div class="detail-item"><div class="label">Order ID</div><div class="value">#${escapeHtml(o.id)}</div></div>
       <div class="detail-item"><div class="label">Date</div><div class="value">${formatDate(o.date)}</div></div>
-      <div class="detail-item"><div class="label">Customer</div><div class="value">${o.customerName}</div></div>
+      <div class="detail-item"><div class="label">Customer</div><div class="value">${escapeHtml(o.customerName)}</div></div>
       <div class="detail-item"><div class="label">Status</div><div class="value">${statusBadge(o.status)}</div></div>
-      <div class="detail-item"><div class="label">Payment</div><div class="value">${o.payment.toUpperCase()}</div></div>
-      <div class="detail-item"><div class="label">Tracking</div><div class="value">${o.trackingId || 'Not assigned'}</div></div>
-      <div class="detail-item" style="grid-column:1/-1"><div class="label">Shipping Address</div><div class="value">${o.shippingAddress}</div></div>
+      <div class="detail-item"><div class="label">Payment</div><div class="value">${escapeHtml(String(o.payment || 'cod').toUpperCase())}</div></div>
+      <div class="detail-item"><div class="label">Tracking</div><div class="value">${escapeHtml(o.trackingId || 'Not assigned')}</div></div>
+      <div class="detail-item" style="grid-column:1/-1"><div class="label">Shipping Address</div><div class="value">${escapeHtml(o.shippingAddress || '—')}</div></div>
     </div>
     <hr style="border-color:var(--grey-mid);margin:16px 0;">
     <h4 style="color:var(--gold);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Order Items</h4>
-    ${o.items.map(i => `
+    ${(o.items || []).map(i => `
       <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--grey-mid);">
-        <div class="table-img"><img src="${i.image}" alt="${i.name}"></div>
-        <div style="flex:1;"><div style="font-weight:500;">${i.name}</div><div style="font-size:0.75rem;color:var(--white-muted);">Qty: ${i.qty}</div></div>
-        <div style="color:var(--gold);font-weight:600;">${formatPrice(i.price * i.qty)}</div>
+        <div class="table-img"><img src="${escapeHtml(i.image)}" alt="${escapeHtml(i.name)}"></div>
+        <div style="flex:1;"><div style="font-weight:500;">${escapeHtml(i.name)}</div><div style="font-size:0.75rem;color:var(--white-muted);">Qty: ${Number(i.qty) || 0}</div></div>
+        <div style="color:var(--gold);font-weight:600;">${formatPrice((Number(i.price) || 0) * (Number(i.qty) || 0))}</div>
       </div>
-    `).join('')}
+    `).join('') || '<p style="color:var(--white-muted);">No line items recorded.</p>'}
     <div style="margin-top:16px;text-align:right;">
       <div style="font-size:0.85rem;color:var(--white-muted);margin-bottom:4px;">Subtotal: ${formatPrice(o.subtotal)}</div>
       <div style="font-size:0.85rem;color:var(--white-muted);margin-bottom:4px;">Shipping: ${o.shipping === 0 ? 'Free' : formatPrice(o.shipping)}</div>
@@ -95,10 +100,16 @@ function openStatusUpdate(id) {
 async function updateOrderStatus(id) {
   const o = DB.orders().find(x => x.id === id);
   if (!o) return;
-  const status = document.getElementById('statusSelect').value;
+  const status = String(document.getElementById('statusSelect').value).toLowerCase();
   const trackingId = document.getElementById('trackingInput').value || o.trackingId;
-  await supabase.from('orders').update({status, tracking_id: trackingId}).eq('id', id);
-  await loadData();
+
+  const { error } = await supabase.from('orders').update({ status, tracking_id: trackingId }).eq('id', id);
+  if (error) {
+    showToast('Could not update the order: ' + error.message, 'error');
+    return;
+  }
+
+  await DB.reload();
   closeAllModals();
   renderOrdersTable();
   renderOrderStats();
@@ -112,22 +123,24 @@ function sendOrderWhatsApp(id) {
   const customer = DB.customers().find(c => c.id === o.customerId);
   if (!customer) { showToast('Customer not found', 'error'); return; }
 
+  const templates = settings.whatsappTemplates || {};
   let template = '';
-  if (o.status === 'shipped') template = settings.whatsappTemplates?.shipped || '';
-  else if (o.status === 'delivered') template = settings.whatsappTemplates?.delivered || '';
-  else template = settings.whatsappTemplates?.orderConfirm || '';
+  if (o.status === 'shipped') template = templates.shipped || '';
+  else if (o.status === 'delivered') template = templates.delivered || '';
+  else template = templates.orderConfirm || '';
 
   const message = template
     .replace('{name}', customer.name)
     .replace('{orderId}', o.id)
-    .replace('{total}', o.total.toLocaleString())
+    .replace('{total}', Number(o.total).toLocaleString())
     .replace('{tracking}', o.trackingId || 'N/A');
 
   sendWhatsApp(customer.phone, message);
 }
 
-function filterOrders(status) {
+function filterOrders(status, evt) {
+  const clicked = (evt && evt.currentTarget) || (typeof event !== 'undefined' ? event.target : null);
   document.querySelectorAll('.order-filter-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  clicked?.classList.add('active');
   renderOrdersTable(status);
 }

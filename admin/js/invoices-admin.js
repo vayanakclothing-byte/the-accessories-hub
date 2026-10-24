@@ -11,18 +11,23 @@ function renderInvoicesTable() {
   const tbody = document.getElementById('invoicesBody');
   if (!tbody) return;
 
+  if (invoices.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--white-muted);padding:24px;">No invoices yet.</td></tr>';
+    return;
+  }
+
   tbody.innerHTML = invoices.map(inv => `
     <tr>
-      <td><strong style="color:var(--gold)">${inv.id}</strong></td>
-      <td>#${inv.orderId}</td>
-      <td>${inv.customerName}</td>
+      <td><strong style="color:var(--gold)">${escapeHtml(inv.id)}</strong></td>
+      <td>#${escapeHtml(inv.orderId)}</td>
+      <td>${escapeHtml(inv.customerName)}</td>
       <td><strong>${formatPrice(inv.amount)}</strong></td>
       <td>${formatDate(inv.date)}</td>
       <td>${statusBadge(inv.status)}</td>
       <td>
         <div style="display:flex;gap:4px;">
-          <button class="btn btn-sm btn-gold" onclick="downloadInvoice('${inv.id}')">📄 PDF</button>
-          <button class="btn btn-sm btn-ghost" onclick="viewInvoiceOrder(${inv.orderId})">👁️</button>
+          <button class="btn btn-sm btn-gold" onclick="downloadInvoice('${escapeHtml(String(inv.id).replace(/'/g, ''))}')">📄 PDF</button>
+          <button class="btn btn-sm btn-ghost" onclick="viewInvoiceOrder(${Number(inv.orderId)})">👁️</button>
         </div>
       </td>
     </tr>
@@ -36,7 +41,7 @@ function openGenerateInvoice() {
 
   const select = document.getElementById('invoiceOrderSelect');
   select.innerHTML = '<option value="">Select an order...</option>' +
-    available.map(o => `<option value="${o.id}">#${o.id} — ${o.customerName} — ${formatPrice(o.total)}</option>`).join('');
+    available.map(o => `<option value="${Number(o.id)}">#${escapeHtml(o.id)} — ${escapeHtml(o.customerName)} — ${formatPrice(o.total)}</option>`).join('');
 
   openModal('generateModal');
 }
@@ -104,7 +109,7 @@ function downloadInvoice(invId) {
   doc.text(`Invoice: ${inv.id}`, 15, y);
   doc.text(`Date: ${formatDate(inv.date)}`, 15, y + 7);
   doc.text(`Order: #${inv.orderId}`, 15, y + 14);
-  doc.text(`Status: ${inv.status.toUpperCase()}`, 15, y + 21);
+  doc.text(`Status: ${String(inv.status || 'unpaid').toUpperCase()}`, 15, y + 21);
 
   // Customer
   doc.text('Bill To:', 130, y);
@@ -135,11 +140,11 @@ function downloadInvoice(invId) {
   y += 12;
   doc.setTextColor(60, 60, 60);
   doc.setFont('helvetica', 'normal');
-  order.items.forEach(item => {
-    doc.text(item.name, 18, y);
-    doc.text(String(item.qty), 123, y);
-    doc.text(`Rs. ${item.price.toLocaleString()}`, 140, y);
-    doc.text(`Rs. ${(item.price * item.qty).toLocaleString()}`, 170, y);
+  (order.items || []).forEach(item => {
+    doc.text(String(item.name || ''), 18, y);
+    doc.text(String(item.qty || 0), 123, y);
+    doc.text(`Rs. ${Number(item.price || 0).toLocaleString()}`, 140, y);
+    doc.text(`Rs. ${(Number(item.price || 0) * Number(item.qty || 0)).toLocaleString()}`, 170, y);
     y += 9;
   });
 
@@ -149,10 +154,10 @@ function downloadInvoice(invId) {
   y += 10;
   doc.setFontSize(9);
   doc.text('Subtotal:', 140, y);
-  doc.text(`Rs. ${order.subtotal.toLocaleString()}`, 170, y);
+  doc.text(`Rs. ${Number(order.subtotal || 0).toLocaleString()}`, 170, y);
   y += 8;
   doc.text('Shipping:', 140, y);
-  doc.text(order.shipping === 0 ? 'Free' : `Rs. ${order.shipping}`, 170, y);
+  doc.text(Number(order.shipping) === 0 ? 'Free' : `Rs. ${Number(order.shipping || 0)}`, 170, y);
   y += 10;
   doc.setDrawColor(212, 175, 55);
   doc.line(120, y - 3, 195, y - 3);
@@ -160,7 +165,7 @@ function downloadInvoice(invId) {
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(212, 175, 55);
   doc.text('TOTAL:', 140, y + 4);
-  doc.text(`Rs. ${order.total.toLocaleString()}`, 170, y + 4);
+  doc.text(`Rs. ${Number(order.total || 0).toLocaleString()}`, 170, y + 4);
 
   // Footer
   const footerY = 265;
@@ -180,7 +185,8 @@ function downloadInvoice(invId) {
   doc.setFont('helvetica', 'bold');
   doc.text('PAID ✓', 35, footerY - 19, { align: 'center' });
 
-  doc.save(`${inv.id}_${order.customerName.replace(/\s/g, '_')}.pdf`);
+  const safeName = String(order.customerName || 'customer').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_');
+  doc.save(`${String(inv.id).replace(/[^\w-]/g, '')}_${safeName || 'customer'}.pdf`);
   showToast(`Invoice ${inv.id} downloaded!`);
 }
 

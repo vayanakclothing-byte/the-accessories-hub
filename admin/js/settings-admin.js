@@ -53,11 +53,16 @@ function renderShippingProviders(providers) {
   const container = document.getElementById('shippingProviders');
   if (!container) return;
 
+  if (!providers.length) {
+    container.innerHTML = '<p style="color:var(--white-muted);font-size:0.85rem;">No shipping providers yet.</p>';
+    return;
+  }
+
   container.innerHTML = providers.map((p, i) => `
     <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--grey);border-radius:10px;border:1px solid var(--grey-mid);margin-bottom:10px;">
       <div style="flex:1;">
-        <div style="font-weight:600;">${p.name}</div>
-        <div style="font-size:0.8rem;color:var(--white-muted);">${p.type === 'express' ? '⚡ Express' : '📦 Standard'} — Rs. ${p.rate} (Free above Rs. ${p.freeAbove})</div>
+        <div style="font-weight:600;">${escapeHtml(p.name)}</div>
+        <div style="font-size:0.8rem;color:var(--white-muted);">${p.type === 'express' ? '⚡ Express' : '📦 Standard'} — Rs. ${Number(p.rate) || 0} (Free above Rs. ${Number(p.freeAbove) || 0})</div>
       </div>
       <button class="btn btn-sm btn-ghost" onclick="editShippingProvider(${i})">✏️</button>
       <button class="btn btn-sm btn-danger" onclick="removeShippingProvider(${i})">🗑️</button>

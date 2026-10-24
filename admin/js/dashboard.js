@@ -50,13 +50,6 @@ function initCharts() {
       orderCounts.push(dayOrders.length);
     }
 
-    // Add some sample data if all zeros
-    if (revenue.every(v => v === 0)) {
-      const sampleRevenue = [4500, 6200, 3800, 8600, 2600, 10850, 5350];
-      const sampleOrders = [1, 2, 1, 2, 1, 2, 2];
-      sampleRevenue.forEach((v, i) => { revenue[i] = v; orderCounts[i] = sampleOrders[i]; });
-    }
-
     const ctx1 = document.getElementById('salesChart')?.getContext('2d');
     if (ctx1) {
       if (salesChart) salesChart.destroy();
@@ -106,14 +99,14 @@ function initCharts() {
     // Collection breakdown
     const collections = { korean: 0, temple: 0, oxidized: 0 };
     orders.forEach(o => {
-      o.items.forEach(item => {
-        const product = DB.products().find(p => p.id === item.productId);
-        if (product) collections[product.collection] = (collections[product.collection] || 0) + (item.price * item.qty);
+      (o.items || []).forEach(item => {
+        const product = DB.products().find(p => String(p.id) === String(item.productId));
+        const key = (product && product.collection) ? String(product.collection).toLowerCase() : null;
+        if (key && collections[key] !== undefined) {
+          collections[key] += (Number(item.price) || 0) * (Number(item.qty) || 0);
+        }
       });
     });
-    if (Object.values(collections).every(v => v === 0)) {
-      collections.korean = 8400; collections.temple = 24700; collections.oxidized = 5200;
-    }
 
     const ctx2 = document.getElementById('collectionChart')?.getContext('2d');
     if (ctx2) {
@@ -157,23 +150,22 @@ function renderRecentOrders() {
 
   tbody.innerHTML = orders.map(o => `
     <tr>
-      <td><strong style="color:var(--gold)">#${o.id}</strong></td>
-      <td>${o.customerName}</td>
-      <td>${o.items.map(i => i.name).join(', ')}</td>
+      <td><strong style="color:var(--gold)">#${escapeHtml(o.id)}</strong></td>
+      <td>${escapeHtml(o.customerName)}</td>
+      <td>${escapeHtml((o.items || []).map(i => i.name).join(', '))}</td>
       <td><strong>${formatPrice(o.total)}</strong></td>
       <td>${statusBadge(o.status)}</td>
       <td>${formatDate(o.date)}</td>
       <td>
-        ${o.status === 'pending' ? `<button onclick="toggleOrderStatus(${o.id}, 'shipped')" class="quick-action-btn">Ship Now</button>` : ''}
-        ${o.status === 'processing' ? `<button onclick="toggleOrderStatus(${o.id}, 'shipped')" class="quick-action-btn">Ship Now</button>` : ''}
-        ${o.status === 'shipped' ? `<button onclick="toggleOrderStatus(${o.id}, 'delivered')" class="quick-action-btn">Delivered</button>` : ''}
+        ${(o.status === 'pending' || o.status === 'processing') ? `<button onclick="toggleOrderStatus(${Number(o.id)}, 'shipped')" class="quick-action-btn">Ship Now</button>` : ''}
+        ${o.status === 'shipped' ? `<button onclick="toggleOrderStatus(${Number(o.id)}, 'delivered')" class="quick-action-btn">Delivered</button>` : ''}
       </td>
     </tr>
   `).join('');
 }
 
 function renderLowStockAlerts() {
-  const products = DB.products().filter(p => p.stock <= p.reorderLevel);
+  const products = DB.products().filter(p => Number(p.stock) <= Number(p.reorderLevel));
   const container = document.getElementById('lowStockAlerts');
   if (!container) return;
 
@@ -184,16 +176,16 @@ function renderLowStockAlerts() {
 
   container.innerHTML = products.map(p => `
     <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(42,42,42,0.5);">
-      <div class="table-img"><img src="${p.image}" alt="${p.name}"></div>
+      <div class="table-img"><img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}"></div>
       <div style="flex:1;">
         <div style="font-size:0.85rem;font-weight:500; display: flex; align-items: center; gap: 8px;">
-            ${p.name} 
-            ${p.stock === 0 ? '<span class="flash-alert"><i data-lucide="alert-triangle" style="width:14px;height:14px;"></i> OUT</span>' : ''}
+            ${escapeHtml(p.name)}
+            ${Number(p.stock) === 0 ? '<span class="flash-alert"><i data-lucide="alert-triangle" style="width:14px;height:14px;"></i> OUT</span>' : ''}
         </div>
-        <div style="font-size:0.75rem;color:var(--red);">Only ${p.stock} left (min: ${p.reorderLevel})</div>
+        <div style="font-size:0.75rem;color:var(--red);">Only ${Number(p.stock) || 0} left (min: ${Number(p.reorderLevel) || 0})</div>
       </div>
       <div>
-        <button onclick="quickStockUpdate(${p.id}, 10)" class="quick-action-btn">+10</button>
+        <button onclick="quickStockUpdate(${Number(p.id)}, 10)" class="quick-action-btn">+10</button>
       </div>
     </div>
   `).join('');
@@ -204,30 +196,32 @@ async function toggleOrderStatus(orderId, newStatus) {
     showToast(`Updating order #${orderId}...`, 'info');
     const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
     if (error) {
-        showToast('Failed to update order', 'error');
-    } else {
-        showToast(`Order #${orderId} marked as ${newStatus}!`);
-        await loadData();
-        renderRecentOrders();
+        showToast('Failed to update order: ' + error.message, 'error');
+        return;
     }
+    showToast(`Order #${orderId} marked as ${newStatus}!`);
+    await DB.reload();
+    renderRecentOrders();
+    renderStatCards();
+    renderLowStockAlerts();
 }
 
 async function quickStockUpdate(productId, amount) {
-    const product = DB.products().find(p => p.id === productId);
+    const product = DB.products().find(p => String(p.id) === String(productId));
     if (!product) return;
-    
-    const newStock = product.stock + amount;
+
+    const newStock = (Number(product.stock) || 0) + amount;
     showToast(`Adding stock to ${product.name}...`, 'info');
-    
-    const { error } = await supabase.from('products').update({ stock: newStock }).eq('id', productId);
+
+    const { error } = await supabase.from('products').update({ stock: newStock, in_stock: newStock > 0 }).eq('id', productId);
     if (error) {
-        showToast('Failed to update stock', 'error');
-    } else {
-        showToast(`Added ${amount} units to ${product.name}!`);
-        await loadData();
-        renderLowStockAlerts();
-        renderStatCards();
+        showToast('Failed to update stock: ' + error.message, 'error');
+        return;
     }
+    showToast(`Added ${amount} units to ${product.name}!`);
+    await DB.reload();
+    renderLowStockAlerts();
+    renderStatCards();
 }
 
 function setupRealtimeSimulation() {

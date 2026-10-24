@@ -5,18 +5,40 @@ if (typeof BigInt !== 'undefined' && !BigInt.prototype.toJSON) {
   BigInt.prototype.toJSON = function() { return this.toString(); };
 }
 
+// ============================================================================
 // === Supabase Config ===
-const supabaseUrl = 'https://hefijdydpibqbubjrnli.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlZmlqZHlkcGlicWJ1YmpybmxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNTQ3NDcsImV4cCI6MjA4OTkzMDc0N30.ogYSnS7w-b5XW9i3TqS6vh7tnuy2ICisJ6D7ExvPdBw';
+// Dashboard → Settings → API:
+//   Project URL  → supabaseUrl
+//   anon public  → supabaseKey
+// Both are public by design: access is controlled by the RLS policies in
+// supabase/schema.sql. Never put the service_role key in client code.
+// ============================================================================
+const SUPABASE_URL = 'https://hefijdydpibqbubjrnli.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlZmlqZHlkcGlicWJ1YmpybmxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNTQ3NDcsImV4cCI6MjA4OTkzMDc0N30.ogYSnS7w-b5XW9i3TqS6vh7tnuy2ICisJ6D7ExvPdBw';
 
-// Determine if we should run in Mock Mode (if cached, forced by URL, or remote fails)
-const mockForced = window.location.search.includes('mock=true');
+// Override in a page (or a local config script) if you ever point at another project.
+const supabaseUrl = window.TAH_SUPABASE_URL || SUPABASE_URL;
+const supabaseKey = window.TAH_SUPABASE_KEY || SUPABASE_ANON_KEY;
+
+// Demo mode: forced by ?mock=true, remembered from a previous failed probe,
+// or implied because the credentials above are missing/placeholders.
+const configMissing = !supabaseUrl || !supabaseKey
+  || supabaseUrl.indexOf('YOUR-PROJECT-REF') !== -1
+  || supabaseKey.indexOf('YOUR-ANON-PUBLIC-KEY') !== -1;
+const mockForced = window.location.search.indexOf('mock=true') !== -1;
 const mockCached = localStorage.getItem('supabase_fallback_mock') === 'true';
-const useMockMode = mockForced || mockCached;
+const useMockMode = mockForced || mockCached || configMissing;
+const FALLBACK_RELOAD_KEY = 'tah_fallback_reloaded';
+
+window.TAH_DEMO_MODE = false;
 
 if (useMockMode) {
-  console.log('[SupabaseClient] Initializing in MOCK mode...');
+  console.warn('[SupabaseClient] DEMO MODE — no database. Data lives in this browser only.');
+  window.TAH_DEMO_MODE = true;
   initMockSupabase();
+  showDemoBanner(configMissing
+    ? 'Demo mode — no Supabase project configured. Orders are not saved.'
+    : 'Demo mode — the database is unreachable. Orders are not saved.');
 } else {
   // Initialize real client
   try {
@@ -29,39 +51,72 @@ if (useMockMode) {
       }
     });
     console.log('[SupabaseClient] Initialized real Supabase client.');
-    
-    // Check connectivity asynchronously to activate fallback if remote is offline
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
 
-    fetch(`${supabaseUrl}/rest/v1/`, { 
-      method: 'GET', 
+    // Connectivity probe. A transient failure is retried once (full reload into
+    // demo mode); after that the page stays on the real client so we never
+    // bounce in a reload loop.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    fetch(`${supabaseUrl}/rest/v1/`, {
+      method: 'GET',
       headers: { apikey: supabaseKey },
       signal: controller.signal
     })
     .then(res => {
       clearTimeout(timeoutId);
-      if (res.ok) {
+      // 401/404 still prove the host is alive; only a network failure is fatal.
+      if (res.ok || res.status === 401 || res.status === 404) {
         console.log('[SupabaseClient] Connectivity check passed. Online.');
-        if (mockCached) {
-          localStorage.removeItem('supabase_fallback_mock');
-        }
+        localStorage.removeItem('supabase_fallback_mock');
+        sessionStorage.removeItem(FALLBACK_RELOAD_KEY);
       } else {
-        console.warn('[SupabaseClient] API returned non-OK status:', res.status);
+        console.warn('[SupabaseClient] API returned unexpected status:', res.status);
       }
     })
     .catch(err => {
       clearTimeout(timeoutId);
-      console.warn('[SupabaseClient] Connection check failed. Activating mock fallback:', err.message);
+      console.warn('[SupabaseClient] Database unreachable:', err.message);
+
+      if (sessionStorage.getItem(FALLBACK_RELOAD_KEY)) {
+        // Already reloaded once this session — stay put and warn the user.
+        showDemoBanner('The shop database is unreachable. Orders cannot be saved right now.');
+        return;
+      }
+
+      sessionStorage.setItem(FALLBACK_RELOAD_KEY, 'true');
       localStorage.setItem('supabase_fallback_mock', 'true');
-      // Reload to let mock mode initialize cleanly for all files
-      console.log('[SupabaseClient] Reloading page to apply mock fallback...');
+      console.log('[SupabaseClient] Reloading once to switch to demo mode...');
       window.location.reload();
     });
   } catch (err) {
-    console.error('[SupabaseClient] Error initializing real client, falling back to mock:', err);
+    console.error('[SupabaseClient] Error initializing real client, falling back to demo mode:', err);
+    window.TAH_DEMO_MODE = true;
     initMockSupabase();
+    showDemoBanner('Demo mode — the database is unreachable. Orders are not saved.');
   }
+}
+
+// A visible, non-dismissible warning so nobody mistakes demo data for real data.
+function showDemoBanner(message) {
+  const render = () => {
+    if (document.getElementById('tahDemoBanner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'tahDemoBanner';
+    banner.setAttribute('role', 'status');
+    banner.textContent = message;
+    banner.style.cssText = [
+      'position:fixed', 'top:0', 'left:0', 'right:0', 'z-index:2147483000',
+      'background:#D4AF37', 'color:#000', 'font:600 12px/1.4 system-ui,sans-serif',
+      'letter-spacing:.02em', 'padding:8px 14px', 'text-align:center',
+      'box-shadow:0 2px 12px rgba(0,0,0,.35)'
+    ].join(';');
+    document.body.appendChild(banner);
+    document.body.style.paddingTop = `${banner.offsetHeight}px`;
+  };
+
+  if (document.body) render();
+  else document.addEventListener('DOMContentLoaded', render, { once: true });
 }
 
 // ============================================================================
@@ -196,12 +251,13 @@ function initMockSupabase() {
       }
 
       if (this.method === 'delete') {
+        // Keep the rows that do NOT match the filters; drop the matching ones.
         const remaining = list.filter(item => {
           let matches = true;
           for (const filter of this.filters) {
-            if (filter.type === 'eq' && item[filter.col] == filter.val) matches = false;
-            if (filter.type === 'neq' && item[filter.col] != filter.val) matches = false;
-            if (filter.type === 'in' && filter.vals.map(v => String(v)).includes(String(item[filter.col]))) matches = false;
+            if (filter.type === 'eq' && item[filter.col] != filter.val) matches = false;
+            if (filter.type === 'neq' && item[filter.col] == filter.val) matches = false;
+            if (filter.type === 'in' && !filter.vals.map(v => String(v)).includes(String(item[filter.col]))) matches = false;
           }
           return !matches;
         });
@@ -323,11 +379,11 @@ function initMockSupabase() {
       if (provider === 'google') {
         console.log('[MockAuth] Simulating Google OAuth login...');
         
-        // Custom popup or prompt to ask user role
-        const defaultEmail = 'theaccessorieshub2530@gmail.com';
+        // Demo sign-in: no credentials are checked. Only the owner's email maps
+        // to an admin role, exactly like the real profiles table does.
         const email = prompt(
-          "=== MOCK GOOGLE LOGIN ===\nEnter an email address to log in.\n\nUse: theaccessorieshub2530@gmail.com to test with Administrator privileges.", 
-          defaultEmail
+          "=== DEMO LOGIN (no database) ===\nEnter any email to continue.\n\ntheaccessorieshub2530@gmail.com gives you the admin panel.",
+          ''
         );
 
         if (!email) {
@@ -396,6 +452,136 @@ function initMockSupabase() {
     }
   };
 
+  // ── Demo-mode equivalent of public.place_order() from schema.sql ──
+  // Same rules as the SQL function: prices and stock come from the stored
+  // catalogue, never from the cart.
+  function readMockTable(name) {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(`tah_mock_${name}`) || '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function writeMockTable(name, rows) {
+    localStorage.setItem(`tah_mock_${name}`, JSON.stringify(rows));
+  }
+
+  function mockToday() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function mockPlaceOrder(params) {
+    const customer = params.p_customer || {};
+    const items = Array.isArray(params.p_items) ? params.p_items : [];
+    const delivery = params.p_delivery === 'express' ? 'express' : 'standard';
+    const payment = ['cod', 'esewa', 'khalti', 'fonepay'].includes(params.p_payment) ? params.p_payment : 'cod';
+
+    const name = String(customer.name || '').trim();
+    const phone = String(customer.phone || '').trim();
+    const address = String(customer.address || '').trim();
+
+    if (!name) return { data: null, error: { message: 'Customer name is required' } };
+    if (phone.replace(/\D/g, '').length < 7) return { data: null, error: { message: 'A valid phone number is required' } };
+    if (items.length === 0) return { data: null, error: { message: 'Your cart is empty' } };
+
+    const products = readMockTable('products');
+    const resolved = [];
+    let subtotal = 0;
+
+    for (const item of items) {
+      const qty = Math.max(1, Math.min(99, parseInt(item.qty, 10) || 1));
+      const product = products.find(p => String(p.id) === String(item.product_id));
+      if (!product) return { data: null, error: { message: `Product ${item.product_id} is no longer available` } };
+
+      const stock = Number(product.stock) || 0;
+      if (stock < qty) return { data: null, error: { message: `Only ${stock} left in stock for ${product.name}` } };
+
+      subtotal += Number(product.price) * qty;
+      resolved.push({ product, qty });
+    }
+
+    const shipping = subtotal >= 2000 ? 0 : (delivery === 'express' ? 250 : 150);
+    const total = subtotal + shipping;
+
+    const customers = readMockTable('customers');
+    let customerRow = customers.find(c => String(c.phone) === phone);
+    if (!customerRow) {
+      customerRow = {
+        id: customers.length ? Math.max(...customers.map(c => Number(c.id) || 0)) + 1 : 1,
+        name, email: '', phone, address,
+        notes: params.p_gift_note || '',
+        total_orders: 1, total_spent: total,
+        join_date: new Date().toISOString()
+      };
+      customers.push(customerRow);
+    } else {
+      customerRow.total_orders = (Number(customerRow.total_orders) || 0) + 1;
+      customerRow.total_spent = (Number(customerRow.total_spent) || 0) + total;
+      if (address) customerRow.address = address;
+    }
+    writeMockTable('customers', customers);
+
+    const orders = readMockTable('orders');
+    const orderId = orders.length ? Math.max(...orders.map(o => Number(o.id) || 0)) + 1 : 1;
+    orders.push({
+      id: orderId,
+      customer_id: customerRow.id,
+      customer_name: name,
+      subtotal, shipping, total,
+      status: 'pending',
+      payment,
+      shipping_address: address,
+      date: mockToday(),
+      created_at: new Date().toISOString()
+    });
+    writeMockTable('orders', orders);
+
+    const orderItems = readMockTable('order_items');
+    const history = readMockTable('stock_history');
+    let nextItemId = orderItems.length ? Math.max(...orderItems.map(i => Number(i.id) || 0)) + 1 : 1;
+    let nextHistoryId = history.length ? Math.max(...history.map(h => Number(h.id) || 0)) + 1 : 1;
+
+    for (const { product, qty } of resolved) {
+      const newStock = Math.max(0, (Number(product.stock) || 0) - qty);
+      product.stock = newStock;
+      product.in_stock = newStock > 0;
+
+      orderItems.push({
+        id: nextItemId++,
+        order_id: orderId,
+        product_id: product.id,
+        name: product.name,
+        price: Number(product.price),
+        qty,
+        image: product.image
+      });
+      history.push({
+        id: nextHistoryId++,
+        product: product.name,
+        product_name: product.name,
+        type: 'Sold',
+        change_amount: -qty,
+        new_stock: newStock,
+        date: mockToday()
+      });
+    }
+
+    writeMockTable('products', products);
+    writeMockTable('order_items', orderItems);
+    writeMockTable('stock_history', history);
+
+    return {
+      data: {
+        order_id: orderId,
+        order_number: 'TAH-' + String(orderId).padStart(5, '0'),
+        subtotal, shipping, total, status: 'pending'
+      },
+      error: null
+    };
+  }
+
   // Mock Client Interface
   window.supabase = {
     auth: mockAuth,
@@ -407,6 +593,10 @@ function initMockSupabase() {
         upsert(row) { return new MockQueryBuilder(table, 'upsert', row); },
         delete() { return new MockQueryBuilder(table, 'delete'); }
       };
+    },
+    async rpc(fn, params) {
+      if (fn === 'place_order') return mockPlaceOrder(params || {});
+      return { data: null, error: { message: `Function ${fn} is not available in demo mode` } };
     },
     channel(name) {
       return {
@@ -472,9 +662,9 @@ function seedMockData() {
   // 4. Seed orders table
   if (!localStorage.getItem('tah_mock_orders')) {
     localStorage.setItem('tah_mock_orders', JSON.stringify([
-      { id: 1001, customer_name: "Prerna Shah", phone: "9801234567", shipping_address: "Kathmandu", total: 4500, status: "delivered", payment_method: "cod", created_at: "2026-05-10T14:22:00Z", tracking_id: "NP1001" },
-      { id: 1002, customer_name: "Sita Devkota", phone: "9841567890", shipping_address: "Birgunj", total: 7600, status: "shipped", payment_method: "esewa", created_at: "2026-05-18T09:11:00Z", tracking_id: "PT2003" },
-      { id: 1003, customer_name: "Aarav Mehta", phone: "9851023456", shipping_address: "Lalitpur", total: 1800, status: "pending", payment_method: "cod", created_at: "2026-05-20T17:45:00Z" }
+      { id: 1001, customer_id: 1, customer_name: "Prerna Shah", phone: "9801234567", shipping_address: "Kathmandu", subtotal: 4500, shipping: 0, total: 4500, status: "delivered", payment: "cod", date: "2026-05-10", created_at: "2026-05-10T14:22:00Z", tracking_id: "NP1001" },
+      { id: 1002, customer_id: 3, customer_name: "Sita Devkota", phone: "9841567890", shipping_address: "Birgunj", subtotal: 7100, shipping: 500, total: 7600, status: "shipped", payment: "esewa", date: "2026-05-18", created_at: "2026-05-18T09:11:00Z", tracking_id: "PT2003" },
+      { id: 1003, customer_id: 2, customer_name: "Aarav Mehta", phone: "9851023456", shipping_address: "Lalitpur", subtotal: 1800, shipping: 0, total: 1800, status: "pending", payment: "cod", date: "2026-05-20", created_at: "2026-05-20T17:45:00Z" }
     ]));
   }
 

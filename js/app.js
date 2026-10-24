@@ -3,6 +3,23 @@
    Navigation, Cart, Popup, Animations
    ============================================================ */
 
+// --- Shared helpers ---
+function escapeHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Only allow real image sources into an <img src>.
+function safeImageUrl(url) {
+  const value = String(url || '').trim();
+  const allowed = /^(https?:\/\/|\/|images\/|data:image\/)/i.test(value);
+  return allowed ? value : 'images/placeholder.webp';
+}
+
 // --- Cart State ---
 const Cart = {
   items: JSON.parse(localStorage.getItem('tah_cart') || '[]').map(item => {
@@ -16,35 +33,46 @@ const Cart = {
   },
 
   add(product, qty = 1) {
-    const existing = this.items.find(i => i.id === product.id);
+    const id = Number(product.id);
+    if (!Number.isFinite(id)) return;
+
+    const quantity = Math.max(1, Math.min(99, parseInt(qty, 10) || 1));
+    const existing = this.items.find(i => Number(i.id) === id);
+
     if (existing) {
-      existing.qty += qty;
+      existing.qty = Math.min(99, existing.qty + quantity);
     } else {
-      this.items.push({ ...product, qty });
+      this.items.push({
+        id,
+        name: String(product.name || ''),
+        price: Number(product.price) || 0,
+        image: safeImageUrl(product.image),
+        qty: quantity
+      });
     }
     this.save();
     this.showNotification(product.name);
   },
 
   remove(productId) {
-    this.items = this.items.filter(i => i.id !== productId);
+    this.items = this.items.filter(i => Number(i.id) !== Number(productId));
     this.save();
   },
 
   updateQty(productId, qty) {
-    const item = this.items.find(i => i.id === productId);
+    const item = this.items.find(i => Number(i.id) === Number(productId));
     if (item) {
-      item.qty = Math.max(1, qty);
+      item.qty = Math.max(1, Math.min(99, parseInt(qty, 10) || 1));
       this.save();
     }
   },
 
   getTotal() {
-    return this.items.reduce((sum, i) => sum + (i.price * i.qty), 0);
+    return this.items.reduce((sum, i) => sum + ((Number(i.price) || 0) * (Number(i.qty) || 0)), 0);
   },
 
   getCount() {
-    return this.items.reduce((sum, i) => sum + i.qty, 0);
+    return this.items.reduce((sum, i) => sum + (Number(i.qty) || 0), 0);
   },
 
   updateUI() {
@@ -59,7 +87,7 @@ const Cart = {
     const notif = document.createElement('div');
     notif.className = 'cart-notification';
     notif.innerHTML = `
-      <span>✓</span> <strong>${name}</strong> added to cart
+      <span>✓</span> <strong>${escapeHtml(name)}</strong> added to cart
     `;
     notif.style.cssText = `
       position: fixed;
@@ -192,32 +220,49 @@ function initScrollAnimations() {
 
 // --- Product Card Rendering ---
 function renderProductCard(product) {
+  const id = Number(product.id);
+  const price = Number(product.price) || 0;
+  const originalPrice = product.originalPrice != null ? Number(product.originalPrice) : null;
+
   const badgeHTML = product.badge
-    ? `<div class="product-badge">${product.badge}</div>`
+    ? `<div class="product-badge">${escapeHtml(product.badge)}</div>`
     : '';
 
-  const priceHTML = product.originalPrice
-    ? `<span class="product-card-price">Rs. ${product.price.toLocaleString()} <span class="original">Rs. ${product.originalPrice.toLocaleString()}</span></span>`
-    : `<span class="product-card-price">Rs. ${product.price.toLocaleString()}</span>`;
+  const priceHTML = originalPrice
+    ? `<span class="product-card-price">Rs. ${price.toLocaleString()} <span class="original">Rs. ${originalPrice.toLocaleString()}</span></span>`
+    : `<span class="product-card-price">Rs. ${price.toLocaleString()}</span>`;
 
-  const imageUrl = product.image ? product.image.replace(/\.(png|jpe?g)$/i, '.webp') : 'images/placeholder.webp';
+  const imageUrl = escapeHtml(safeImageUrl(product.image).replace(/\.(png|jpe?g)$/i, '.webp'));
 
   return `
-    <div class="product-card animate-on-scroll" data-id="${product.id}" data-collection="${product.collection}" data-category="${product.category}" data-price="${product.price}">
+    <div class="product-card animate-on-scroll" data-id="${id}" data-collection="${escapeHtml(product.collection)}" data-category="${escapeHtml(product.category)}" data-price="${price}">
       <div class="product-card-image">
         ${badgeHTML}
-        <img src="${imageUrl}" alt="${product.name}" loading="lazy" decoding="async" width="400" height="400" onerror="this.onerror=null; this.src='images/placeholder.png'; this.style.objectFit='contain';">
+        <img src="${imageUrl}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" width="400" height="400" onerror="this.onerror=null; this.src='images/placeholder.png'; this.style.objectFit='contain';">
         <div class="product-card-overlay">
-          <button class="quick-view-btn" onclick="openQuickView(${product.id})">Quick View</button>
+          <button class="quick-view-btn" onclick="openQuickView(${id})">Quick View</button>
         </div>
       </div>
       <div class="product-card-info">
-        <div class="product-card-collection">${product.collection} Collection</div>
-        <h3 class="product-card-name">${product.name}</h3>
+        <div class="product-card-collection">${escapeHtml(product.collection)} Collection</div>
+        <h3 class="product-card-name">${escapeHtml(product.name)}</h3>
         ${priceHTML}
       </div>
     </div>
   `;
+}
+
+// Look products up by id instead of inlining their fields into onclick handlers.
+function addToCartById(productId) {
+  const product = allProducts.find(p => Number(p.id) === Number(productId));
+  if (product) Cart.add(product);
+}
+
+function buyNowById(productId) {
+  const product = allProducts.find(p => Number(p.id) === Number(productId));
+  if (!product) return;
+  Cart.add(product);
+  window.location.href = 'checkout.html';
 }
 
 // --- Quick View Modal ---
@@ -234,8 +279,9 @@ async function loadProducts() {
 
     // Immediate UI Update from Cache (Stale-While-Revalidate pattern)
     if (cachedData) {
-      const parsed = JSON.parse(cachedData);
-      if (parsed && parsed.length > 0) {
+      let parsed = [];
+      try { parsed = JSON.parse(cachedData) || []; } catch (e) { parsed = []; }
+      if (Array.isArray(parsed) && parsed.length > 0) {
         allProducts = parsed.map(p => {
           if (p.image) p.image = p.image.replace(/\.(png|jpe?g)$/i, '.webp');
           if (p.images) p.images = p.images.map(img => img.replace(/\.(png|jpe?g)$/i, '.webp'));
@@ -272,8 +318,8 @@ async function fetchAndUpdateProducts(cacheKey, cacheTimeKey) {
     if (error) throw error;
 
     allProducts = (data || []).map(p => {
-      if (p.image) p.image = p.image.replace(/\.(png|jpe?g)$/i, '.webp');
-      if (p.images) p.images = p.images.map(img => img.replace(/\.(png|jpe?g)$/i, '.webp'));
+      if (typeof p.image === 'string') p.image = p.image.replace(/\.(png|jpe?g)$/i, '.webp');
+      if (Array.isArray(p.images)) p.images = p.images.map(img => String(img).replace(/\.(png|jpe?g)$/i, '.webp'));
       return p;
     });
     
@@ -317,28 +363,32 @@ function showSkeletonLoading() {
 }
 
 function openQuickView(productId) {
-  const product = allProducts.find(p => p.id === productId);
+  const product = allProducts.find(p => Number(p.id) === Number(productId));
   if (!product) return;
 
   const modal = document.getElementById('quickViewModal');
   if (!modal) return;
 
-  const featuresHTML = product.features
-    ? product.features.map(f => `<span style="display:inline-block;padding:4px 12px;border:1px solid var(--gold);border-radius:20px;font-size:0.75rem;color:var(--gold);margin-right:6px;margin-bottom:6px;">${f}</span>`).join('')
+  const id = Number(product.id);
+  const price = Number(product.price) || 0;
+  const originalPrice = product.originalPrice != null ? Number(product.originalPrice) : null;
+
+  const featuresHTML = Array.isArray(product.features)
+    ? product.features.map(f => `<span style="display:inline-block;padding:4px 12px;border:1px solid var(--gold);border-radius:20px;font-size:0.75rem;color:var(--gold);margin-right:6px;margin-bottom:6px;">${escapeHtml(f)}</span>`).join('')
     : '';
 
-  modal.querySelector('.quick-view-image').innerHTML = `<img src="${product.image}" alt="${product.name}" onerror="this.onerror=null; this.src='images/placeholder.png';">`;
+  modal.querySelector('.quick-view-image').innerHTML = `<img src="${escapeHtml(safeImageUrl(product.image))}" alt="${escapeHtml(product.name)}" onerror="this.onerror=null; this.src='images/placeholder.png';">`;
   modal.querySelector('.quick-view-details').innerHTML = `
-    <span style="font-size:0.75rem;color:var(--white-muted);text-transform:uppercase;letter-spacing:1.5px;">${product.collection} Collection</span>
-    <h3>${product.name}</h3>
-    <div class="price">Rs. ${product.price.toLocaleString()}${product.originalPrice ? `<span style="font-size:0.9rem;color:var(--white-muted);text-decoration:line-through;margin-left:10px;font-weight:400;">Rs. ${product.originalPrice.toLocaleString()}</span>` : ''}</div>
-    <p class="description">${product.description}</p>
+    <span style="font-size:0.75rem;color:var(--white-muted);text-transform:uppercase;letter-spacing:1.5px;">${escapeHtml(product.collection)} Collection</span>
+    <h3>${escapeHtml(product.name)}</h3>
+    <div class="price">Rs. ${price.toLocaleString()}${originalPrice ? `<span style="font-size:0.9rem;color:var(--white-muted);text-decoration:line-through;margin-left:10px;font-weight:400;">Rs. ${originalPrice.toLocaleString()}</span>` : ''}</div>
+    <p class="description">${escapeHtml(product.description)}</p>
     <div>${featuresHTML}</div>
     <div style="display:flex;gap:10px;margin-top:auto;flex-wrap:wrap;">
-      <button style="flex:1;padding:14px 20px;background:transparent;border:2px solid #D4AF37;color:#D4AF37;font-weight:700;font-size:0.85rem;letter-spacing:1.5px;text-transform:uppercase;border-radius:6px;cursor:pointer;" onclick="Cart.add({id:${product.id},name:'${product.name.replace(/'/g, "\\'")}',price:${product.price},image:'${product.image}'}); closeQuickView();">ADD TO CART</button>
-      <button style="flex:1;padding:14px 20px;background:linear-gradient(135deg,#D4AF37,#E8C84A);color:#000;border:none;font-weight:800;font-size:0.85rem;letter-spacing:1.5px;text-transform:uppercase;border-radius:6px;cursor:pointer;box-shadow:0 0 15px rgba(212,175,55,0.4);" onclick="Cart.add({id:${product.id},name:'${product.name.replace(/'/g, "\\'")}',price:${product.price},image:'${product.image}'}); closeQuickView(); window.location.href='checkout.html';">BUY NOW</button>
+      <button style="flex:1;padding:14px 20px;background:transparent;border:2px solid #D4AF37;color:#D4AF37;font-weight:700;font-size:0.85rem;letter-spacing:1.5px;text-transform:uppercase;border-radius:6px;cursor:pointer;" onclick="addToCartById(${id}); closeQuickView();">ADD TO CART</button>
+      <button style="flex:1;padding:14px 20px;background:linear-gradient(135deg,#D4AF37,#E8C84A);color:#000;border:none;font-weight:800;font-size:0.85rem;letter-spacing:1.5px;text-transform:uppercase;border-radius:6px;cursor:pointer;box-shadow:0 0 15px rgba(212,175,55,0.4);" onclick="buyNowById(${id});">BUY NOW</button>
     </div>
-    <a href="product-detail.html?id=${product.id}" style="display:block;text-align:center;margin-top:8px;color:var(--white-muted);font-size:0.85rem;text-decoration:underline;">View Full Details →</a>
+    <a href="product-detail.html?id=${id}" style="display:block;text-align:center;margin-top:8px;color:var(--white-muted);font-size:0.85rem;text-decoration:underline;">View Full Details →</a>
   `;
 
   modal.classList.add('active');
@@ -378,7 +428,7 @@ async function initAuthStatus() {
       }
 
       if (avatarUrl) {
-          userBtn.innerHTML = `<img src="${avatarUrl}" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--gold); object-fit: cover;">`;
+          userBtn.innerHTML = `<img src="${escapeHtml(safeImageUrl(avatarUrl))}" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--gold); object-fit: cover;">`;
       } else if (isAuthAdmin) {
         userBtn.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"

@@ -8,11 +8,16 @@ let currentProduct = null;
 document.addEventListener('DOMContentLoaded', async () => {
   const products = await loadProducts();
   const params = new URLSearchParams(window.location.search);
-  const productId = parseInt(params.get('id'));
+  const rawId = params.get('id');
+  const productId = parseInt(rawId, 10);
 
-  currentProduct = products.find(p => p.id === productId);
+  currentProduct = Number.isFinite(productId)
+    ? products.find(p => Number(p.id) === productId)
+    : null;
+
   if (!currentProduct) {
-    currentProduct = products[0]; // Fallback
+    renderMissingProduct();
+    return;
   }
 
   renderProductDetail(currentProduct);
@@ -24,28 +29,70 @@ document.addEventListener('DOMContentLoaded', async () => {
   initScrollAnimations();
 });
 
+// A stale or hand-edited ?id= must not silently show a different product.
+function renderMissingProduct() {
+  document.title = 'Product not found — The Accessories Hub';
+
+  const title = document.getElementById('productTitle');
+  if (title) title.textContent = 'Product not found';
+
+  const desc = document.getElementById('productDescription');
+  if (desc) desc.textContent = 'This item is no longer available. Browse the collection to find something similar.';
+
+  const price = document.getElementById('productPrice');
+  if (price) price.textContent = '';
+
+  const original = document.getElementById('originalPrice');
+  if (original) original.style.display = 'none';
+
+  const mainImg = document.getElementById('galleryMain');
+  if (mainImg) {
+    mainImg.src = 'images/placeholder.png';
+    mainImg.alt = 'Product not found';
+  }
+
+  const thumbs = document.getElementById('galleryThumbs');
+  if (thumbs) thumbs.innerHTML = '';
+
+  const addSection = document.querySelector('.add-to-cart-section');
+  if (addSection) addSection.style.display = 'none';
+
+  const stickyBar = document.querySelector('.sticky-cart-bar');
+  if (stickyBar) stickyBar.style.display = 'none';
+}
+
 function renderProductDetail(product) {
+  const name = String(product.name || 'Product');
+  const price = Number(product.price) || 0;
+  const image = safeImageUrl(product.image);
+
   // Update page title
-  document.title = `${product.name} — The Accessories Hub`;
+  document.title = `${name} — The Accessories Hub`;
 
   // Gallery
   const mainImg = document.getElementById('galleryMain');
-  if (mainImg) mainImg.src = product.image;
+  if (mainImg) {
+    mainImg.src = image;
+    mainImg.alt = name;
+  }
 
-  // Thumbnails
+  // Thumbnails (built with DOM APIs so nothing is interpolated into onclick)
   const thumbs = document.getElementById('galleryThumbs');
   if (thumbs) {
-    thumbs.innerHTML = `
-      <div class="gallery-thumb active" onclick="changeImage('${product.image}', this)">
-        <img src="${product.image}" alt="${product.name}">
-      </div>
-      <div class="gallery-thumb" onclick="changeImage('${product.image}', this)">
-        <img src="${product.image}" alt="${product.name} angle 2">
-      </div>
-      <div class="gallery-thumb" onclick="changeImage('${product.image}', this)">
-        <img src="${product.image}" alt="${product.name} angle 3">
-      </div>
-    `;
+    thumbs.innerHTML = '';
+    const gallery = Array.isArray(product.images) && product.images.length ? product.images : [product.image];
+    gallery.filter(Boolean).slice(0, 4).forEach((src, index) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'gallery-thumb' + (index === 0 ? ' active' : '');
+
+      const img = document.createElement('img');
+      img.src = safeImageUrl(src);
+      img.alt = index === 0 ? name : `${name} view ${index + 1}`;
+
+      wrap.appendChild(img);
+      wrap.addEventListener('click', () => changeImage(safeImageUrl(src), wrap));
+      thumbs.appendChild(wrap);
+    });
   }
 
   // Badge
@@ -64,23 +111,24 @@ function renderProductDetail(product) {
   if (title) title.textContent = product.name;
 
   // Price
-  const price = document.getElementById('productPrice');
-  if (price) price.textContent = `Rs. ${product.price.toLocaleString()}`;
+  const priceEl = document.getElementById('productPrice');
+  if (priceEl) priceEl.textContent = `Rs. ${price.toLocaleString()}`;
 
-  const originalPrice = document.getElementById('originalPrice');
-  if (originalPrice) {
-    if (product.originalPrice) {
-      originalPrice.textContent = `Rs. ${product.originalPrice.toLocaleString()}`;
-      originalPrice.style.display = 'inline';
-      const discount = Math.round((1 - product.price / product.originalPrice) * 100);
-      const discountEl = document.getElementById('discountBadge');
+  const originalPriceEl = document.getElementById('originalPrice');
+  const discountEl = document.getElementById('discountBadge');
+  const originalPrice = product.originalPrice != null ? Number(product.originalPrice) : null;
+  const hasDiscount = Number.isFinite(originalPrice) && originalPrice > price;
+
+  if (originalPriceEl) {
+    if (hasDiscount) {
+      originalPriceEl.textContent = `Rs. ${originalPrice.toLocaleString()}`;
+      originalPriceEl.style.display = 'inline';
       if (discountEl) {
-        discountEl.textContent = `-${discount}%`;
+        discountEl.textContent = `-${Math.round((1 - price / originalPrice) * 100)}%`;
         discountEl.style.display = 'inline-block';
       }
     } else {
-      originalPrice.style.display = 'none';
-      const discountEl = document.getElementById('discountBadge');
+      originalPriceEl.style.display = 'none';
       if (discountEl) discountEl.style.display = 'none';
     }
   }
@@ -91,9 +139,9 @@ function renderProductDetail(product) {
 
   // Features
   const features = document.getElementById('productFeatures');
-  if (features && product.features) {
+  if (features && Array.isArray(product.features)) {
     features.innerHTML = product.features.map(f =>
-      `<span class="feature-tag">✦ ${f}</span>`
+      `<span class="feature-tag">✦ ${escapeHtml(f)}</span>`
     ).join('');
   }
 
@@ -101,18 +149,22 @@ function renderProductDetail(product) {
   const material = document.getElementById('productMaterial');
   if (material) material.textContent = product.material;
 
-  const collection = document.getElementById('productCollection');
-  if (collection) collection.textContent = product.collection.charAt(0).toUpperCase() + product.collection.slice(1);
+  const collectionEl = document.getElementById('productCollection');
+  if (collectionEl) {
+    const collectionName = String(product.collection || '');
+    collectionEl.textContent = collectionName ? collectionName.charAt(0).toUpperCase() + collectionName.slice(1) : 'Jewellery';
+  }
 
   const availability = document.getElementById('productAvailability');
   if (availability) {
-    availability.textContent = product.inStock ? 'In Stock' : 'Out of Stock';
-    availability.style.color = product.inStock ? 'var(--green)' : 'var(--red)';
+    const inStock = product.inStock !== false && Number(product.stock) !== 0;
+    availability.textContent = inStock ? 'In Stock' : 'Out of Stock';
+    availability.style.color = inStock ? 'var(--green)' : 'var(--red)';
   }
 
   // Sticky cart price
   const stickyPrice = document.getElementById('stickyPrice');
-  if (stickyPrice) stickyPrice.textContent = `Rs. ${product.price.toLocaleString()}`;
+  if (stickyPrice) stickyPrice.textContent = `Rs. ${price.toLocaleString()}`;
 
   // Breadcrumb
   const breadcrumbName = document.getElementById('breadcrumbProduct');
@@ -121,7 +173,7 @@ function renderProductDetail(product) {
 
 function renderRelatedProducts(products, current) {
   const related = products
-    .filter(p => p.id !== current.id && (p.collection === current.collection || p.category === current.category))
+    .filter(p => Number(p.id) !== Number(current.id) && (p.collection === current.collection || p.category === current.category))
     .slice(0, 4);
 
   const grid = document.getElementById('relatedGrid');
@@ -189,7 +241,7 @@ function initQuantity() {
 
 function addToCartFromDetail() {
   if (!currentProduct) return;
-  const qty = parseInt(document.getElementById('qtyInput')?.value) || 1;
+  const qty = parseInt(document.getElementById('qtyInput')?.value, 10) || 1;
   Cart.add({
     id: currentProduct.id,
     name: currentProduct.name,
@@ -239,8 +291,8 @@ function initZoom() {
 async function handleBuyNow() {
   if (!currentProduct) return;
 
-  const qty = parseInt(document.getElementById('qtyInput')?.value) || 1;
-  
+  const qty = parseInt(document.getElementById('qtyInput')?.value, 10) || 1;
+
   // Add to cart and immediately go to checkout
   Cart.add({
     id: currentProduct.id,
@@ -248,7 +300,7 @@ async function handleBuyNow() {
     price: currentProduct.price,
     image: currentProduct.image
   }, qty);
-  
+
   window.location.href = 'checkout.html';
 }
 

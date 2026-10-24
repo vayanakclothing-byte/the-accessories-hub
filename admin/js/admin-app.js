@@ -124,21 +124,48 @@ function normalizeToYYYYMMDD(dateStr) {
   return dateStr;
 }
 
+// Admin pages live under /admin/, so a catalogue path like "images/x.webp" must
+// be made root-relative or every thumbnail 404s.
+function assetUrl(path) {
+  const value = String(path || '');
+  if (!value) return '';
+  if (/^(https?:)?\/\//i.test(value) || value.startsWith('data:') || value.startsWith('/')) return value;
+  return '/' + value;
+}
+
 const DB = {
   _cache: { products: [], customers: [], orders: [], invoices: [], stockHistory: [], settings: {} },
-  products() { return (this._cache.products || []).map(p => ({...p, originalPrice: p.original_price, inStock: p.in_stock, reorderLevel: p.reorder_level})); },
+  // Force a fresh read. Every mutation must call this instead of loadData(),
+  // otherwise the 60s cache keeps showing pre-edit values.
+  async reload() { return loadData(true); },
+  products() {
+    return (this._cache.products || []).map(p => ({
+      ...p,
+      image: assetUrl(p.image),
+      images: Array.isArray(p.images) ? p.images.map(assetUrl) : [],
+      originalPrice: p.original_price,
+      inStock: p.in_stock,
+      reorderLevel: p.reorder_level
+    }));
+  },
   customers() { return (this._cache.customers || []).map(c => ({...c, totalOrders: c.total_orders, totalSpent: c.total_spent, joinDate: c.join_date})); },
-  orders() { 
+  orders() {
     return (this._cache.orders || []).map(o => {
       const rawDate = o.date || o.created_at;
       return {
         ...o,
         date: normalizeToYYYYMMDD(rawDate),
+        // Older rows were written as 'Pending'; treat every status case-insensitively.
+        status: String(o.status || 'pending').toLowerCase(),
+        payment: o.payment || o.payment_method || 'cod',
+        subtotal: Number(o.subtotal) || 0,
+        shipping: Number(o.shipping) || 0,
+        total: Number(o.total) || 0,
         customerId: o.customer_id,
         customerName: o.customer_name,
         trackingId: o.tracking_id,
         shippingAddress: o.shipping_address,
-        items: o.items || []
+        items: (o.items || []).map(item => ({ ...item, image: assetUrl(item.image) }))
       };
     });
   },
@@ -171,7 +198,19 @@ const DB = {
       };
     });
   },
-  settings() { return this._cache.settings || {}; },
+  settings() {
+    const s = this._cache.settings || {};
+    return {
+      ...s,
+      businessName: s.business_name || s.businessName || '',
+      businessAddress: s.business_address || s.businessAddress || '',
+      businessPhone: s.business_phone || s.businessPhone || '',
+      businessEmail: s.business_email || s.businessEmail || '',
+      whatsappNumber: s.whatsapp_number || s.whatsappNumber || '',
+      whatsappTemplates: s.whatsapp_templates || s.whatsappTemplates || {},
+      shippingProviders: s.shipping_providers || s.shippingProviders || []
+    };
+  },
   nextId(arr) { return arr.length ? Math.max(...arr.map(i => i.id)) + 1 : 1; },
   async saveSettings(data) {
     const payload = {
@@ -185,8 +224,8 @@ const DB = {
       shipping_providers: data.shippingProviders || data.shipping_providers
     };
     const { error } = await supabase.from('settings').upsert(payload);
-    if (error) { showToast('Error saving settings', 'error'); console.error(error); }
-    else { await loadData(); showToast('Settings saved successfully!'); }
+    if (error) { showToast('Error saving settings: ' + error.message, 'error'); console.error(error); }
+    else { await loadData(true); showToast('Settings saved successfully!'); }
   },
   async saveInvoices(invoices) {
     const payload = invoices.map(inv => ({
@@ -198,8 +237,8 @@ const DB = {
       date: inv.date
     }));
     const { error } = await supabase.from('invoices').upsert(payload);
-    if (error) { showToast('Error saving invoices', 'error'); console.error(error); }
-    else await loadData();
+    if (error) { showToast('Error saving invoices: ' + error.message, 'error'); console.error(error); }
+    else await loadData(true);
   }
 };
 
@@ -295,11 +334,27 @@ function closeAllModals() {
 }
 
 // ===== FORMATTING =====
-function formatPrice(n) { return `Rs. ${Number(n).toLocaleString()}`; }
-function formatDate(d) { return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }); }
+function formatPrice(n) { return `Rs. ${Number(n || 0).toLocaleString()}`; }
+function formatDate(d) {
+  const date = new Date(d);
+  return isNaN(date.getTime()) ? '—' : date.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+}
+
+// Every template below interpolates data that a customer or an admin typed.
+// Escape it before it reaches innerHTML.
+function escapeHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function statusBadge(status) {
+  const key = String(status || '').toLowerCase();
   const map = { pending:'orange', processing:'blue', shipped:'gold', 'in-transit':'blue', delivered:'green', cancelled:'red', paid:'green', unpaid:'orange', draft:'grey' };
-  return `<span class="badge badge-${map[status]||'grey'}">${status}</span>`;
+  return `<span class="badge badge-${map[key]||'grey'}">${escapeHtml(key || 'unknown')}</span>`;
 }
 
 // ===== WHATSAPP =====
