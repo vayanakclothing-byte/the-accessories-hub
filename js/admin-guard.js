@@ -1,9 +1,14 @@
-// js/admin-guard.js — Protects admin pages via Supabase profiles.role check
+// js/admin-guard.js — High-Performance Admin RBAC Guard via Supabase profiles.role check
 (function () {
   'use strict';
 
-  // Hide page content until authorized (prevents flash)
-  document.documentElement.style.visibility = 'hidden';
+  // Fast-path: If user was verified as admin in this session, show immediately without flash
+  const cachedRole = sessionStorage.getItem('tah_admin_role');
+  if (cachedRole === 'admin') {
+    document.documentElement.style.visibility = 'visible';
+  } else {
+    document.documentElement.style.visibility = 'hidden';
+  }
 
   let initRetries = 0;
   async function checkAdminAuth() {
@@ -15,7 +20,7 @@
         redirectToLogin();
         return;
       }
-      setTimeout(checkAdminAuth, 100);
+      setTimeout(checkAdminAuth, 80);
       return;
     }
 
@@ -25,6 +30,7 @@
 
       if (error) {
         console.error('[AdminGuard] Session error:', error.message);
+        sessionStorage.removeItem('tah_admin_role');
         redirectToLogin();
         return;
       }
@@ -43,7 +49,6 @@
 
       if (hasCode || hasToken) {
         console.log('[AdminGuard] OAuth callback detected, waiting for session...');
-        // Wait for onAuthStateChange to pick up the hash/code
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
           if (event === 'SIGNED_IN' && session) {
             subscription.unsubscribe();
@@ -53,18 +58,20 @@
         
         // Safety timeout to prevent infinite hidden screen
         setTimeout(() => {
-            if (document.documentElement.style.visibility === 'hidden') {
-                console.warn('[AdminGuard] OAuth callback timed out.');
-                redirectToLogin();
-            }
+          if (document.documentElement.style.visibility === 'hidden') {
+            console.warn('[AdminGuard] OAuth callback timed out.');
+            redirectToLogin();
+          }
         }, 5000);
       } else {
         // No session and not a callback
+        sessionStorage.removeItem('tah_admin_role');
         redirectToLogin();
       }
 
     } catch (e) {
       console.error('[AdminGuard] Unexpected error:', e);
+      sessionStorage.removeItem('tah_admin_role');
       redirectToLogin();
     }
   }
@@ -83,23 +90,25 @@
 
       if (error) {
         console.error('[AdminGuard] Profile query error:', error.message);
-        // Profile might not exist yet (race condition on first sign-up)
-        // Redirect to request-access so user can see their ID
+        sessionStorage.removeItem('tah_admin_role');
         redirectToRequestAccess(user.id, user.email);
         return;
       }
 
       if (profile.role !== 'admin') {
         console.warn('[AdminGuard] User is not admin. Role:', profile.role);
+        sessionStorage.removeItem('tah_admin_role');
         redirectToRequestAccess(user.id, user.email);
         return;
       }
 
       // ✅ User is authorized admin
+      sessionStorage.setItem('tah_admin_role', 'admin');
       document.documentElement.style.visibility = 'visible';
 
     } catch (e) {
       console.error('[AdminGuard] Role verification error:', e);
+      sessionStorage.removeItem('tah_admin_role');
       redirectToRequestAccess(user.id, user.email);
     }
   }

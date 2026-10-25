@@ -1,163 +1,52 @@
 /* ============================================================
    THE ACCESSORIES HUB — Enterprise Jewellery ERP Shared App
-   Universal Navigation, Supabase ERP Data Layer, Audit & Helpers
+   Universal Navigation, High-Performance Cached Data Layer & Modals
    ============================================================ */
 
 // ===== GLOBAL ERROR BOUNDARY =====
 window.addEventListener('error', function (e) {
   console.error('[ERP Admin] Uncaught error:', e.error || e.message);
   document.documentElement.style.visibility = 'visible';
-  const loader = document.getElementById('adminLoader');
-  if (loader) { loader.style.opacity = '0'; loader.style.display = 'none'; }
+  dismissLoader();
 });
 
 window.addEventListener('unhandledrejection', function (e) {
   console.error('[ERP Admin] Unhandled promise rejection:', e.reason);
   document.documentElement.style.visibility = 'visible';
-  const loader = document.getElementById('adminLoader');
-  if (loader) { loader.style.opacity = '0'; loader.style.display = 'none'; }
+  dismissLoader();
 });
 
-// ===== DATA CACHE & HELPERS =====
-let _dataLoaded = false;
-let _lastDataLoad = 0;
-const DATA_CACHE_EXPIRY = 60000; // 1 minute session cache
+// ===== CACHED DATA LAYER WITH STALE-WHILE-REVALIDATE =====
+const CACHE_KEY = 'tah_erp_data_v2';
+const CACHE_TTL_MS = 90000; // 90 seconds local cache
+let _loadDataPromise = null;
 
-async function loadData(force = false) {
-  if (_dataLoaded && !force && (Date.now() - _lastDataLoad < DATA_CACHE_EXPIRY)) {
-    return;
-  }
-
-  try {
-    const fetchStart = Date.now();
-    const [
-      { data: products, error: e1 },
-      { data: customers, error: e2 },
-      { data: orders, error: e3 },
-      { data: orderItems, error: e4 },
-      { data: invoices, error: e5 },
-      { data: stockHistory, error: e6 },
-      { data: settings, error: e7 },
-      { data: categories, error: e8 },
-      { data: suppliers, error: e9 },
-      { data: purchaseOrders, error: e10 },
-      { data: expenses, error: e11 },
-      { data: shipments, error: e12 },
-      { data: returnsRefunds, error: e13 },
-      { data: coupons, error: e14 },
-      { data: auditLogs, error: e15 },
-      { data: notifications, error: e16 },
-      { data: reviews, error: e17 },
-      { data: profiles, error: e18 }
-    ] = await Promise.all([
-      supabase.from('products').select('*').order('id', { ascending: true }),
-      supabase.from('customers').select('*').order('id', { ascending: true }),
-      supabase.from('orders').select('*').order('id', { ascending: false }),
-      supabase.from('order_items').select('*'),
-      supabase.from('invoices').select('*').order('created_at', { ascending: false }),
-      supabase.from('stock_history').select('*').order('id', { ascending: false }),
-      supabase.from('settings').select('*').single(),
-      supabase.from('categories').select('*').order('sort_order', { ascending: true }),
-      supabase.from('suppliers').select('*').order('id', { ascending: true }),
-      supabase.from('purchase_orders').select('*, purchase_order_items(*)').order('id', { ascending: false }),
-      supabase.from('expenses').select('*').order('date', { ascending: false }),
-      supabase.from('shipments').select('*').order('id', { ascending: false }),
-      supabase.from('returns_refunds').select('*').order('id', { ascending: false }),
-      supabase.from('coupons').select('*').order('id', { ascending: false }),
-      supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(100),
-      supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(50),
-      supabase.from('reviews').select('*').order('created_at', { ascending: false }),
-      supabase.from('profiles').select('*').order('created_at', { ascending: false })
-    ]);
-
-    console.log(`[ERP Admin] Data loaded in ${Date.now() - fetchStart}ms`);
-
-    // Link order items to orders
-    if (orders) {
-      orders.forEach(o => {
-        o.items = (orderItems || []).filter(i => i.order_id === o.id).map(i => ({
-          productId: i.product_id, name: i.name, price: i.price, qty: i.qty, image: i.image
-        }));
-      });
-    }
-
-    DB._cache = {
-      products: products || [],
-      categories: (categories && categories.length > 0) ? categories : [
-        { id: 'c1', name: 'Rings', slug: 'rings', description: 'Handcrafted luxury rings.', is_active: true, sort_order: 1 },
-        { id: 'c2', name: 'Bracelets', slug: 'bracelets', description: 'Refined bangles & cuffs.', is_active: true, sort_order: 2 },
-        { id: 'c3', name: 'Earrings', slug: 'earrings', description: 'Dainty & statement earrings.', is_active: true, sort_order: 3 },
-        { id: 'c4', name: 'Necklaces', slug: 'necklaces', description: 'Pendants & temple chokers.', is_active: true, sort_order: 4 }
-      ],
-      customers: customers || [],
-      orders: orders || [],
-      invoices: invoices || [],
-      stockHistory: stockHistory || [],
-      suppliers: suppliers || [],
-      purchaseOrders: purchaseOrders || [],
-      expenses: expenses || [],
-      shipments: shipments || [],
-      returnsRefunds: returnsRefunds || [],
-      coupons: coupons || [],
-      auditLogs: auditLogs || [],
-      notifications: notifications || [],
-      reviews: reviews || [],
-      profiles: profiles || [],
-      settings: (settings && Object.keys(settings).length > 0) ? settings : {
-        business_name: "The Accessories Hub",
-        currency: "NPR",
-        tax_rate: 0,
-        whatsapp_templates: {
-          orderConfirm: "Hello {name}! 🎉 Your order #{orderId} has been confirmed. Total: Rs. {total}. Thank you for shopping with The Accessories Hub! 💎",
-          shipped: "Hi {name}! 📦 Great news! Your order #{orderId} has been shipped. Tracking: {tracking}. Expected delivery: 3-5 days.",
-          delivered: "Hello {name}! ✅ Your order #{orderId} has been delivered! We hope you love your purchase. Leave us a review! 💛"
-        },
-        shipping_providers: [
-          { name: "Nepal Post", type: "standard", rate: 150, freeAbove: 2000 },
-          { name: "Pathao Courier", type: "express", rate: 250, freeAbove: 3000 }
-        ]
-      }
-    };
-    _dataLoaded = true;
-    _lastDataLoad = Date.now();
-  } catch (err) {
-    console.error('[ERP Admin] Error loading data:', err);
-    DB._cache = DB._cache || {
-      products: [], customers: [], orders: [], invoices: [],
-      stockHistory: [], suppliers: [], purchaseOrders: [], expenses: [],
-      shipments: [], returnsRefunds: [], coupons: [], auditLogs: [],
-      notifications: [], reviews: [], profiles: [], settings: {}
-    };
-    _dataLoaded = true;
-  }
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function isValidUUID(str) {
+  return typeof str === 'string' && UUID_REGEX.test(str);
 }
 
 function normalizeToYYYYMMDD(dateStr) {
   if (!dateStr) return '';
   if (typeof dateStr !== 'string') dateStr = String(dateStr);
-  if (dateStr.includes('-')) {
-    return dateStr.split('T')[0];
-  }
+  if (dateStr.includes('-')) return dateStr.split('T')[0];
   if (dateStr.includes('/')) {
     const parts = dateStr.split('/');
     if (parts.length === 3) {
-      if (parts[0].length === 4) {
-        return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
-      } else {
-        return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-      }
+      if (parts[0].length === 4) return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+      return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
     }
   }
   try {
     const d = new Date(dateStr);
     if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
-  } catch (e) {}
+  } catch (_) {}
   return dateStr;
 }
 
 function assetUrl(path) {
   const value = String(path || '');
-  if (!value) return '';
+  if (!value) return '/images/placeholder.webp';
   if (/^(https?:)?\/\//i.test(value) || value.startsWith('data:') || value.startsWith('/')) return value;
   return '/' + value;
 }
@@ -165,33 +54,95 @@ function assetUrl(path) {
 // ===== DATABASE ACCESS LAYER =====
 const DB = {
   _cache: {
-    products: [], customers: [], orders: [], invoices: [],
-    stockHistory: [], categories: [], suppliers: [], purchaseOrders: [],
-    expenses: [], shipments: [], returnsRefunds: [], coupons: [],
-    auditLogs: [], notifications: [], reviews: [], profiles: [], settings: {}
+    products: [], categories: [], orders: [], orderItems: [],
+    invoices: [], stockHistory: [], customers: [], suppliers: [],
+    purchaseOrders: [], expenses: [], shipments: [], returnsRefunds: [],
+    coupons: [], auditLogs: [], notifications: [], reviews: [],
+    profiles: [], settings: {}
   },
-  async reload() { return loadData(true); },
-  
+  _loadedModules: new Set(['core']),
+
+  initFromStorage() {
+    try {
+      const raw = sessionStorage.getItem(CACHE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.timestamp && (Date.now() - parsed.timestamp < CACHE_TTL_MS)) {
+          this._cache = Object.assign(this._cache, parsed.data);
+          this._loadedModules = new Set(parsed.modules || ['core']);
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('[ERP Data] Failed to read session cache:', e);
+    }
+    return false;
+  },
+
+  saveToStorage() {
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+        timestamp: Date.now(),
+        data: this._cache,
+        modules: Array.from(this._loadedModules)
+      }));
+    } catch (e) {
+      console.warn('[ERP Data] Storage quota warning:', e);
+    }
+  },
+
+  invalidate(modules = null) {
+    if (!modules) {
+      sessionStorage.removeItem(CACHE_KEY);
+      this._loadedModules.clear();
+    } else {
+      (Array.isArray(modules) ? modules : [modules]).forEach(m => this._loadedModules.delete(m));
+      this.saveToStorage();
+    }
+  },
+
+  async reload(module = null) {
+    this.invalidate(module);
+    return loadData(true);
+  },
+
+  // Core Models
   products() {
-    return (this._cache.products || []).map(p => ({
-      ...p,
-      image: assetUrl(p.image),
-      images: Array.isArray(p.images) ? p.images.map(assetUrl) : [],
-      originalPrice: p.original_price,
-      costPrice: Number(p.cost_price) || 0,
-      inStock: p.in_stock,
-      reorderLevel: p.reorder_level || 5
-    }));
+    return (this._cache.products || []).map(p => {
+      const stock = Number(p.stock) || 0;
+      const reserved = Number(p.reserved_stock) || 0;
+      const available = Math.max(0, stock - reserved);
+      return {
+        ...p,
+        image: assetUrl(p.image),
+        images: Array.isArray(p.images) && p.images.length ? p.images.map(assetUrl) : [assetUrl(p.image)],
+        originalPrice: p.original_price,
+        costPrice: Number(p.cost_price) || 0,
+        inStock: p.in_stock !== false && stock > 0,
+        isArchived: !!p.is_archived,
+        reorderLevel: p.reorder_level || 5,
+        stock,
+        reservedStock: reserved,
+        availableStock: available,
+        color: p.color || '',
+        audience: p.audience || 'unisex',
+        location: p.location || 'Main Warehouse',
+        variants: Array.isArray(p.variants) ? p.variants : []
+      };
+    });
   },
-  categories() { return this._cache.categories || []; },
-  customers() {
-    return (this._cache.customers || []).map(c => ({
-      ...c,
-      totalOrders: Number(c.total_orders) || 0,
-      totalSpent: Number(c.total_spent) || 0,
-      joinDate: c.join_date ? normalizeToYYYYMMDD(c.join_date) : '—'
-    }));
+
+  categories() {
+    const cats = this._cache.categories || [];
+    if (cats.length > 0) return cats;
+    return [
+      { id: 'rings', name: 'Rings', slug: 'rings', description: 'Handcrafted luxury rings.', is_active: true, sort_order: 1 },
+      { id: 'bracelets', name: 'Bracelets', slug: 'bracelets', description: 'Refined bangles & cuffs.', is_active: true, sort_order: 2 },
+      { id: 'earrings', name: 'Earrings', slug: 'earrings', description: 'Dainty & statement earrings.', is_active: true, sort_order: 3 },
+      { id: 'necklaces', name: 'Necklaces', slug: 'necklaces', description: 'Pendants & temple chokers.', is_active: true, sort_order: 4 }
+    ];
   },
+
   orders() {
     return (this._cache.orders || []).map(o => {
       const rawDate = o.date || o.created_at;
@@ -212,6 +163,16 @@ const DB = {
       };
     });
   },
+
+  customers() {
+    return (this._cache.customers || []).map(c => ({
+      ...c,
+      totalOrders: Number(c.total_orders) || 0,
+      totalSpent: Number(c.total_spent) || 0,
+      joinDate: c.join_date ? normalizeToYYYYMMDD(c.join_date) : '—'
+    }));
+  },
+
   invoices() {
     return (this._cache.invoices || []).map(i => ({
       ...i,
@@ -221,19 +182,22 @@ const DB = {
       amount: Number(i.amount) || 0
     }));
   },
+
   stockHistory() {
     return (this._cache.stockHistory || []).map(h => {
       const rawDate = h.date || h.created_at;
-      let formattedDate = rawDate ? normalizeToYYYYMMDD(rawDate) : '—';
       return {
         ...h,
-        product: h.product || h.product_name,
-        date: formattedDate,
-        newStock: h.new_stock,
-        change: h.change_amount
+        product: h.product || h.product_name || 'Item',
+        productName: h.product_name || h.product || 'Item',
+        date: rawDate ? normalizeToYYYYMMDD(rawDate) : '—',
+        newStock: Number(h.new_stock) || 0,
+        change: Number(h.change_amount) || 0,
+        reason: h.reason || h.type || 'Adjustment'
       };
     });
   },
+
   suppliers() { return this._cache.suppliers || []; },
   purchaseOrders() {
     return (this._cache.purchaseOrders || []).map(po => ({
@@ -247,6 +211,7 @@ const DB = {
       items: po.purchase_order_items || po.items || []
     }));
   },
+
   expenses() {
     return (this._cache.expenses || []).map(e => ({
       ...e,
@@ -254,6 +219,7 @@ const DB = {
       amount: Number(e.amount) || 0
     }));
   },
+
   shipments() {
     return (this._cache.shipments || []).map(s => ({
       ...s,
@@ -262,6 +228,7 @@ const DB = {
       deliveredAt: s.delivered_at ? normalizeToYYYYMMDD(s.delivered_at) : '—'
     }));
   },
+
   returnsRefunds() {
     return (this._cache.returnsRefunds || []).map(r => ({
       ...r,
@@ -269,6 +236,7 @@ const DB = {
       date: normalizeToYYYYMMDD(r.created_at)
     }));
   },
+
   coupons() {
     return (this._cache.coupons || []).map(c => ({
       ...c,
@@ -278,30 +246,35 @@ const DB = {
       timesUsed: Number(c.times_used) || 0
     }));
   },
+
   auditLogs() {
     return (this._cache.auditLogs || []).map(l => ({
       ...l,
       date: l.created_at ? new Date(l.created_at).toLocaleString() : '—'
     }));
   },
+
   notifications() {
     return (this._cache.notifications || []).map(n => ({
       ...n,
       date: n.created_at ? new Date(n.created_at).toLocaleString() : '—'
     }));
   },
+
   reviews() {
     return (this._cache.reviews || []).map(r => ({
       ...r,
       date: r.created_at ? normalizeToYYYYMMDD(r.created_at) : '—'
     }));
   },
+
   profiles() {
     return (this._cache.profiles || []).map(p => ({
       ...p,
       date: p.created_at ? normalizeToYYYYMMDD(p.created_at) : '—'
     }));
   },
+
   settings() {
     const s = this._cache.settings || {};
     return {
@@ -312,7 +285,11 @@ const DB = {
       businessEmail: s.business_email || s.businessEmail || 'theaccessorieshub2530@gmail.com',
       whatsappNumber: s.whatsapp_number || s.whatsappNumber || '9805659501',
       whatsappTemplates: s.whatsapp_templates || s.whatsappTemplates || {},
-      shippingProviders: s.shipping_providers || s.shippingProviders || []
+      shippingProviders: s.shipping_providers || s.shippingProviders || [],
+      currencySymbol: s.currency_symbol || s.currencySymbol || 'Rs.',
+      currencyCode: s.currency_code || s.currencyCode || 'NPR',
+      taxRate: s.tax_rate !== undefined ? s.tax_rate : 13,
+      lowStockLimit: s.low_stock_limit || 5
     };
   },
 
@@ -329,7 +306,7 @@ const DB = {
         details: String(details || '')
       }]);
     } catch (e) {
-      console.warn('[AuditLog] Non-blocking audit log error:', e);
+      console.warn('[AuditLog] Non-blocking audit error:', e);
     }
   },
 
@@ -348,12 +325,130 @@ const DB = {
     if (error) {
       showToast('Error saving settings: ' + error.message, 'error');
     } else {
+      this.invalidate('settings');
       await loadData(true);
       await this.logAudit('UPDATE_SETTINGS', 'settings', '1', 'Updated store configuration');
       showToast('Settings saved successfully!');
     }
   }
 };
+
+// Initialize cache from session storage immediately on script evaluation
+DB.initFromStorage();
+
+// ===== HIGH-PERFORMANCE DATA FETCHING =====
+async function loadData(force = false) {
+  if (!force && _loadDataPromise) return _loadDataPromise;
+  if (!force && DB._loadedModules.has('core') && DB._cache.products.length > 0) {
+    return Promise.resolve();
+  }
+
+  _loadDataPromise = (async () => {
+    const fetchStart = Date.now();
+    try {
+      // Parallel fetch of core essentials (fast, non-blocking)
+      const [
+        { data: products },
+        { data: categories },
+        { data: orders },
+        { data: orderItems },
+        { data: settings },
+        { data: notifications }
+      ] = await Promise.all([
+        supabase.from('products').select('*').order('id', { ascending: false }),
+        supabase.from('categories').select('*').order('sort_order', { ascending: true }),
+        supabase.from('orders').select('*').order('id', { ascending: false }).limit(200),
+        supabase.from('order_items').select('*').limit(500),
+        supabase.from('settings').select('*').single(),
+        supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(30)
+      ]);
+
+      // Link order items to orders
+      if (orders) {
+        orders.forEach(o => {
+          o.items = (orderItems || []).filter(i => i.order_id === o.id).map(i => ({
+            productId: i.product_id, name: i.name, price: i.price, qty: i.qty, image: i.image
+          }));
+        });
+      }
+
+      DB._cache.products = products || DB._cache.products || [];
+      if (categories && categories.length) DB._cache.categories = categories;
+      DB._cache.orders = orders || DB._cache.orders || [];
+      DB._cache.orderItems = orderItems || DB._cache.orderItems || [];
+      if (settings) DB._cache.settings = settings;
+      DB._cache.notifications = notifications || DB._cache.notifications || [];
+      DB._loadedModules.add('core');
+
+      DB.saveToStorage();
+      console.log(`[ERP Admin] Core data loaded in ${Date.now() - fetchStart}ms (${DB._cache.products.length} products)`);
+
+      // Trigger lazy background load for secondary tables
+      lazyLoadSecondaryModules();
+
+    } catch (err) {
+      console.error('[ERP Admin] Error loading core data:', err);
+    } finally {
+      _loadDataPromise = null;
+    }
+  })();
+
+  return _loadDataPromise;
+}
+
+// Background lazy loader for secondary modules so they never block page rendering
+async function lazyLoadSecondaryModules() {
+  if (DB._loadedModules.has('secondary')) return;
+  try {
+    const [
+      { data: stockHistory },
+      { data: customers },
+      { data: suppliers },
+      { data: purchaseOrders },
+      { data: expenses },
+      { data: shipments },
+      { data: returnsRefunds },
+      { data: coupons },
+      { data: reviews },
+      { data: profiles },
+      { data: invoices },
+      { data: auditLogs }
+    ] = await Promise.all([
+      supabase.from('stock_history').select('*').order('id', { ascending: false }).limit(150),
+      supabase.from('customers').select('*').order('id', { ascending: false }).limit(200),
+      supabase.from('suppliers').select('*').order('id', { ascending: true }),
+      supabase.from('purchase_orders').select('*, purchase_order_items(*)').order('id', { ascending: false }).limit(50),
+      supabase.from('expenses').select('*').order('date', { ascending: false }).limit(100),
+      supabase.from('shipments').select('*').order('id', { ascending: false }).limit(50),
+      supabase.from('returns_refunds').select('*').order('id', { ascending: false }).limit(50),
+      supabase.from('coupons').select('*').order('id', { ascending: false }),
+      supabase.from('reviews').select('*').order('created_at', { ascending: false }).limit(50),
+      supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+      supabase.from('invoices').select('*').order('created_at', { ascending: false }).limit(100),
+      supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(50)
+    ]);
+
+    if (stockHistory) DB._cache.stockHistory = stockHistory;
+    if (customers) DB._cache.customers = customers;
+    if (suppliers) DB._cache.suppliers = suppliers;
+    if (purchaseOrders) DB._cache.purchaseOrders = purchaseOrders;
+    if (expenses) DB._cache.expenses = expenses;
+    if (shipments) DB._cache.shipments = shipments;
+    if (returnsRefunds) DB._cache.returnsRefunds = returnsRefunds;
+    if (coupons) DB._cache.coupons = coupons;
+    if (reviews) DB._cache.reviews = reviews;
+    if (profiles) DB._cache.profiles = profiles;
+    if (invoices) DB._cache.invoices = invoices;
+    if (auditLogs) DB._cache.auditLogs = auditLogs;
+
+    DB._loadedModules.add('secondary');
+    DB.saveToStorage();
+    // Update sidebar badges if counts changed
+    updateSidebarBadges();
+  } catch (err) {
+    console.warn('[ERP Admin] Secondary modules background sync warning:', err);
+  }
+}
 
 // ===== TOAST NOTIFICATIONS =====
 function showToast(message, type = 'success') {
@@ -382,23 +477,6 @@ function initSidebar() {
 
   const currentPath = window.location.pathname;
 
-  // Calculate live badge alerts from loaded data
-  let lowStockCount = 0;
-  let pendingOrdersCount = 0;
-  let pendingReturnsCount = 0;
-  let unreadNotifsCount = 0;
-
-  try {
-    const products = DB.products();
-    lowStockCount = products.filter(p => p.stock <= p.reorderLevel).length;
-    const orders = DB.orders();
-    pendingOrdersCount = orders.filter(o => o.status === 'pending' || o.status === 'processing').length;
-    const returns = DB.returnsRefunds();
-    pendingReturnsCount = returns.filter(r => r.status === 'requested').length;
-    const notifs = DB.notifications();
-    unreadNotifsCount = notifs.filter(n => !n.is_read).length;
-  } catch (_) {}
-
   const navGroups = [
     {
       title: 'Core Operations',
@@ -406,10 +484,10 @@ function initSidebar() {
         { href: '/admin/index.html', label: 'Overview', icon: 'layout-dashboard' },
         { href: '/admin/products.html', label: 'Products & Catalogue', icon: 'gem' },
         { href: '/admin/categories.html', label: 'Categories & Collections', icon: 'folder-tree' },
-        { href: '/admin/inventory.html', label: 'Inventory & Stock Ledger', icon: 'package', badge: lowStockCount, badgeClass: 'badge-orange' },
-        { href: '/admin/orders.html', label: 'Orders & Fulfilment', icon: 'shopping-bag', badge: pendingOrdersCount, badgeClass: 'badge-blue' },
+        { href: '/admin/inventory.html', label: 'Inventory & Stock Ledger', icon: 'package', id: 'badge-inventory', badgeClass: 'badge-orange' },
+        { href: '/admin/orders.html', label: 'Orders & Fulfilment', icon: 'shopping-bag', id: 'badge-orders', badgeClass: 'badge-blue' },
         { href: '/admin/shipping.html', label: 'Shipping & Delivery', icon: 'truck' },
-        { href: '/admin/returns.html', label: 'Returns & Refunds', icon: 'rotate-ccw', badge: pendingReturnsCount, badgeClass: 'badge-red' }
+        { href: '/admin/returns.html', label: 'Returns & Refunds', icon: 'rotate-ccw', id: 'badge-returns', badgeClass: 'badge-red' }
       ]
     },
     {
@@ -435,7 +513,7 @@ function initSidebar() {
       title: 'System & Admin',
       links: [
         { href: '/admin/staff.html', label: 'Staff & Permissions', icon: 'shield-check' },
-        { href: '/admin/notifications.html', label: 'Notifications & Tasks', icon: 'bell', badge: unreadNotifsCount, badgeClass: 'badge-gold' },
+        { href: '/admin/notifications.html', label: 'Notifications & Tasks', icon: 'bell', id: 'badge-notifs', badgeClass: 'badge-gold' },
         { href: '/admin/audit-logs.html', label: 'Security & Audit Logs', icon: 'scroll-text' },
         { href: '/admin/settings.html', label: 'Settings & Config', icon: 'settings' }
       ]
@@ -447,14 +525,12 @@ function initSidebar() {
     navHtml += `<div class="sidebar-section"><div class="sidebar-section-title">${group.title}</div>`;
     group.links.forEach(link => {
       const isExact = currentPath === link.href || (currentPath === '/admin' && link.href === '/admin/index.html') || currentPath === link.href.replace('.html', '');
-      const badgeHtml = link.badge && link.badge > 0
-        ? `<span class="badge ${link.badgeClass || ''}">${link.badge}</span>`
-        : '';
+      const badgeIdAttr = link.id ? `id="${link.id}"` : '';
       navHtml += `
         <a href="${link.href}" class="sidebar-link ${isExact ? 'active' : ''}">
           <span class="link-icon"><i data-lucide="${link.icon}" style="width: 17px; height: 17px;"></i></span>
           <span class="link-text">${link.label}</span>
-          ${badgeHtml}
+          <span class="badge ${link.badgeClass || ''}" ${badgeIdAttr} style="display:none;"></span>
         </a>
       `;
     });
@@ -497,10 +573,46 @@ function initSidebar() {
     overlay.classList.remove('active');
   });
 
+  updateSidebarBadges();
   if (window.lucide) lucide.createIcons();
 }
 
+function updateSidebarBadges() {
+  try {
+    const products = DB.products();
+    const lowStock = products.filter(p => p.stock <= p.reorderLevel).length;
+    const orders = DB.orders();
+    const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'processing').length;
+    const returns = DB.returnsRefunds();
+    const pendingReturns = returns.filter(r => r.status === 'requested').length;
+    const notifs = DB.notifications();
+    const unreadNotifs = notifs.filter(n => !n.is_read).length;
+
+    const setBadge = (id, count) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (count > 0) {
+        el.textContent = count;
+        el.style.display = 'inline-block';
+      } else {
+        el.style.display = 'none';
+      }
+    };
+
+    setBadge('badge-inventory', lowStock);
+    setBadge('badge-orders', pendingOrders);
+    setBadge('badge-returns', pendingReturns);
+    setBadge('badge-notifs', unreadNotifs);
+
+    // Update topbar bell dot
+    const bellDot = document.querySelector('#topbarNotifBtn .dot');
+    if (bellDot) bellDot.style.display = unreadNotifs > 0 ? 'block' : 'none';
+  } catch (_) {}
+}
+
 async function handleLogout() {
+  sessionStorage.removeItem('tah_admin_role');
+  sessionStorage.removeItem(CACHE_KEY);
   const { error } = await supabase.auth.signOut();
   if (error) showToast('Logout failed', 'error');
   else window.location.href = '/admin/login.html';
@@ -514,7 +626,6 @@ function initTopBar() {
   const notifs = DB.notifications ? DB.notifications() : [];
   const unreadCount = notifs.filter(n => !n.is_read).length;
 
-  // Insert notification bell if not present
   if (!document.getElementById('topbarNotifBtn')) {
     const notifBtn = document.createElement('a');
     notifBtn.id = 'topbarNotifBtn';
@@ -523,7 +634,7 @@ function initTopBar() {
     notifBtn.title = 'Notifications & Tasks';
     notifBtn.innerHTML = `
       <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
-      ${unreadCount > 0 ? '<span class="dot"></span>' : ''}
+      <span class="dot" style="${unreadCount > 0 ? 'display:block;' : 'display:none;'}"></span>
     `;
     topbarRight.insertBefore(notifBtn, topbarRight.firstChild);
   }
@@ -621,7 +732,7 @@ async function initAdminAuth() {
     if (session) {
       const user = session.user;
       const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
-      const fullName = user.user_metadata?.full_name || 'Admin';
+      const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin';
 
       if (avatarEl && avatarUrl) {
         avatarEl.innerHTML = `<img src="${avatarUrl}" alt="Admin" style="width:100%; height:100%; object-fit:cover;">`;
@@ -632,7 +743,7 @@ async function initAdminAuth() {
       }
     }
   } catch (e) {
-    console.warn('[Admin] Auth info population warning:', e);
+    console.warn('[Admin] Auth info warning:', e);
   }
 }
 
@@ -641,27 +752,29 @@ function dismissLoader() {
   const loader = document.getElementById('adminLoader');
   if (loader) {
     loader.style.opacity = '0';
-    setTimeout(() => loader.style.display = 'none', 500);
+    setTimeout(() => {
+      loader.style.display = 'none';
+    }, 250);
   }
 }
 
-// ===== INIT =====
+// ===== AUTO-BOOTSTRAP =====
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    initAdminAuth();
-    await loadData();
+    // If cache is ready, initialize sidebar immediately for instant layout
     initSidebar();
     initTopBar();
+    initAdminAuth();
+
+    // Load/revalidate data
+    await loadData();
+    updateSidebarBadges();
     dismissLoader();
   } catch (e) {
-    console.error('[ERP Admin] Init error:', e);
+    console.error('[ERP Admin] Bootstrap error:', e);
     dismissLoader();
   }
 });
 
-setTimeout(() => {
-  const loader = document.getElementById('adminLoader');
-  if (loader && loader.style.display !== 'none') {
-    dismissLoader();
-  }
-}, 4000);
+// Fallback safety timeout for loader
+setTimeout(dismissLoader, 1500);

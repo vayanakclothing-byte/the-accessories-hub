@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Products — Admin | The Accessories Hub</title>
+  <title>Products & Catalogue — Admin ERP | The Accessories Hub</title>
   <link rel="stylesheet" href="/admin/css/admin.css">
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <script src="https://unpkg.com/lucide@1.61.0"></script>
@@ -15,21 +15,27 @@
   <main class="admin-main">
     <div class="topbar">
       <div class="topbar-left">
-        <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i data-lucide="menu"></i></button>
-        <div><h1>Products</h1><div class="topbar-breadcrumb"><a href="index.html">Dashboard</a> / Products</div></div>
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>Products & Catalogue</h1>
+          <div class="topbar-breadcrumb">Core Operations / Product Catalogue & Sourcing</div>
+        </div>
       </div>
       <div class="topbar-right">
-          <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
-              <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
-              <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
-          </div>
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
       </div>
     </div>
 
     <div class="admin-content">
       <div class="table-card">
         <div class="table-header">
-          <div class="table-title"><i data-lucide="package" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i> Product Inventory <span id="productsCount" style="font-size: 0.8rem; color: var(--white-muted); font-weight: normal; margin-left: 8px;"></span></div>
+          <div class="table-title">
+            <i data-lucide="gem" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i>
+            Jewellery Items <span id="productsCount" style="font-size: 0.8rem; color: var(--white-muted); font-weight: normal; margin-left: 8px;"></span>
+          </div>
           <div class="table-actions">
             <select class="form-select" id="categoryFilter" onchange="filterProducts()" style="padding:6px 12px;font-size:0.85rem;background:var(--grey);border:1px solid var(--grey-mid);color:var(--white);border-radius:var(--radius-sm);">
               <option value="">All Categories</option>
@@ -38,16 +44,36 @@
               <option value="earrings">Earrings</option>
               <option value="necklaces">Necklaces</option>
             </select>
-            <div class="table-search"><i data-lucide="search" style="width: 16px; height: 16px; margin-right: 8px; color: var(--white-muted);"></i><input type="text" placeholder="Search products..." id="productSearch" oninput="searchProducts()"></div>
+            <select class="form-select" id="audienceFilter" onchange="filterProducts()" style="padding:6px 12px;font-size:0.85rem;background:var(--grey);border:1px solid var(--grey-mid);color:var(--white);border-radius:var(--radius-sm);">
+              <option value="">All Audiences</option>
+              <option value="unisex">Unisex</option>
+              <option value="women">Women</option>
+              <option value="men">Men</option>
+            </select>
+            <div class="table-search">
+              <i data-lucide="search" style="width: 16px; height: 16px; margin-right: 8px; color: var(--white-muted);"></i>
+              <input type="text" placeholder="Search name, SKU, material..." id="productSearch" oninput="searchProducts()">
+            </div>
             <button class="btn btn-outline btn-sm" onclick="exportProductsCSV()"><i data-lucide="download" style="width:14px;height:14px;"></i> Export</button>
             <button class="btn btn-gold" onclick="openAddProduct()">+ Add Product</button>
           </div>
         </div>
         <div style="overflow-x:auto;">
-        <table>
-          <thead><tr><th>Product</th><th>Collection</th><th>Category</th><th>Price</th><th>Stock</th><th>Badge</th><th>Actions</th></tr></thead>
-          <tbody id="productsBody"></tbody>
-        </table>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Material / Audience</th>
+                <th>Pricing</th>
+                <th>Stock & Availability</th>
+                <th>Status</th>
+                <th>Badge</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productsBody"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -57,25 +83,21 @@
 <div class="modal-overlay" onclick="closeAllModals()"></div>
 
 <!-- Product Form Modal -->
-<div class="modal wide" id="productModal">
-  <div class="modal-header"><h3 id="modalTitle">Add New Product</h3><span class="modal-close" onclick="closeAllModals()">✕</span></div>
+<div class="modal wide" id="productModal" style="max-width:850px; max-height:90vh; overflow-y:auto;">
+  <div class="modal-header">
+    <h3 id="modalTitle">Add New Product to Inventory</h3>
+    <span class="modal-close" onclick="closeAllModals()">✕</span>
+  </div>
   <div class="modal-body">
     <form id="productForm">
+      <!-- Row 1: Core Info -->
       <div class="form-row">
-        <div class="form-group" style="flex:2;"><label class="form-label">Product Name *</label><input class="form-input" id="pName" required placeholder="e.g. Elegant Temple Necklace"></div>
-        <div class="form-group"><label class="form-label">Selling Price (Rs.) *</label><input class="form-input" type="number" id="pPrice" required placeholder="2500"></div>
-        <div class="form-group"><label class="form-label">Cost Price (Rs.)</label><input class="form-input" type="number" id="pCostPrice" placeholder="1200"></div>
-        <div class="form-group"><label class="form-label">Original Price</label><input class="form-input" type="number" id="pOriginalPrice" placeholder="3000"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Collection</label>
-          <select class="form-select" id="pCollection">
-            <option value="korean">Korean Collection</option>
-            <option value="temple">Temple Collection</option>
-            <option value="oxidized">Oxidized Collection</option>
-          </select>
+        <div class="form-group" style="flex:2;">
+          <label class="form-label">Product Name *</label>
+          <input class="form-input" id="pName" required placeholder="e.g. Royal Temple Necklace Set">
         </div>
-        <div class="form-group"><label class="form-label">Category *</label>
+        <div class="form-group">
+          <label class="form-label">Category *</label>
           <select class="form-select" id="pCategory" required>
             <option value="rings">Rings</option>
             <option value="bracelets">Bracelets</option>
@@ -83,25 +105,130 @@
             <option value="necklaces">Necklaces</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Material</label><input class="form-input" id="pMaterial" placeholder="e.g. Gold Plated, Brass"></div>
-      </div>
-      <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="pDescription" style="height:80px;"></textarea></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Badge (e.g. NEW, SALE)</label><input class="form-input" id="pBadge" placeholder="None"></div>
-        <div class="form-group"><label class="form-label">SKU</label><input class="form-input" id="pSku" placeholder="Auto-generated"></div>
-        <div class="form-group"><label class="form-label">Initial Stock</label><input class="form-input" type="number" id="pStock" value="10"></div>
-        <div class="form-group"><label class="form-label">Reorder Level</label><input class="form-input" type="number" id="pReorderLevel" value="5"></div>
-      </div>
-      <div class="form-group"><label class="form-label">Features (comma separated)</label><input class="form-input" id="pFeatures" placeholder="Handcrafted, Lightweight, Anti-tarnish"></div>
-      
-      <!-- Image Upload Section -->
-      <div class="form-group">
-        <label class="form-label">Product Images</label>
-        <div class="image-upload-zone" id="imageUploadZone"><i data-lucide="cloud-upload" style="width: 32px; height: 32px; color: var(--gold); margin-bottom: 8px;"></i><div>Click or drag images to upload</div><input type="file" id="imageFileInput" multiple accept="image/*" style="display:none;"></div>
-        <div class="image-preview-grid" id="imagePreviewGrid"></div>
+        <div class="form-group">
+          <label class="form-label">Collection</label>
+          <select class="form-select" id="pCollection">
+            <option value="korean">Korean Collection</option>
+            <option value="temple">Temple Collection</option>
+            <option value="oxidized">Oxidized Collection</option>
+            <option value="minimalist">Minimalist Daily</option>
+          </select>
+        </div>
       </div>
 
-      <div class="modal-footer" style="padding:0;border:none;margin-top:20px;">
+      <!-- Row 2: Pricing & Valuation -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Selling Price (Rs.) *</label>
+          <input class="form-input" type="number" step="1" id="pPrice" required placeholder="2500">
+          <div class="form-help">Storefront retail price</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purchase Cost Price (Rs.)</label>
+          <input class="form-input" type="number" step="1" id="pCostPrice" placeholder="1100">
+          <div class="form-help">Used for COGS & inventory valuation</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Original / Strikethrough Price</label>
+          <input class="form-input" type="number" step="1" id="pOriginalPrice" placeholder="3200">
+          <div class="form-help">Optional discount comparison</div>
+        </div>
+      </div>
+
+      <!-- Row 3: Material, Color, Audience -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Material</label>
+          <input class="form-input" id="pMaterial" placeholder="e.g. 18K Gold Plated, Stainless Steel">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Primary Colour</label>
+          <input class="form-input" id="pColor" placeholder="e.g. Yellow Gold, Antique Silver, Rose Gold">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target Audience</label>
+          <select class="form-select" id="pAudience">
+            <option value="unisex">Unisex (Everyone)</option>
+            <option value="women">Women</option>
+            <option value="men">Men</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 4: Variants & Features -->
+      <div class="form-row">
+        <div class="form-group" style="flex:2;">
+          <label class="form-label">Variants (e.g. Ring Size, Chain Length)</label>
+          <input class="form-input" id="pVariants" placeholder="Size: 6/7/8/Adjustable; Length: 16in/18in">
+          <div class="form-help">Separate variant types with semicolon and options with slash</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Badge Tag</label>
+          <input class="form-input" id="pBadge" placeholder="e.g. Best Seller, New Arrival, Sale">
+        </div>
+      </div>
+
+      <!-- Row 5: Inventory & Ledger Entry -->
+      <div style="background:rgba(212,175,55,0.06); border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:14px; margin-bottom:18px;">
+        <div style="font-weight:600; color:var(--gold); margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+          <i data-lucide="package-check" style="width:16px; height:16px;"></i> Stock & Inventory Controls
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Initial Stock (Units) *</label>
+            <input class="form-input" type="number" id="pStock" value="10" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reorder Alert Threshold</label>
+            <input class="form-input" type="number" id="pReorderLevel" value="5" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stock Location</label>
+            <input class="form-input" id="pLocation" value="Main Warehouse">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Stock Movement Reason</label>
+            <input class="form-input" id="pStockReason" value="Initial Stock Receipt">
+            <div class="form-help">Recorded in audit stock history ledger</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Supplier</label>
+            <select class="form-select" id="pSupplier">
+              <option value="">None / Direct Sourcing</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Product SKU</label>
+            <input class="form-input" id="pSku" placeholder="Auto-generated if empty">
+          </div>
+        </div>
+      </div>
+
+      <!-- Description & Features -->
+      <div class="form-group">
+        <label class="form-label">Product Description</label>
+        <textarea class="form-textarea" id="pDescription" style="height:70px;" placeholder="Handcrafted with precision and tarnish-free protection..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Highlights / Features (comma-separated)</label>
+        <input class="form-input" id="pFeatures" placeholder="Tarnish-Free, Waterproof, Hypoallergenic, Handcrafted">
+      </div>
+
+      <!-- Image Upload Section -->
+      <div class="form-group">
+        <label class="form-label">Product Images & Gallery (WebP optimized)</label>
+        <div class="image-upload-zone" id="imageUploadZone" style="cursor:pointer; padding:20px; text-align:center; border:2px dashed var(--grey-mid); border-radius:8px; background:var(--grey);">
+          <i data-lucide="cloud-upload" style="width: 28px; height: 28px; color: var(--gold); margin-bottom: 6px;"></i>
+          <div style="font-size:0.9rem;">Click or drag images to upload (Max 5 MB each)</div>
+          <div style="font-size:0.75rem; color:var(--white-muted); margin-top:4px;">Automatically resized and compressed to responsive WebP</div>
+          <input type="file" id="imageFileInput" multiple accept="image/*" style="display:none;">
+        </div>
+        <div class="image-preview-grid" id="imagePreviewGrid" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;"></div>
+      </div>
+
+      <div class="modal-footer" style="padding:14px 0 0; border-top:1px solid var(--grey-mid); margin-top:20px;">
         <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
         <button type="submit" class="btn btn-gold">Save Product</button>
       </div>
@@ -110,15 +237,15 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal" id="deleteModal" style="width:400px;">
+<div class="modal" id="deleteModal" style="width:420px;">
   <div class="modal-header"><h3>Delete Product</h3><span class="modal-close" onclick="closeAllModals()">✕</span></div>
   <div class="modal-body">
     <div style="text-align:center;padding:10px 0;">
       <div style="display:flex;justify-content:center;margin-bottom:12px;color:var(--red);">
         <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
       </div>
-      <p>Are you sure you want to delete <strong id="deleteProductName"></strong>?</p>
-      <p style="font-size:0.8rem;color:var(--white-muted);margin-top:6px;">This action cannot be undone.</p>
+      <p>Are you sure you want to permanently delete <strong id="deleteProductName"></strong>?</p>
+      <p style="font-size:0.8rem;color:var(--white-muted);margin-top:6px;">This action cannot be undone. If this product was ever ordered, please use <strong>Archive</strong> instead.</p>
     </div>
   </div>
   <div class="modal-footer">
@@ -130,18 +257,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/supabase-client.js"></script>
   <script src="/js/admin-guard.js"></script>
-  
-  <style>
-    .admin-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--black); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s ease; }
-    .spinner { width: 50px; height: 50px; border: 3px solid rgba(212, 175, 55, 0.1); border-top: 3px solid var(--gold); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  </style>
-
-  <div id="adminLoader" class="admin-loader">
-    <div class="spinner"></div>
-    <div style="color: var(--gold); letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem;">The Accessories Hub</div>
-  </div>
-
   <script src="/admin/js/admin-app.js"></script>
   <script src="/admin/js/products-admin.js"></script>
   <script>lucide.createIcons();</script>

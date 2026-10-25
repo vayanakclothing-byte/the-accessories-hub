@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inventory — Admin | The Accessories Hub</title>
+  <title>Inventory & Stock Ledger — Admin ERP | The Accessories Hub</title>
   <link rel="stylesheet" href="/admin/css/admin.css">
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <script src="https://unpkg.com/lucide@1.61.0"></script>
@@ -16,7 +16,10 @@
     <div class="topbar">
       <div class="topbar-left">
         <button class="admin-hamburger"><i data-lucide="menu"></i></button>
-        <div><h1>Inventory & Stock Ledger</h1><div class="topbar-breadcrumb">Core Operations / On-Hand Stock, Ledger History & Valuation</div></div>
+        <div>
+          <h1>Inventory & Stock Ledger</h1>
+          <div class="topbar-breadcrumb">Core Operations / On-Hand Stock, Ledger History & Valuation</div>
+        </div>
       </div>
       <div class="topbar-right">
         <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
@@ -52,42 +55,265 @@
       </div>
 
       <div class="chart-grid">
-        <!-- Inventory Table -->
+        <!-- Inventory Table Card -->
         <div class="table-card">
           <div class="table-header">
-            <div class="table-title"><i data-lucide="package" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i> Stock Levels & Ledger</div>
+            <div class="table-title">
+              <i data-lucide="package" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i>
+              Stock Levels & Ledger
+            </div>
             <div class="table-actions">
-              <button class="btn btn-sm btn-ghost inv-filter-btn active" onclick="filterInventory('')">All</button>
-              <button class="btn btn-sm btn-ghost inv-filter-btn" onclick="filterInventory('low')">Low Stock</button>
-              <button class="btn btn-sm btn-ghost inv-filter-btn" onclick="filterInventory('out')">Out of Stock</button>
-              <button class="btn btn-sm btn-outline" onclick="exportInventoryCSV()"><i data-lucide="download" style="width:14px;height:14px;"></i> Export CSV</button>
+              <select class="form-select" onchange="handleCategoryFilter(this.value)" style="padding:6px 12px;font-size:0.85rem;background:var(--grey);border:1px solid var(--grey-mid);color:var(--white);border-radius:var(--radius-sm);">
+                <option value="">All Categories</option>
+                <option value="rings">Rings</option>
+                <option value="bracelets">Bracelets</option>
+                <option value="earrings">Earrings</option>
+                <option value="necklaces">Necklaces</option>
+              </select>
+              <div class="table-search">
+                <i data-lucide="search" style="width: 15px; height: 15px; margin-right: 6px; color: var(--white-muted);"></i>
+                <input type="text" placeholder="Search product or SKU..." oninput="handleSearch(this.value)">
+              </div>
+              <button class="btn btn-sm btn-ghost inv-filter-btn active" onclick="filterInventory('', event)">All</button>
+              <button class="btn btn-sm btn-ghost inv-filter-btn" onclick="filterInventory('low', event)">Low Stock</button>
+              <button class="btn btn-sm btn-ghost inv-filter-btn" onclick="filterInventory('out', event)">Out of Stock</button>
+              <button class="btn btn-sm btn-outline" onclick="exportInventoryCSV()"><i data-lucide="download" style="width:14px;height:14px;"></i> Export</button>
+              <button class="btn btn-gold" onclick="openAddProductFromInventory()">+ Add Product</button>
             </div>
           </div>
           <div style="overflow-x:auto;">
-          <table>
-            <thead><tr><th>Product</th><th>Cost Price</th><th>Stock</th><th>Reorder Level</th><th>Status</th><th>Quick Update</th></tr></thead>
-            <tbody id="inventoryBody"></tbody>
-          </table>
+            <table>
+              <thead>
+                <tr>
+                  <th>Product & SKU</th>
+                  <th>Category / Location</th>
+                  <th>Unit Cost / Retail</th>
+                  <th>On-Hand</th>
+                  <th>Reserved</th>
+                  <th>Available to Sell</th>
+                  <th>Status</th>
+                  <th>Stock Adjustments</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryBody"></tbody>
+            </table>
           </div>
         </div>
 
-        <!-- Stock History -->
+        <!-- Stock History Card -->
         <div class="chart-card">
           <div class="chart-card-header">
-            <div class="chart-card-title"><i data-lucide="history" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i> Stock Ledger History</div>
+            <div class="chart-card-title">
+              <i data-lucide="history" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i>
+              Stock Movement Ledger
+            </div>
           </div>
-          <div class="timeline" id="stockTimeline" style="max-height:480px;overflow-y:auto;"></div>
+          <div class="timeline" id="stockTimeline" style="max-height:540px; overflow-y:auto;"></div>
         </div>
       </div>
     </div>
   </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/supabase-client.js"></script>
-<script src="/js/admin-guard.js"></script>
-<script src="/admin/js/admin-app.js"></script>
-<script src="/admin/js/inventory-admin.js"></script>
-<script>lucide.createIcons();</script>
+<div class="modal-overlay" onclick="closeAllModals()"></div>
+
+<!-- Controlled Stock Adjustment Modal -->
+<div class="modal" id="stockAdjustmentModal" style="width:480px;">
+  <div class="modal-header">
+    <h3>Controlled Stock Adjustment</h3>
+    <span class="modal-close" onclick="closeAllModals()">✕</span>
+  </div>
+  <div class="modal-body">
+    <div style="background:var(--grey); padding:12px; border-radius:6px; margin-bottom:14px; border:1px solid var(--grey-mid);">
+      <div style="font-weight:600; font-size:1rem; color:var(--white);" id="adjProductName">Product Name</div>
+      <div style="font-size:0.75rem; color:var(--gold); font-family:monospace;" id="adjProductSku">SKU</div>
+      <div style="margin-top:6px; font-size:0.85rem; color:var(--white-muted);">
+        Current On-Hand Stock: <strong style="color:var(--white);" id="adjCurrentStock">0</strong> units
+      </div>
+    </div>
+
+    <form id="stockAdjustmentForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Adjustment Type *</label>
+          <select class="form-select" id="adjType" onchange="updateAdjPreview()" required>
+            <option value="restock">Restock (+ Add Stock)</option>
+            <option value="return">Customer Return (+ Add Stock)</option>
+            <option value="audit_plus">Audit Surplus (+ Add Stock)</option>
+            <option value="damage">Damaged / Defective (- Deduct)</option>
+            <option value="shrinkage">Store Loss / Shrinkage (- Deduct)</option>
+            <option value="sale">Manual Sale (- Deduct)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quantity *</label>
+          <input class="form-input" type="number" id="adjQuantity" value="5" min="1" required oninput="updateAdjPreview()">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Audit Reason / Notes *</label>
+        <input class="form-input" id="adjReason" placeholder="e.g. Supplier PO receipt, Shelf inspection, Breakage" required>
+        <div class="form-help">Mandatory for permanent stock movement audit trail</div>
+      </div>
+
+      <div style="padding:10px 14px; background:rgba(212,175,55,0.08); border-radius:6px; border:1px solid rgba(212,175,55,0.3); margin-top:14px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.85rem; color:var(--white-muted);">Resulting Stock On-Hand:</span>
+        <strong id="adjNewStockPreview" style="font-size:1.1rem; color:var(--gold);">0</strong>
+      </div>
+
+      <div class="modal-footer" style="padding:14px 0 0; border:none; margin-top:18px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button type="submit" class="btn btn-gold">Confirm Stock Adjustment</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Product Creation Modal directly inside Inventory page -->
+<div class="modal wide" id="productModal" style="max-width:850px; max-height:90vh; overflow-y:auto;">
+  <div class="modal-header">
+    <h3 id="modalTitle">Add New Product to Inventory</h3>
+    <span class="modal-close" onclick="closeAllModals()">✕</span>
+  </div>
+  <div class="modal-body">
+    <form id="productForm">
+      <div class="form-row">
+        <div class="form-group" style="flex:2;">
+          <label class="form-label">Product Name *</label>
+          <input class="form-input" id="pName" required placeholder="e.g. Korean Stackable Rings Set">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select class="form-select" id="pCategory" required>
+            <option value="rings">Rings</option>
+            <option value="bracelets">Bracelets</option>
+            <option value="earrings">Earrings</option>
+            <option value="necklaces">Necklaces</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Collection</label>
+          <select class="form-select" id="pCollection">
+            <option value="korean">Korean Collection</option>
+            <option value="temple">Temple Collection</option>
+            <option value="oxidized">Oxidized Collection</option>
+            <option value="minimalist">Minimalist Daily</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Selling Price (Rs.) *</label>
+          <input class="form-input" type="number" step="1" id="pPrice" required placeholder="1400">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cost Price (Rs.)</label>
+          <input class="form-input" type="number" step="1" id="pCostPrice" placeholder="650">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Original / Strikethrough Price</label>
+          <input class="form-input" type="number" step="1" id="pOriginalPrice" placeholder="1800">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Material</label>
+          <input class="form-input" id="pMaterial" placeholder="e.g. Stainless Steel, Gold Plated">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Colour</label>
+          <input class="form-input" id="pColor" placeholder="e.g. Gold, Silver">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target Audience</label>
+          <select class="form-select" id="pAudience">
+            <option value="unisex">Unisex</option>
+            <option value="women">Women</option>
+            <option value="men">Men</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Inventory Block -->
+      <div style="background:rgba(212,175,55,0.06); border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:14px; margin-bottom:18px;">
+        <div style="font-weight:600; color:var(--gold); margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+          <i data-lucide="package-plus" style="width:16px; height:16px;"></i> Stock & Inventory Details
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Initial Opening Stock *</label>
+            <input class="form-input" type="number" id="pStock" value="10" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reorder Alert Threshold</label>
+            <input class="form-input" type="number" id="pReorderLevel" value="5" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Storage Location</label>
+            <input class="form-input" id="pLocation" value="Main Warehouse">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Stock Entry Reason</label>
+            <input class="form-input" id="pStockReason" value="Initial Inventory Receipt">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Supplier</label>
+            <select class="form-select" id="pSupplier">
+              <option value="">None / Direct Sourcing</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Product SKU</label>
+            <input class="form-input" id="pSku" placeholder="Auto-generated if empty">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Product Description</label>
+        <textarea class="form-textarea" id="pDescription" style="height:60px;" placeholder="Exquisite handcrafted jewellery piece..."></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="flex:2;">
+          <label class="form-label">Features / Highlights (comma-separated)</label>
+          <input class="form-input" id="pFeatures" placeholder="Tarnish-Free, Waterproof, Hypoallergenic">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Badge Tag</label>
+          <input class="form-input" id="pBadge" placeholder="e.g. New Arrival">
+        </div>
+      </div>
+
+      <!-- Image Upload Section -->
+      <div class="form-group">
+        <label class="form-label">Product Images (WebP compressed)</label>
+        <div class="image-upload-zone" id="imageUploadZone" style="cursor:pointer; padding:18px; text-align:center; border:2px dashed var(--grey-mid); border-radius:8px; background:var(--grey);">
+          <i data-lucide="cloud-upload" style="width: 26px; height: 26px; color: var(--gold); margin-bottom: 6px;"></i>
+          <div style="font-size:0.85rem;">Click or drag images to upload</div>
+          <input type="file" id="imageFileInput" multiple accept="image/*" style="display:none;">
+        </div>
+        <div class="image-preview-grid" id="imagePreviewGrid" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;"></div>
+      </div>
+
+      <div class="modal-footer" style="padding:14px 0 0; border-top:1px solid var(--grey-mid); margin-top:18px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button type="submit" class="btn btn-gold">Save Product to Inventory</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/admin-guard.js"></script>
+  <script src="/admin/js/admin-app.js"></script>
+  <script src="/admin/js/inventory-admin.js"></script>
+  <script>lucide.createIcons();</script>
 </body>
 </html>
