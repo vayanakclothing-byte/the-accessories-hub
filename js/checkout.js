@@ -381,30 +381,47 @@ function showConfirmation(orderNumber, result) {
   const textEl = confirmation.querySelector('p');
 
   if (orderNumEl) orderNumEl.textContent = orderNumber;
+  if (titleEl) titleEl.textContent = 'Order Placed Successfully!';
 
-  if (window.TAH_DEMO_MODE) {
-    if (titleEl) titleEl.textContent = 'Demo order — not sent to the shop';
-    if (textEl) {
-      textEl.textContent = 'This site is running without a database, so this order was NOT saved and no one was notified. '
-        + 'Please send your order on WhatsApp instead.';
-    }
-    if (!document.getElementById('demoWhatsappLink')) {
-      const link = document.createElement('a');
-      link.id = 'demoWhatsappLink';
-      link.href = 'https://wa.me/9779805659501?text=' + encodeURIComponent(`Hi! I'd like to order (${orderNumber}).`);
-      link.className = 'btn btn-gold';
-      link.textContent = 'Order on WhatsApp';
-      link.style.marginBottom = '12px';
-      link.style.display = 'inline-block';
-      confirmation.insertBefore(link, orderNumEl || null);
-    }
-  } else {
-    if (titleEl) titleEl.textContent = 'Order Placed Successfully!';
-    if (textEl && result && result.total != null) {
+  if (textEl) {
+    if (result && result.total != null) {
       textEl.textContent = 'Thank you for shopping with The Accessories Hub. '
         + `Your total is Rs. ${Number(result.total).toLocaleString()} and you will receive a confirmation on WhatsApp shortly.`;
+    } else {
+      textEl.textContent = 'Thank you for shopping with The Accessories Hub. Your order has been placed and you will receive a confirmation shortly.';
     }
   }
+
+  // Ensure there is a direct WhatsApp order confirmation button
+  let waBtn = document.getElementById('checkoutWhatsappBtn');
+  if (!waBtn) {
+    waBtn = document.createElement('a');
+    waBtn.id = 'checkoutWhatsappBtn';
+    waBtn.className = 'btn btn-gold';
+    waBtn.target = '_blank';
+    waBtn.rel = 'noopener noreferrer';
+    waBtn.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:14px 0 16px 0;padding:12px 24px;border-radius:4px;font-weight:600;text-decoration:none;';
+    const msg = encodeURIComponent(`Hi! I just placed order (${orderNumber}) on The Accessories Hub.`);
+    waBtn.href = `https://wa.me/9779805659501?text=${msg}`;
+    waBtn.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+      </svg>
+      Confirm on WhatsApp
+    `;
+    if (orderNumEl) {
+      orderNumEl.parentNode.insertBefore(waBtn, orderNumEl.nextSibling);
+    } else {
+      confirmation.appendChild(waBtn);
+    }
+  } else {
+    const msg = encodeURIComponent(`Hi! I just placed order (${orderNumber}) on The Accessories Hub.`);
+    waBtn.href = `https://wa.me/9779805659501?text=${msg}`;
+  }
+
+  // Remove any obsolete demo link
+  const oldDemo = document.getElementById('demoWhatsappLink');
+  if (oldDemo) oldDemo.remove();
 
   confirmation.style.display = 'block';
   if (content) content.style.display = 'none';

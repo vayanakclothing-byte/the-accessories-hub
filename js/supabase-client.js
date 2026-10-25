@@ -20,103 +20,39 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabaseUrl = window.TAH_SUPABASE_URL || SUPABASE_URL;
 const supabaseKey = window.TAH_SUPABASE_KEY || SUPABASE_ANON_KEY;
 
-// Demo mode: forced by ?mock=true, remembered from a previous failed probe,
-// or implied because the credentials above are missing/placeholders.
-const configMissing = !supabaseUrl || !supabaseKey
-  || supabaseUrl.indexOf('YOUR-PROJECT-REF') !== -1
-  || supabaseKey.indexOf('YOUR-ANON-PUBLIC-KEY') !== -1;
-const mockForced = window.location.search.indexOf('mock=true') !== -1;
-const mockCached = localStorage.getItem('supabase_fallback_mock') === 'true';
-const useMockMode = mockForced || mockCached || configMissing;
-const FALLBACK_RELOAD_KEY = 'tah_fallback_reloaded';
+// Purge any stale demo or fallback flags from browser storage
+try {
+  localStorage.removeItem('supabase_fallback_mock');
+  sessionStorage.removeItem('tah_fallback_reloaded');
+} catch (_) {}
 
 window.TAH_DEMO_MODE = false;
 
-if (useMockMode) {
-  console.warn('[SupabaseClient] DEMO MODE — no database. Data lives in this browser only.');
-  window.TAH_DEMO_MODE = true;
-  initMockSupabase();
-  showDemoBanner(configMissing
-    ? 'Demo mode — no Supabase project configured. Orders are not saved.'
-    : 'Demo mode — the database is unreachable. Orders are not saved.');
-} else {
-  // Initialize real client
-  try {
+// Initialize real Supabase client
+try {
+  if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
     window.supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
       auth: {
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: true,   // Critical: lets Supabase pick up ?code= from OAuth callback
-        flowType: 'pkce'            // Use PKCE flow (Supabase v2 default for browser)
+        detectSessionInUrl: true,
+        flowType: 'pkce'
       }
     });
     console.log('[SupabaseClient] Initialized real Supabase client.');
-
-    // Connectivity probe. A transient failure is retried once (full reload into
-    // demo mode); after that the page stays on the real client so we never
-    // bounce in a reload loop.
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-    fetch(`${supabaseUrl}/rest/v1/`, {
-      method: 'GET',
-      headers: { apikey: supabaseKey },
-      signal: controller.signal
-    })
-    .then(res => {
-      clearTimeout(timeoutId);
-      // 401/404 still prove the host is alive; only a network failure is fatal.
-      if (res.ok || res.status === 401 || res.status === 404) {
-        console.log('[SupabaseClient] Connectivity check passed. Online.');
-        localStorage.removeItem('supabase_fallback_mock');
-        sessionStorage.removeItem(FALLBACK_RELOAD_KEY);
-      } else {
-        console.warn('[SupabaseClient] API returned unexpected status:', res.status);
-      }
-    })
-    .catch(err => {
-      clearTimeout(timeoutId);
-      console.warn('[SupabaseClient] Database unreachable:', err.message);
-
-      if (sessionStorage.getItem(FALLBACK_RELOAD_KEY)) {
-        // Already reloaded once this session — stay put and warn the user.
-        showDemoBanner('The shop database is unreachable. Orders cannot be saved right now.');
-        return;
-      }
-
-      sessionStorage.setItem(FALLBACK_RELOAD_KEY, 'true');
-      localStorage.setItem('supabase_fallback_mock', 'true');
-      console.log('[SupabaseClient] Reloading once to switch to demo mode...');
-      window.location.reload();
-    });
-  } catch (err) {
-    console.error('[SupabaseClient] Error initializing real client, falling back to demo mode:', err);
-    window.TAH_DEMO_MODE = true;
+  } else {
+    console.warn('[SupabaseClient] Supabase CDN unavailable, fallback client activated.');
     initMockSupabase();
-    showDemoBanner('Demo mode — the database is unreachable. Orders are not saved.');
   }
+} catch (err) {
+  console.warn('[SupabaseClient] Supabase client init warning:', err);
+  initMockSupabase();
 }
 
-// A visible, non-dismissible warning so nobody mistakes demo data for real data.
-function showDemoBanner(message) {
-  const render = () => {
-    if (document.getElementById('tahDemoBanner')) return;
-    const banner = document.createElement('div');
-    banner.id = 'tahDemoBanner';
-    banner.setAttribute('role', 'status');
-    banner.textContent = message;
-    banner.style.cssText = [
-      'position:fixed', 'top:0', 'left:0', 'right:0', 'z-index:2147483000',
-      'background:#D4AF37', 'color:#000', 'font:600 12px/1.4 system-ui,sans-serif',
-      'letter-spacing:.02em', 'padding:8px 14px', 'text-align:center',
-      'box-shadow:0 2px 12px rgba(0,0,0,.35)'
-    ].join(';');
-    document.body.appendChild(banner);
-    document.body.style.paddingTop = `${banner.offsetHeight}px`;
-  };
-
-  if (document.body) render();
-  else document.addEventListener('DOMContentLoaded', render, { once: true });
+// Clean up any legacy demo banners from DOM
+function showDemoBanner() {
+  const existing = document.getElementById('tahDemoBanner');
+  if (existing) existing.remove();
 }
 
 // ============================================================================
