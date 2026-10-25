@@ -42,7 +42,8 @@ async function loadData(force = false) {
       {data: orderItems, error: e4},
       {data: invoices, error: e5},
       {data: stockHistory, error: e6},
-      {data: settings, error: e7}
+      {data: settings, error: e7},
+      {data: categories, error: e8}
     ] = await Promise.all([
       supabase.from('products').select('*').order('id', {ascending:true}),
       supabase.from('customers').select('*').order('id', {ascending:true}),
@@ -50,13 +51,14 @@ async function loadData(force = false) {
       supabase.from('order_items').select('*'),
       supabase.from('invoices').select('*').order('created_at', {ascending:false}),
       supabase.from('stock_history').select('*').order('id', {ascending:false}),
-      supabase.from('settings').select('*').single()
+      supabase.from('settings').select('*').single(),
+      supabase.from('categories').select('*').order('sort_order', {ascending:true})
     ]);
 
     console.log(`[Admin] Data loaded in ${Date.now() - fetchStart}ms`);
 
     // Log any errors but don't crash
-    [e1,e2,e3,e4,e5,e6,e7].forEach((err, i) => {
+    [e1,e2,e3,e4,e5,e6,e7,e8].forEach((err, i) => {
       if (err) console.warn(`[LoadData] Query ${i} error:`, err.message);
     });
 
@@ -70,6 +72,12 @@ async function loadData(force = false) {
 
     DB._cache = {
       products: products || [],
+      categories: (categories && categories.length > 0) ? categories : [
+        { id: 'c1', name: 'Rings', slug: 'rings', description: 'Handcrafted luxury rings.', is_active: true, sort_order: 1 },
+        { id: 'c2', name: 'Bracelets', slug: 'bracelets', description: 'Refined bangles & cuffs.', is_active: true, sort_order: 2 },
+        { id: 'c3', name: 'Earrings', slug: 'earrings', description: 'Dainty & statement earrings.', is_active: true, sort_order: 3 },
+        { id: 'c4', name: 'Necklaces', slug: 'necklaces', description: 'Pendants & temple chokers.', is_active: true, sort_order: 4 }
+      ],
       customers: customers || [],
       orders: orders || [],
       invoices: invoices || [],
@@ -147,6 +155,9 @@ const DB = {
       inStock: p.in_stock,
       reorderLevel: p.reorder_level
     }));
+  },
+  categories() {
+    return this._cache.categories || [];
   },
   customers() { return (this._cache.customers || []).map(c => ({...c, totalOrders: c.total_orders, totalSpent: c.total_spent, joinDate: c.join_date})); },
   orders() {
@@ -308,7 +319,7 @@ function initSidebar() {
 async function handleLogout() {
   const { error } = await supabase.auth.signOut();
   if (error) showToast('Logout failed', 'error');
-  else window.location.href = '/login.html';
+  else window.location.href = '/admin/login.html';
 }
 
 // ===== MODAL HELPERS =====
@@ -387,8 +398,17 @@ async function initAdminAuth() {
       if (breadcrumbEl) breadcrumbEl.textContent = `Welcome back, ${fullName.split(' ')[0]}`;
 
     } else {
-      sessionStorage.setItem('tah_return_url', window.location.href);
-      window.location.href = '/login.html';
+      let returnUrl = window.location.href;
+      try {
+        const u = new URL(returnUrl);
+        if (u.pathname === '/admin' || u.pathname === '/admin/') {
+          returnUrl = u.origin + '/admin/index.html' + u.search + u.hash;
+        } else if (!u.pathname.endsWith('.html') && u.pathname.startsWith('/admin/')) {
+          returnUrl = u.origin + u.pathname + '.html' + u.search + u.hash;
+        }
+      } catch (_) {}
+      sessionStorage.setItem('tah_return_url', returnUrl);
+      window.location.href = '/admin/login.html';
     }
   } catch (e) {
     console.warn('Admin auth init failed', e);

@@ -83,36 +83,49 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── Shared redirect logic after successful auth ──
-// Now checks the profiles table for the user's role instead of hardcoded email
 async function handleSuccessfulAuth(session) {
   if (!session) return;
 
-  const user = session.user;
-  const storedReturn = sessionStorage.getItem('tah_return_url');
-  let returnUrl = storedReturn || '/';
+  let storedReturn = sessionStorage.getItem('tah_return_url');
+  sessionStorage.removeItem('tah_return_url');
 
-  try {
-    // Query the profiles table for the user's role
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (!error && profile && profile.role === 'admin') {
-      // Admin user — go to admin or the stored return URL (if it was an admin page)
-      returnUrl = (storedReturn && storedReturn.includes('/admin')) ? storedReturn : '/admin/index.html';
-    } else {
-      // Regular user — go to storefront
-      returnUrl = (storedReturn && !storedReturn.includes('/admin')) ? storedReturn : '/';
-    }
-  } catch (e) {
-    console.warn('[Auth] Could not verify role, defaulting to storefront:', e);
-    returnUrl = storedReturn || '/';
+  if (storedReturn) {
+    try {
+      const u = new URL(storedReturn, window.location.origin);
+      if (u.pathname === '/admin' || u.pathname === '/admin/') {
+        storedReturn = u.origin + '/admin/index.html' + u.search + u.hash;
+      } else if (!u.pathname.endsWith('.html') && u.pathname.startsWith('/admin/')) {
+        storedReturn = u.origin + u.pathname + '.html' + u.search + u.hash;
+      }
+    } catch (_) {}
   }
 
-  sessionStorage.removeItem('tah_return_url');
-  window.location.href = returnUrl;
+  // Only redirect to admin if the user was explicitly navigating to an admin page
+  if (storedReturn && storedReturn.includes('/admin') && !storedReturn.includes('/login')) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile && profile.role === 'admin') {
+        window.location.href = storedReturn;
+        return;
+      }
+    } catch (e) {
+      console.warn('[Auth] Role check error:', e);
+    }
+  }
+
+  // If returning to a storefront page (e.g. checkout), resume there
+  if (storedReturn && !storedReturn.includes('/admin') && !storedReturn.includes('/login')) {
+    window.location.href = storedReturn;
+    return;
+  }
+
+  // Otherwise, default to the storefront homepage
+  window.location.href = '/';
 }
 
 // ── Google OAuth Sign-In ──
@@ -126,8 +139,8 @@ async function handleGoogleSignIn() {
         msg.style.color = 'var(--gold)';
     }
 
-    // Use normalized redirect URL from config
-    const redirectTo = CONFIG.getRedirectURL('login');
+    // Use normalized redirect URL from config (targeting valid .html endpoint)
+    const redirectTo = CONFIG.getRedirectURL('login.html');
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

@@ -1,12 +1,32 @@
 // js/config.js
 const CONFIG = {
-  // Dynamically get the redirect URL based on environment
-  getRedirectURL(path = '') {
+  // Normalize clean URLs to physical .html files for static / localhost compatibility
+  normalizePath(urlOrPath = '') {
+    if (!urlOrPath) return '/';
+    try {
+      const u = new URL(urlOrPath, window.location.origin);
+      let p = u.pathname;
+      if (p === '/admin' || p === '/admin/') p = '/admin/index.html';
+      else if (p === '/admin/login' || p === '/admin/login/') p = '/admin/login.html';
+      else if (p === '/login' || p === '/login/') p = '/login.html';
+      else if (p === '/checkout' || p === '/checkout/') p = '/checkout.html';
+      else if (p === '/products' || p === '/products/') p = '/products.html';
+      else if (p === '/product-detail' || p === '/product-detail/') p = '/product-detail.html';
+      else if (p === '/request-access' || p === '/request-access/') p = '/request-access.html';
+      return u.origin + p + u.search + u.hash;
+    } catch (_) {
+      return urlOrPath;
+    }
+  },
+
+  // Dynamically get the redirect URL based on environment (always targeting valid .html endpoints)
+  getRedirectURL(path = 'login.html') {
       const origin = window.location.origin;
-      // Normalizes the redirect path to avoid double slashes and ensure correctness
-      const cleanPath = path.startsWith('/') ? path : `/${path}`;
-      const url = `${origin}${cleanPath}`;
-      return url;
+      let cleanPath = path.startsWith('/') ? path : `/${path}`;
+      if (cleanPath === '/login' || cleanPath === 'login') cleanPath = '/login.html';
+      else if (cleanPath === '/admin/login' || cleanPath === 'admin/login') cleanPath = '/admin/login.html';
+      else if (cleanPath === '/admin' || cleanPath === 'admin' || cleanPath === '/admin/') cleanPath = '/admin/index.html';
+      return `${origin}${cleanPath}`;
   },
   
   // Is this running on localhost?

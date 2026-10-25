@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal Login — The Accessories Hub</title>
+  <meta name="description" content="Restricted administrator portal access for The Accessories Hub.">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@1.61.0"></script>
+  <style>
+    :root {
+      --bg: #FAF8F5;
+      --card-bg: #FFFFFF;
+      --gold: #C5A028;
+      --gold-light: #E0C058;
+      --gold-dark: #9A7B1C;
+      --charcoal: #1A1A1A;
+      --charcoal-dim: #4A4A4A;
+      --muted: #7A756D;
+      --border: rgba(197, 160, 40, 0.28);
+      --red: #C0392B;
+      --green: #2E7D32;
+      --font-serif: 'Playfair Display', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--charcoal);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      position: relative;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Luxury Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: 
+        radial-gradient(circle at 15% 20%, rgba(197, 160, 40, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(197, 160, 40, 0.09) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(250, 248, 245, 0.8) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .admin-card {
+      position: relative;
+      z-index: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 44px 40px;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 
+        0 15px 45px rgba(0, 0, 0, 0.06),
+        0 4px 20px rgba(197, 160, 40, 0.08);
+      animation: cardFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes cardFadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      background: rgba(197, 160, 40, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: 20px;
+    }
+
+    .icon-wrapper {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, rgba(197, 160, 40, 0.15), rgba(224, 192, 88, 0.08));
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-dark);
+      box-shadow: 0 4px 18px rgba(197, 160, 40, 0.15);
+    }
+
+    .card-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .card-header h1 {
+      font-family: var(--font-serif);
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--charcoal);
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .card-header p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Google Button */
+    .btn-google {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 13px 20px;
+      background: #FFFFFF;
+      border: 1.5px solid #E0D9C8;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      color: var(--charcoal);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .btn-google:hover {
+      background: #FAF8F5;
+      border-color: var(--gold);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(197, 160, 40, 0.15);
+    }
+
+    .btn-google img {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 24px 0;
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #E8E2D6;
+    }
+
+    .divider span {
+      padding: 0 14px;
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--charcoal);
+      margin-bottom: 7px;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 13px 44px 13px 14px;
+      background: #FAF8F5;
+      border: 1.5px solid #E8E2D6;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: var(--charcoal);
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    .input-wrapper input:focus {
+      outline: none;
+      background: #FFFFFF;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(197, 160, 40, 0.18);
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+
+    .password-toggle:hover {
+      color: var(--gold-dark);
+    }
+
+    /* Submit Button */
+    .btn-submit {
+      width: 100%;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, #D4AF37, var(--gold));
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 16px rgba(197, 160, 40, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: linear-gradient(135deg, var(--gold-light), #D4AF37);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(197, 160, 40, 0.45);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    /* Message Banner */
+    .auth-alert {
+      margin-top: 20px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      display: none;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .auth-alert.error {
+      display: block;
+      background: rgba(192, 57, 43, 0.08);
+      border: 1px solid rgba(192, 57, 43, 0.3);
+      color: var(--red);
+    }
+
+    .auth-alert.success {
+      display: block;
+      background: rgba(46, 125, 50, 0.08);
+      border: 1px solid rgba(46, 125, 50, 0.3);
+      color: var(--green);
+    }
+
+    .auth-alert.info {
+      display: block;
+      background: rgba(197, 160, 40, 0.1);
+      border: 1px solid var(--border);
+      color: var(--gold-dark);
+    }
+
+    /* Footer Navigation */
+    .card-footer {
+      margin-top: 28px;
+      text-align: center;
+      font-size: 0.85rem;
+      border-top: 1px solid #F0EBE0;
+      padding-top: 20px;
+    }
+
+    .card-footer a {
+      color: var(--gold-dark);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+
+    .card-footer a:hover {
+      color: var(--charcoal);
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-top-color: #FFFFFF;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-card">
+    <div style="text-align: center;">
+      <div class="card-badge">
+        <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i>
+        Staff Authentication
+      </div>
+      <div class="icon-wrapper">
+        <i data-lucide="gem" style="width: 32px; height: 32px;"></i>
+      </div>
+      <div class="card-header">
+        <h1>Admin Portal</h1>
+        <p>Sign in with your authorized administrator credentials to manage the store.</p>
+      </div>
+    </div>
+
+    <!-- Google Sign In -->
+    <button type="button" class="btn-google" id="btnGoogle" onclick="handleAdminGoogleSignIn()">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+      Continue with Google
+    </button>
+
+    <div class="divider">
+      <span>or sign in with admin email</span>
+    </div>
+
+    <!-- Email & Password Form -->
+    <form id="adminLoginForm">
+      <div class="form-group">
+        <label for="adminEmail">Email Address</label>
+        <div class="input-wrapper">
+          <input type="email" id="adminEmail" required placeholder="admin@theaccessorieshub.com" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="adminPassword">Password</label>
+        <div class="input-wrapper">
+          <input type="password" id="adminPassword" required placeholder="••••••••••••" autocomplete="current-password">
+          <button type="button" class="password-toggle" id="togglePasswordBtn" aria-label="Toggle password visibility">
+            <i data-lucide="eye" id="togglePasswordIcon" style="width: 18px; height: 18px;"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btnSubmit">
+        <span id="btnSubmitText">Sign In to Dashboard</span>
+      </button>
+    </form>
+
+    <div id="authAlert" class="auth-alert"></div>
+
+    <div class="card-footer">
+      <a href="/">
+        <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+        Return to Storefront
+      </a>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/supabase-client.js"></script>
+
+  <script>
+    lucide.createIcons();
+
+    // Password visibility toggle
+    const toggleBtn = document.getElementById('togglePasswordBtn');
+    const pwdInput = document.getElementById('adminPassword');
+    const toggleIcon = document.getElementById('togglePasswordIcon');
+
+    toggleBtn.addEventListener('click', () => {
+      const isPassword = pwdInput.type === 'password';
+      pwdInput.type = isPassword ? 'text' : 'password';
+      toggleIcon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+      lucide.createIcons();
+    });
+
+    const alertBox = document.getElementById('authAlert');
+    function showAlert(text, type = 'error') {
+      alertBox.className = 'auth-alert ' + type;
+      alertBox.textContent = text;
+      alertBox.style.display = 'block';
+    }
+
+    function hideAlert() {
+      alertBox.style.display = 'none';
+    }
+
+    // Role verification helper
+    async function verifyAdminAndRedirect(userId, userEmail) {
+      showAlert('Verifying admin privileges...', 'info');
+
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', userId)
+          .single();
+
+        if (error || !profile) {
+          showAlert('Access Denied: No profile found for this account. Request admin access below.', 'error');
+          showRequestAccessLink(userId, userEmail);
+          return;
+        }
+
+        if (profile.role !== 'admin') {
+          showAlert('Access Denied: Account (' + userEmail + ') does not have administrator privileges.', 'error');
+          showRequestAccessLink(userId, userEmail);
+          return;
+        }
+
+        // Success!
+        showAlert('Admin verified! Entering Dashboard...', 'success');
+        let returnUrl = sessionStorage.getItem('tah_return_url');
+        sessionStorage.removeItem('tah_return_url');
+
+        // Normalize and sanitize returnUrl to prevent 404 or infinite loop
+        if (!returnUrl || returnUrl.includes('/admin/login') || returnUrl.endsWith('/login.html') || returnUrl.endsWith('/login')) {
+          returnUrl = '/admin/index.html';
+        } else {
+          try {
+            const u = new URL(returnUrl, window.location.origin);
+            if (u.pathname === '/admin' || u.pathname === '/admin/') {
+              returnUrl = '/admin/index.html' + u.search + u.hash;
+            } else if (!u.pathname.endsWith('.html') && u.pathname.startsWith('/admin/')) {
+              returnUrl = u.pathname + '.html' + u.search + u.hash;
+            }
+          } catch (_) {
+            returnUrl = '/admin/index.html';
+          }
+        }
+
+        setTimeout(() => {
+          window.location.href = returnUrl;
+        }, 500);
+
+      } catch (err) {
+        console.error('[Admin Login] Verification error:', err);
+        showAlert('Verification failed: ' + (err.message || 'Please try again.'), 'error');
+      }
+    }
+
+    function showRequestAccessLink(userId, userEmail) {
+      const params = new URLSearchParams({ uid: userId || '', email: userEmail || '' });
+      setTimeout(() => {
+        alertBox.innerHTML += `<div style="margin-top:8px;"><a href="/request-access.html?${params.toString()}" style="color:var(--gold-dark); text-decoration:underline; font-weight:600;">Request Admin Access Here &rarr;</a></div>`;
+      }, 300);
+    }
+
+    // Check if user is already logged in as admin
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Check URL for error message
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('error')) {
+        showAlert(urlParams.get('error'), 'error');
+      }
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && session.user) {
+          await verifyAdminAndRedirect(session.user.id, session.user.email);
+        }
+      } catch (e) {
+        console.warn('Initial session check error:', e);
+      }
+    });
+
+    // Handle OAuth Callback / state change
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session && session.user) {
+        await verifyAdminAndRedirect(session.user.id, session.user.email);
+      }
+    });
+
+    // Google Sign In for Admin
+    async function handleAdminGoogleSignIn() {
+      hideAlert();
+      showAlert('Connecting to Google...', 'info');
+
+      try {
+        const redirectUrl = window.location.origin + '/admin/login.html';
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: redirectUrl,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent'
+            }
+          }
+        });
+
+        if (error) throw error;
+      } catch (err) {
+        console.error('[Admin Google Auth Error]', err);
+        showAlert(err.message || 'Failed to sign in with Google.', 'error');
+      }
+    }
+
+    // Email/Password Sign In for Admin
+    const loginForm = document.getElementById('adminLoginForm');
+    const submitBtn = document.getElementById('btnSubmit');
+    const submitBtnText = document.getElementById('btnSubmitText');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAlert();
+
+      const email = document.getElementById('adminEmail').value.trim();
+      const password = document.getElementById('adminPassword').value;
+
+      if (!email || !password) {
+        showAlert('Please fill in both email and password.', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtnText.innerHTML = '<span class="spinner"></span> Authenticating...';
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) throw error;
+
+        if (data.session && data.session.user) {
+          await verifyAdminAndRedirect(data.session.user.id, data.session.user.email);
+        } else {
+          throw new Error('No session returned. Please verify credentials.');
+        }
+
+      } catch (err) {
+        console.error('[Admin Email Login Error]', err);
+        showAlert(err.message || 'Invalid administrator login credentials.', 'error');
+        submitBtn.disabled = false;
+        submitBtnText.textContent = 'Sign In to Dashboard';
+      }
+    });
+  </script>
+</body>
+</html>

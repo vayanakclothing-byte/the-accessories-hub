@@ -105,9 +105,18 @@
   }
 
   function redirectToLogin() {
-    sessionStorage.setItem('tah_return_url', window.location.href);
+    let returnUrl = window.location.href;
+    try {
+      const u = new URL(returnUrl);
+      if (u.pathname === '/admin' || u.pathname === '/admin/') {
+        returnUrl = u.origin + '/admin/index.html' + u.search + u.hash;
+      } else if (!u.pathname.endsWith('.html') && u.pathname.startsWith('/admin/')) {
+        returnUrl = u.origin + u.pathname + '.html' + u.search + u.hash;
+      }
+    } catch (_) {}
+    sessionStorage.setItem('tah_return_url', returnUrl);
     document.documentElement.style.visibility = 'visible';
-    window.location.href = '/login.html';
+    window.location.href = '/admin/login.html';
   }
 
   function redirectToRequestAccess(userId, userEmail) {

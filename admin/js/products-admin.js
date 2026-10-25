@@ -17,11 +17,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function renderProductsTable(filter = '') {
   let products = DB.products();
+  const catFilter = document.getElementById('categoryFilter')?.value?.toLowerCase();
+  if (catFilter) {
+    products = products.filter(p => String(p.category || '').toLowerCase() === catFilter);
+  }
   if (filter) {
     const needle = filter.toLowerCase();
     products = products.filter(p =>
       String(p.name || '').toLowerCase().includes(needle) ||
-      String(p.collection || '').toLowerCase().includes(needle)
+      String(p.collection || '').toLowerCase().includes(needle) ||
+      String(p.category || '').toLowerCase().includes(needle)
     );
   }
 
@@ -59,8 +64,12 @@ function renderProductsTable(filter = '') {
       <td>${p.badge ? `<span class="badge badge-green">${escapeHtml(p.badge)}</span>` : '<span class="badge badge-grey">None</span>'}</td>
       <td>
         <div style="display:flex;gap:4px;">
-          <button class="btn btn-sm btn-ghost" onclick="editProduct(${Number(p.id)})" title="Edit">✏️</button>
-          <button class="btn btn-sm btn-danger" onclick="confirmDeleteProduct(${Number(p.id)})" title="Delete">🗑️</button>
+          <button class="btn btn-sm btn-ghost" onclick="editProduct(${Number(p.id)})" title="Edit" aria-label="Edit product">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit-3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </button>
+          <button class="btn btn-sm btn-danger" onclick="confirmDeleteProduct(${Number(p.id)})" title="Delete" aria-label="Delete product">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          </button>
         </div>
       </td>
     </tr>
@@ -121,7 +130,7 @@ async function saveProduct(e) {
     price,
     original_price: originalPriceRaw ? Number(originalPriceRaw) : null,
     collection: document.getElementById('pCollection').value.trim(),
-    category: document.getElementById('pCategory').value.trim(),
+    category: document.getElementById('pCategory').value.trim().toLowerCase(),
     material: document.getElementById('pMaterial').value.trim(),
     description: document.getElementById('pDescription').value.trim(),
     features: document.getElementById('pFeatures').value.split(',').map(f => f.trim()).filter(Boolean),
@@ -133,6 +142,11 @@ async function saveProduct(e) {
     images,
     image: images[0]
   };
+
+  const matchedCat = DB.categories().find(c => (c.slug || '').toLowerCase() === data.category);
+  if (matchedCat && matchedCat.id) {
+    data.category_id = matchedCat.id;
+  }
 
   if (!data.sku) data.sku = 'TAH-' + Math.floor(100000 + Math.random() * 900000);
 
@@ -254,3 +268,9 @@ function searchProducts() {
   const q = document.getElementById('productSearch')?.value || '';
   renderProductsTable(q);
 }
+
+function filterProducts() {
+  const q = document.getElementById('productSearch')?.value || '';
+  renderProductsTable(q);
+}
+window.filterProducts = filterProducts;

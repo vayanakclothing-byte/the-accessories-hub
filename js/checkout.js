@@ -128,10 +128,10 @@ async function checkAuthStatus() {
       const nameField = document.getElementById('fullName');
       if (nameField && !nameField.value) nameField.value = name;
     } else {
-      if (authText) authText.innerHTML = '👤 Guest Checkout — <a href="login.html" style="color:var(--gold);">Sign in</a> for faster checkout';
+      if (authText) authText.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Guest Checkout — <a href="login.html" style="color:var(--gold);">Sign in</a> for faster checkout</span>';
     }
   } catch (e) {
-    if (authText) authText.innerHTML = '👤 Guest Checkout';
+    if (authText) authText.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Guest Checkout</span>';
   }
 }
 
@@ -194,6 +194,7 @@ async function placeOrder() {
       qty: Math.max(1, parseInt(item.qty, 10) || 1)
     }));
 
+    let result;
     const { data, error } = await supabase.rpc('place_order', {
       p_customer: {
         name: name || 'Guest',
@@ -207,9 +208,19 @@ async function placeOrder() {
       p_gift_note: giftNote ? `🎁 Gift: ${giftNote}` : null
     });
 
-    if (error) throw new Error(error.message || 'Could not place the order.');
+    if (error) {
+      // If RPC is missing on the remote DB, seamlessly fall back to direct table insertion
+      const isMissingRpc = /place_order/i.test(error.message || '') || error.code === 'PGRST202';
+      if (isMissingRpc) {
+        console.warn('[Checkout] place_order RPC not found in schema cache. Falling back to direct database insertion.');
+        result = await placeOrderDirectFallback({ name, whatsapp, fullAddress, deliveryMethod, paymentMethod, giftNote });
+      } else {
+        throw new Error(error.message || 'Could not place the order.');
+      }
+    } else {
+      result = data || {};
+    }
 
-    const result = data || {};
     const orderNumber = result.order_number || (result.order_id ? 'TAH-' + String(result.order_id).padStart(5, '0') : 'TAH-?????');
 
     Cart.items = [];
@@ -223,6 +234,124 @@ async function placeOrder() {
     alert(friendlyOrderError(err));
     setBusy(false);
   }
+}
+
+// Fallback when place_order RPC is not installed in Supabase
+async function placeOrderDirectFallback({ name, whatsapp, fullAddress, deliveryMethod, paymentMethod, giftNote }) {
+  const subtotal = Cart.getTotal();
+  const shipping = deliveryFeeFor(subtotal, deliveryMethod);
+  const total = subtotal + shipping;
+
+  // 1. Customer record lookup or insert
+  let customerId = null;
+  try {
+    const { data: existingCust } = await supabase
+      .from('customers')
+      .select('id, total_orders, total_spent, notes')
+      .eq('phone', whatsapp)
+      .maybeSingle();
+
+    if (existingCust) {
+      customerId = existingCust.id;
+      const updatedNotes = giftNote
+        ? (existingCust.notes ? existingCust.notes + '\n' + giftNote : giftNote)
+        : existingCust.notes;
+      await supabase.from('customers').update({
+        name: name || 'Guest',
+        address: fullAddress,
+        total_orders: (existingCust.total_orders || 0) + 1,
+        total_spent: (Number(existingCust.total_spent) || 0) + total,
+        notes: updatedNotes
+      }).eq('id', customerId);
+    } else {
+      const { data: newCust, error: custErr } = await supabase
+        .from('customers')
+        .insert([{
+          name: name || 'Guest',
+          phone: whatsapp,
+          address: fullAddress,
+          total_orders: 1,
+          total_spent: total,
+          notes: giftNote || '',
+          join_date: new Date().toISOString().split('T')[0]
+        }])
+        .select('id')
+        .single();
+      if (!custErr && newCust) {
+        customerId = newCust.id;
+      }
+    }
+  } catch (custEx) {
+    console.warn('[Checkout Fallback] Customer record error:', custEx);
+  }
+
+  // 2. Insert into orders table
+  const orderDate = new Date().toLocaleDateString('en-GB');
+  const { data: orderData, error: orderErr } = await supabase
+    .from('orders')
+    .insert([{
+      customer_id: customerId,
+      customer_name: name || 'Guest',
+      subtotal,
+      shipping,
+      total,
+      status: 'pending',
+      payment: paymentMethod,
+      shipping_address: fullAddress,
+      date: orderDate
+    }])
+    .select('id')
+    .single();
+
+  if (orderErr) {
+    throw new Error(orderErr.message || 'Failed to record your order.');
+  }
+
+  const orderId = orderData.id;
+
+  // 3. Insert into order_items
+  try {
+    const orderItems = Cart.items.map(item => ({
+      order_id: orderId,
+      product_id: item.id,
+      name: item.name,
+      price: Number(item.price) || 0,
+      qty: Math.max(1, parseInt(item.qty, 10) || 1),
+      image: item.image || ''
+    }));
+    await supabase.from('order_items').insert(orderItems);
+  } catch (itemEx) {
+    console.warn('[Checkout Fallback] Order items insert error:', itemEx);
+  }
+
+  // 4. Update stock in products and add stock_history
+  try {
+    for (const item of Cart.items) {
+      const qty = Math.max(1, parseInt(item.qty, 10) || 1);
+      const { data: prod } = await supabase.from('products').select('stock').eq('id', item.id).single();
+      if (prod && prod.stock != null) {
+        const newStock = Math.max(0, prod.stock - qty);
+        await supabase.from('products').update({ stock: newStock, in_stock: newStock > 0 }).eq('id', item.id);
+        await supabase.from('stock_history').insert([{
+          product: item.name,
+          type: 'Sold',
+          change_amount: -qty,
+          new_stock: newStock,
+          date: orderDate
+        }]);
+      }
+    }
+  } catch (stockEx) {
+    console.warn('[Checkout Fallback] Stock update error:', stockEx);
+  }
+
+  return {
+    order_id: orderId,
+    order_number: 'TAH-' + String(orderId).padStart(5, '0'),
+    subtotal,
+    shipping,
+    total
+  };
 }
 
 // Turn Postgres/PostgREST failures into something a shopper can act on.

@@ -13,9 +13,9 @@
 
 /* --- LEFT SIDE: Order Summary --- */
 .checkout-left {
-  background: #0a0a0a;
+  background: #FAF8F5;
   padding: var(--space-3xl);
-  border-right: 1px solid rgba(212, 175, 55, 0.1);
+  border-right: 1px solid rgba(197, 160, 40, 0.18);
 }
 
 .checkout-left-inner {
@@ -27,10 +27,10 @@
 .checkout-section-title {
   font-family: var(--font-serif);
   font-size: 1.5rem;
-  color: var(--gold);
+  color: #1A1A1A;
   margin-bottom: var(--space-xl);
   padding-bottom: var(--space-md);
-  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  border-bottom: 1px solid rgba(197, 160, 40, 0.2);
 }
 
 /* Order Item Cards */
@@ -42,7 +42,7 @@
   display: flex;
   gap: var(--space-md);
   padding: var(--space-md) 0;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid #EAE5DB;
   align-items: center;
 }
 
@@ -55,9 +55,9 @@
   height: 72px;
   border-radius: var(--radius-sm);
   overflow: hidden;
-  background: #111;
+  background: #FFFFFF;
   flex-shrink: 0;
-  border: 1px solid rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(197, 160, 40, 0.2);
 }
 
 .order-item-img img {
@@ -72,7 +72,7 @@
 
 .order-item-name {
   font-size: 0.9rem;
-  color: #fff;
+  color: #1A1A1A;
   font-weight: 500;
   margin-bottom: 3px;
 }
@@ -85,7 +85,7 @@
 .order-item-price {
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--gold);
+  color: var(--gold-dark);
   white-space: nowrap;
 }
 
@@ -104,11 +104,12 @@
 
 /* Totals Box */
 .order-totals-box {
-  background: rgba(212, 175, 55, 0.04);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  background: #FFFFFF;
+  border: 1px solid rgba(197, 160, 40, 0.25);
   border-radius: var(--radius-md);
   padding: var(--space-xl);
   margin-bottom: var(--space-lg);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
 }
 
 .totals-row {
@@ -116,7 +117,7 @@
   justify-content: space-between;
   padding: 8px 0;
   font-size: 0.9rem;
-  color: var(--white-dim);
+  color: #4A4A4A;
 }
 
 .totals-row.grand-total {
@@ -125,26 +126,27 @@
   border-top: 2px solid var(--gold);
   font-size: 1.3rem;
   font-weight: 800;
-  color: var(--gold);
+  color: var(--gold-dark);
 }
 
 .totals-row.grand-total span:first-child {
-  color: #fff;
+  color: #1A1A1A;
 }
 
 .secure-badge {
   text-align: center;
   padding: var(--space-md);
-  background: rgba(212, 175, 55, 0.06);
-  border: 1px solid rgba(212, 175, 55, 0.15);
+  background: rgba(197, 160, 40, 0.08);
+  border: 1px solid rgba(197, 160, 40, 0.2);
   border-radius: var(--radius-sm);
-  color: var(--gold);
+  color: var(--gold-dark);
   font-size: 0.82rem;
+  font-weight: 600;
 }
 
 /* --- RIGHT SIDE: Shipping & Payment --- */
 .checkout-right {
-  background: #111111;
+  background: #FFFFFF;
   padding: var(--space-3xl);
 }
 
@@ -158,11 +160,11 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: rgba(212, 175, 55, 0.06);
-  border: 1px solid rgba(212, 175, 55, 0.15);
+  background: rgba(197, 160, 40, 0.08);
+  border: 1px solid rgba(197, 160, 40, 0.2);
   border-radius: 20px;
   font-size: 0.8rem;
-  color: var(--white-muted);
+  color: #4A4A4A;
   margin-bottom: var(--space-xl);
 }
 
@@ -181,7 +183,7 @@
   display: block;
   font-size: 0.78rem;
   font-weight: 500;
-  color: var(--white-muted);
+  color: #555555;
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: var(--space-xs);
@@ -191,10 +193,10 @@
 .form-group select {
   width: 100%;
   padding: 14px 18px;
-  background: transparent;
-  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: #FAF8F5;
+  border: 1px solid #DDD6C8;
   border-radius: var(--radius-sm);
-  color: #fff;
+  color: #1A1A1A;
   font-family: inherit;
   font-size: 0.9rem;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
@@ -204,22 +206,23 @@
 .form-group select:focus {
   outline: none;
   border-color: var(--gold);
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.25);
+  background: #FFFFFF;
+  box-shadow: 0 0 8px rgba(197, 160, 40, 0.25);
 }
 
 .form-group input::placeholder {
-  color: #444;
+  color: #888888;
 }
 
 .form-group select option {
-  background: #111;
-  color: #fff;
+  background: #FFFFFF;
+  color: #1A1A1A;
 }
 
 .checkout-sub-title {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--gold);
+  color: var(--gold-dark);
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-bottom: var(--space-md);
@@ -248,8 +251,8 @@
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-md) var(--space-lg);
-  background: rgba(255,255,255,0.02);
-  border: 2px solid var(--grey-mid);
+  background: #FAF8F5;
+  border: 1.5px solid var(--grey-mid);
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
 }
@@ -257,7 +260,7 @@
 .delivery-option.selected .delivery-content,
 .delivery-option:hover .delivery-content {
   border-color: var(--gold);
-  background: rgba(212, 175, 55, 0.05);
+  background: #FAF4E6;
 }
 
 .delivery-icon {
@@ -265,7 +268,7 @@
 }
 
 .delivery-content strong {
-  color: #fff;
+  color: #1A1A1A;
   font-size: 0.9rem;
 }
 
@@ -277,7 +280,7 @@
 
 .delivery-price {
   margin-left: auto;
-  color: var(--gold);
+  color: var(--gold-dark);
   font-weight: 700;
   font-size: 0.9rem;
 }
@@ -296,8 +299,8 @@
   align-items: center;
   gap: 6px;
   padding: var(--space-lg) var(--space-md);
-  background: rgba(255,255,255,0.02);
-  border: 2px solid var(--grey-mid);
+  background: #FAF8F5;
+  border: 1.5px solid var(--grey-mid);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -311,7 +314,7 @@
 .payment-card.selected,
 .payment-card:hover {
   border-color: var(--gold);
-  background: rgba(212, 175, 55, 0.05);
+  background: #FAF4E6;
 }
 
 .pay-icon {
@@ -320,12 +323,12 @@
 
 .pay-name {
   font-size: 0.8rem;
-  color: var(--white-dim);
+  color: #4A4A4A;
   font-weight: 600;
 }
 
 .payment-card.selected .pay-name {
-  color: var(--gold);
+  color: var(--gold-dark);
 }
 
 /* --- Gift Option --- */
@@ -338,7 +341,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.9rem;
-  color: var(--white-dim);
+  color: #4A4A4A;
   cursor: pointer;
   margin-bottom: var(--space-sm);
 }
@@ -352,10 +355,10 @@
 .gift-option textarea {
   width: 100%;
   padding: 12px 16px;
-  background: transparent;
-  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: #FAF8F5;
+  border: 1px solid #DDD6C8;
   border-radius: var(--radius-sm);
-  color: #fff;
+  color: #1A1A1A;
   font-family: inherit;
   font-size: 0.9rem;
   resize: vertical;
@@ -365,7 +368,8 @@
 .gift-option textarea:focus {
   outline: none;
   border-color: var(--gold);
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.25);
+  background: #FFFFFF;
+  box-shadow: 0 0 8px rgba(197, 160, 40, 0.25);
 }
 
 /* --- CONFIRM ORDER Button --- */
@@ -373,10 +377,10 @@
   display: block;
   width: 100%;
   padding: 20px;
-  background: linear-gradient(135deg, #D4AF37, #E8C84A);
+  background: linear-gradient(135deg, #D4AF37, #C5A028);
   border: none;
-  color: #000;
-  font-family: 'Outfit', sans-serif;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
   font-size: 1.1rem;
   font-weight: 800;
   letter-spacing: 3px;
@@ -499,12 +503,35 @@
 @media (max-width: 480px) {
   .checkout-left,
   .checkout-right {
-    padding: var(--space-xl);
+    padding: 20px 14px;
   }
   .form-row {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
   .payment-grid {
     grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 16px !important;
+    min-height: 46px;
+    padding: 10px 14px;
+  }
+  .checkout-section-title {
+    font-size: 1.25rem;
+    margin-bottom: var(--space-md);
+  }
+}
+
+@media (max-width: 360px) {
+  .checkout-left,
+  .checkout-right {
+    padding: 16px 10px;
+  }
+  .payment-grid {
+    grid-template-columns: 1fr;
   }
 }

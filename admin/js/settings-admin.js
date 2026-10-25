@@ -62,10 +62,14 @@ function renderShippingProviders(providers) {
     <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--grey);border-radius:10px;border:1px solid var(--grey-mid);margin-bottom:10px;">
       <div style="flex:1;">
         <div style="font-weight:600;">${escapeHtml(p.name)}</div>
-        <div style="font-size:0.8rem;color:var(--white-muted);">${p.type === 'express' ? '⚡ Express' : '📦 Standard'} — Rs. ${Number(p.rate) || 0} (Free above Rs. ${Number(p.freeAbove) || 0})</div>
+        <div style="font-size:0.8rem;color:var(--white-muted);">${p.type === 'express' ? 'Express Delivery' : 'Standard Delivery'} — Rs. ${Number(p.rate) || 0} (Free above Rs. ${Number(p.freeAbove) || 0})</div>
       </div>
-      <button class="btn btn-sm btn-ghost" onclick="editShippingProvider(${i})">✏️</button>
-      <button class="btn btn-sm btn-danger" onclick="removeShippingProvider(${i})">🗑️</button>
+      <button class="btn btn-sm btn-ghost" onclick="editShippingProvider(${i})" title="Edit Provider" aria-label="Edit provider">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit-3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </button>
+      <button class="btn btn-sm btn-danger" onclick="removeShippingProvider(${i})" title="Remove Provider" aria-label="Remove provider">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+      </button>
     </div>
   `).join('');
 }

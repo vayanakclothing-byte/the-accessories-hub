@@ -26,8 +26,13 @@ function renderInvoicesTable() {
       <td>${statusBadge(inv.status)}</td>
       <td>
         <div style="display:flex;gap:4px;">
-          <button class="btn btn-sm btn-gold" onclick="downloadInvoice('${escapeHtml(String(inv.id).replace(/'/g, ''))}')">📄 PDF</button>
-          <button class="btn btn-sm btn-ghost" onclick="viewInvoiceOrder(${Number(inv.orderId)})">👁️</button>
+          <button class="btn btn-sm btn-gold" onclick="downloadInvoice('${escapeHtml(String(inv.id).replace(/'/g, ''))}')" title="Download PDF" aria-label="Download PDF" style="display:inline-flex;align-items:center;gap:4px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+            <span>PDF</span>
+          </button>
+          <button class="btn btn-sm btn-ghost" onclick="viewInvoiceOrder(${Number(inv.orderId)})" title="View Order" aria-label="View order">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
         </div>
       </td>
     </tr>

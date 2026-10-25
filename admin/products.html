@@ -16,6 +16,7 @@
       <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
         <a href="/admin/index.html" class="sidebar-link"><span class="link-icon"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i></span> Dashboard</a>
         <a href="/admin/products.html" class="sidebar-link active"><span class="link-icon"><i data-lucide="gem" style="width: 18px; height: 18px;"></i></span> Products</a>
+        <a href="/admin/categories.html" class="sidebar-link"><span class="link-icon"><i data-lucide="folder-tree" style="width: 18px; height: 18px;"></i></span> Categories</a>
         <a href="/admin/inventory.html" class="sidebar-link"><span class="link-icon"><i data-lucide="package" style="width: 18px; height: 18px;"></i></span> Inventory <span class="badge">0</span></a>
         <a href="/admin/orders.html" class="sidebar-link"><span class="link-icon"><i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i></span> Sales <span class="badge">0</span></a>
       </div>
@@ -50,6 +51,13 @@
         <div class="table-header">
           <div class="table-title"><i data-lucide="package" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i> Product Inventory <span id="productsCount" style="font-size: 0.8rem; color: var(--white-muted); font-weight: normal; margin-left: 8px;"></span></div>
           <div class="table-actions">
+            <select class="form-select" id="categoryFilter" onchange="filterProducts()" style="padding:6px 12px;font-size:0.85rem;background:var(--grey);border:1px solid var(--grey-mid);color:var(--white);border-radius:var(--radius-sm);">
+              <option value="">All Categories</option>
+              <option value="rings">Rings</option>
+              <option value="bracelets">Bracelets</option>
+              <option value="earrings">Earrings</option>
+              <option value="necklaces">Necklaces</option>
+            </select>
             <div class="table-search"><i data-lucide="search" style="width: 16px; height: 16px; margin-right: 8px; color: var(--white-muted);"></i><input type="text" placeholder="Search products..." id="productSearch" oninput="searchProducts()"></div>
             <button class="btn btn-gold" onclick="openAddProduct()">+ Add Product</button>
           </div>
@@ -85,7 +93,14 @@
             <option value="oxidized">Oxidized Collection</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Category</label><input class="form-input" id="pCategory" placeholder="e.g. Necklace, Earrings"></div>
+        <div class="form-group"><label class="form-label">Category *</label>
+          <select class="form-select" id="pCategory" required>
+            <option value="rings">Rings</option>
+            <option value="bracelets">Bracelets</option>
+            <option value="earrings">Earrings</option>
+            <option value="necklaces">Necklaces</option>
+          </select>
+        </div>
         <div class="form-group"><label class="form-label">Material</label><input class="form-input" id="pMaterial" placeholder="e.g. Gold Plated, Brass"></div>
       </div>
       <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="pDescription" style="height:80px;"></textarea></div>
@@ -117,7 +132,9 @@
   <div class="modal-header"><h3>Delete Product</h3><span class="modal-close" onclick="closeAllModals()">✕</span></div>
   <div class="modal-body">
     <div style="text-align:center;padding:10px 0;">
-      <div style="font-size:2.5rem;color:var(--red);margin-bottom:12px;">⚠️</div>
+      <div style="display:flex;justify-content:center;margin-bottom:12px;color:var(--red);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+      </div>
       <p>Are you sure you want to delete <strong id="deleteProductName"></strong>?</p>
       <p style="font-size:0.8rem;color:var(--white-muted);margin-top:6px;">This action cannot be undone.</p>
     </div>

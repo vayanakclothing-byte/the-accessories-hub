@@ -28,54 +28,55 @@
       <nav class="nav-desktop">
         <a href="index.html" class="active">Home</a>
         <div class="mega-menu-trigger">
-          <a href="products.html">Collections</a>
+          <a href="shop.html">Shop</a>
           <div class="mega-menu">
             <div class="mega-menu-col">
-              <h4>By Style</h4>
-              <a href="products.html?collection=korean">Korean Collection</a>
-              <a href="products.html?collection=temple">Temple Collection</a>
-              <a href="products.html?collection=oxidized">Oxidized Collection</a>
+              <h4>Jewellery Categories</h4>
+              <a href="shop.html">All Jewellery</a>
+              <a href="collections/rings.html">Rings</a>
+              <a href="collections/bracelets.html">Bracelets</a>
+              <a href="collections/earrings.html">Earrings</a>
+              <a href="collections/necklaces.html">Necklaces</a>
             </div>
             <div class="mega-menu-col">
-              <h4>By Category</h4>
-              <a href="products.html?category=necklaces">Necklaces</a>
-              <a href="products.html?category=earrings">Earrings</a>
-              <a href="products.html?category=rings">Rings</a>
-              <a href="products.html?category=bracelets">Bracelets</a>
+              <h4>Curated Collections</h4>
+              <a href="shop.html?collection=korean">Korean Collection</a>
+              <a href="shop.html?collection=temple">Temple Collection</a>
+              <a href="shop.html?collection=oxidized">Oxidized Collection</a>
             </div>
             <div class="mega-menu-col">
               <h4>Featured</h4>
-              <a href="products.html?badge=new">New Arrivals</a>
-              <a href="products.html?badge=best">Best Sellers</a>
-              <a href="products.html?badge=trending">Trending Now</a>
+              <a href="shop.html?badge=new">New Arrivals</a>
+              <a href="shop.html?badge=best">Best Sellers</a>
+              <a href="shop.html?badge=trending">Trending Now</a>
             </div>
           </div>
         </div>
-        <a href="products.html">Shop</a>
-        <a href="#story">About</a>
+        <a href="#story">About Us</a>
+        <a href="#footer">Contact</a>
       </nav>
 
       <div class="nav-actions">
-        <button onclick="window.location.href='products.html'" title="Search" aria-label="Search">
+        <button onclick="window.location.href='shop.html'" title="Search" aria-label="Search" class="nav-action-btn">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
             class="lucide lucide-search">
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.3-4.3" />
           </svg>
         </button>
-        <button onclick="window.location.href='login.html'" title="Account" aria-label="Account" class="nav-user-btn"
+        <button onclick="window.location.href='login.html'" title="Account" aria-label="Account" class="nav-action-btn nav-user-btn"
           id="navUserBtn">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-user">
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
+            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-user-round">
+            <circle cx="12" cy="8" r="5" />
+            <path d="M20 21a8 8 0 0 0-16 0" />
           </svg>
         </button>
-        <button onclick="window.location.href='checkout.html'" title="Cart" aria-label="Cart">
+        <button onclick="window.location.href='checkout.html'" title="Cart" aria-label="Cart" class="nav-action-btn">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
             class="lucide lucide-shopping-bag">
             <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
             <path d="M3 6h18" />
@@ -83,25 +84,46 @@
           </svg>
           <span class="cart-count" style="display:none;">0</span>
         </button>
-        <div class="hamburger" aria-label="Menu">
+        <button class="hamburger" aria-label="Open Navigation Menu" aria-expanded="false">
           <span></span>
           <span></span>
           <span></span>
-        </div>
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- Mobile Nav -->
+  <!-- Mobile Nav Drawer -->
   <div class="nav-overlay"></div>
-  <nav class="mobile-nav">
-    <a href="index.html">Home</a>
-    <a href="products.html">Shop All</a>
-    <a href="products.html?collection=korean">Korean Collection</a>
-    <a href="products.html?collection=temple">Temple Collection</a>
-    <a href="products.html?collection=oxidized">Oxidized Collection</a>
-    <a href="#story">About Us</a>
-    <a href="checkout.html">Cart</a>
+  <nav class="mobile-nav" aria-label="Mobile Navigation" role="dialog" aria-modal="true">
+    <div class="mobile-nav-header">
+      <span class="mobile-nav-brand">THE ACCESSORIES HUB</span>
+      <button class="mobile-nav-close" aria-label="Close navigation menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <div class="mobile-nav-body">
+      <a href="index.html" class="active">Home</a>
+      <div class="mobile-nav-group">
+        <button class="mobile-nav-toggle" aria-expanded="false" aria-controls="mobileShopMenu">
+          <span>Shop</span>
+          <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="mobile-nav-sub" id="mobileShopMenu">
+          <a href="shop.html">All Jewellery</a>
+          <a href="collections/rings.html">Rings</a>
+          <a href="collections/bracelets.html">Bracelets</a>
+          <a href="collections/earrings.html">Earrings</a>
+          <a href="collections/necklaces.html">Necklaces</a>
+          <a href="shop.html?collection=korean">Korean Collection</a>
+          <a href="shop.html?collection=temple">Temple Collection</a>
+          <a href="shop.html?collection=oxidized">Oxidized Collection</a>
+        </div>
+      </div>
+      <a href="#story">About Us</a>
+      <a href="#footer">Contact</a>
+      <a href="checkout.html">Shopping Bag</a>
+    </div>
   </nav>
 
   <!-- ===== HERO ===== -->
@@ -119,8 +141,8 @@
         woman who values timeless beauty.
       </p>
       <div class="hero-actions">
-        <a href="products.html" class="btn btn-gold btn-lg">Shop the Collection</a>
-        <a href="#collections" class="btn btn-outline btn-lg">Explore Styles</a>
+        <a href="shop.html" class="btn btn-gold btn-lg">Shop the Collection</a>
+        <a href="#categories" class="btn btn-outline btn-lg">Explore Styles</a>
       </div>
     </div>
     <div class="hero-scroll">
@@ -151,7 +173,7 @@
       <p class="section-subtitle animate-on-scroll">Find your perfect piece from our carefully curated collections</p>
 
       <div class="categories-grid">
-        <a href="products.html?category=necklaces" class="category-card animate-on-scroll">
+        <a href="collections/necklaces.html" class="category-card animate-on-scroll">
           <div class="category-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
@@ -163,7 +185,7 @@
           </div>
           <span class="category-name">Necklaces</span>
         </a>
-        <a href="products.html?category=earrings" class="category-card animate-on-scroll">
+        <a href="collections/earrings.html" class="category-card animate-on-scroll">
           <div class="category-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
@@ -178,7 +200,7 @@
           </div>
           <span class="category-name">Earrings</span>
         </a>
-        <a href="products.html?category=rings" class="category-card animate-on-scroll">
+        <a href="collections/rings.html" class="category-card animate-on-scroll">
           <div class="category-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
@@ -189,20 +211,18 @@
           </div>
           <span class="category-name">Rings</span>
         </a>
-        <a href="products.html?category=bracelets" class="category-card animate-on-scroll">
+        <a href="collections/bracelets.html" class="category-card animate-on-scroll">
           <div class="category-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-              class="lucide lucide-watch">
-              <circle cx="12" cy="12" r="7" />
-              <polyline points="12 9 12 12 13.5 13.5" />
-              <path d="M16.51 17.35 15.5 22H8.5l-1.01-4.65" />
-              <path d="m7.49 6.65 1.01-4.65h7l1.01 4.65" />
+              stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-bangle">
+              <circle cx="12" cy="12" r="9" />
+              <circle cx="12" cy="12" r="5" stroke-dasharray="2 3" />
             </svg>
           </div>
           <span class="category-name">Bracelets</span>
         </a>
-        <a href="products.html?collection=oxidized" class="category-card animate-on-scroll">
+        <a href="shop.html?collection=oxidized" class="category-card animate-on-scroll">
           <div class="category-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"

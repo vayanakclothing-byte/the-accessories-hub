@@ -141,21 +141,65 @@ function initMobileNav() {
   const hamburger = document.querySelector('.hamburger');
   const mobileNav = document.querySelector('.mobile-nav');
   const overlay = document.querySelector('.nav-overlay');
+  const closeBtn = mobileNav?.querySelector('.mobile-nav-close');
 
   if (!hamburger || !mobileNav) return;
 
+  const openDrawer = () => {
+    hamburger.classList.add('active');
+    hamburger.setAttribute('aria-expanded', 'true');
+    mobileNav.classList.add('open');
+    overlay?.classList.add('active');
+    document.body.classList.add('drawer-open');
+    closeBtn?.focus();
+  };
+
+  const closeDrawer = () => {
+    hamburger.classList.remove('active');
+    hamburger.setAttribute('aria-expanded', 'false');
+    mobileNav.classList.remove('open');
+    overlay?.classList.remove('active');
+    document.body.classList.remove('drawer-open');
+  };
+
   const toggle = () => {
-    hamburger.classList.toggle('active');
-    mobileNav.classList.toggle('open');
-    overlay?.classList.toggle('active');
-    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+    if (mobileNav.classList.contains('open')) {
+      closeDrawer();
+    } else {
+      openDrawer();
+    }
   };
 
   hamburger.addEventListener('click', toggle);
-  overlay?.addEventListener('click', toggle);
+  overlay?.addEventListener('click', closeDrawer);
+  closeBtn?.addEventListener('click', closeDrawer);
 
+  // Close drawer on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileNav.classList.contains('open')) {
+      closeDrawer();
+    }
+  });
+
+  // Expandable Mobile Shop Accordion
+  const shopToggle = mobileNav.querySelector('.mobile-nav-toggle');
+  const shopSub = mobileNav.querySelector('.mobile-nav-sub');
+  if (shopToggle && shopSub) {
+    shopToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isExpanded = shopToggle.getAttribute('aria-expanded') === 'true';
+      shopToggle.setAttribute('aria-expanded', !isExpanded);
+      shopToggle.classList.toggle('active', !isExpanded);
+      shopSub.classList.toggle('open', !isExpanded);
+    });
+  }
+
+  // Close drawer on clicking any navigation link
   mobileNav.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', toggle);
+    link.addEventListener('click', () => {
+      closeDrawer();
+    });
   });
 }
 
@@ -192,9 +236,11 @@ function initPopup() {
     if (input?.value) {
       popup.innerHTML = `
         <div style="padding: 2rem; text-align: center;">
-          <div style="font-size: 3rem; margin-bottom: 1rem;">💎</div>
-          <h3 style="color: var(--gold); margin-bottom: 0.5rem;">Thank You!</h3>
-          <p style="color: var(--white-muted);">Your 10% discount code has been sent to your email.</p>
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: #FAF8F5; border: 1px solid rgba(197, 160, 40, 0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: var(--gold-dark);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+          </div>
+          <h3 style="color: var(--gold-dark); margin-bottom: 0.5rem; font-family: var(--font-serif);">Thank You!</h3>
+          <p style="color: #666666;">Your 10% discount code has been sent to your email.</p>
         </div>
       `;
       setTimeout(close, 3000);
@@ -479,13 +525,13 @@ async function initAuthStatus() {
               const adminLink = document.createElement('a');
               adminLink.href = '/admin/index.html';
               adminLink.style.cssText = 'color: var(--gold); font-size: 0.85rem; padding: 8px; text-decoration: none; border-radius: 4px; display: flex; align-items: center; gap: 8px;';
-              adminLink.innerHTML = '🛡️ Admin Panel';
+              adminLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <span>Admin Panel</span>';
               dropdown.appendChild(adminLink);
           }
 
           const logoutBtn = document.createElement('button');
           logoutBtn.style.cssText = 'background: transparent; border: none; color: var(--red); font-size: 0.85rem; padding: 8px; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: inherit; width: 100%;';
-          logoutBtn.innerHTML = '🚪 Sign Out';
+          logoutBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg> <span>Sign Out</span>';
           logoutBtn.onclick = async () => {
               await supabase.auth.signOut();
               window.location.reload();

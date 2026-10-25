@@ -54,9 +54,15 @@ function renderCustomersTable(filter = '') {
       <td>${formatDate(c.joinDate)}</td>
       <td>
         <div style="display:flex;gap:4px;">
-          <button class="btn btn-sm btn-ghost" onclick="viewCustomer(${Number(c.id)})">👁️</button>
-          <button class="btn btn-sm btn-ghost" onclick="editCustomer(${Number(c.id)})">✏️</button>
-          <button class="wa-btn" style="padding:5px 8px;font-size:0.7rem;" onclick="sendCustomerWhatsApp(${Number(c.id)})">💬</button>
+          <button class="btn btn-sm btn-ghost" onclick="viewCustomer(${Number(c.id)})" title="View Customer" aria-label="View customer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="btn btn-sm btn-ghost" onclick="editCustomer(${Number(c.id)})" title="Edit Customer" aria-label="Edit customer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit-3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </button>
+          <button class="wa-btn" style="padding:5px 8px;display:inline-flex;align-items:center;justify-content:center;" onclick="sendCustomerWhatsApp(${Number(c.id)})" title="WhatsApp Customer" aria-label="WhatsApp customer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+          </button>
         </div>
       </td>
     </tr>
@@ -84,7 +90,10 @@ function viewCustomer(id) {
       <div class="detail-item"><div class="label">Address</div><div class="value">${escapeHtml(c.address || '—')}</div></div>
       <div class="detail-item"><div class="label">Total Spent</div><div class="value" style="color:var(--gold)">${formatPrice(c.totalSpent)}</div></div>
     </div>
-    ${c.notes ? `<div class="alert alert-info" style="margin-bottom:20px;">📝 <strong>Notes:</strong> ${escapeHtml(c.notes)}</div>` : ''}
+    ${c.notes ? `<div class="alert alert-info" style="margin-bottom:20px;display:flex;align-items:center;gap:8px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+      <span><strong>Notes:</strong> ${escapeHtml(c.notes)}</span>
+    </div>` : ''}
     <h4 style="color:var(--gold);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Order History (${orders.length})</h4>
     ${orders.length === 0 ? '<p style="color:var(--white-muted);">No orders yet.</p>' :
       orders.map(o => `

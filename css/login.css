@@ -1,6 +1,6 @@
 /* ============================================================
    THE ACCESSORIES HUB — Login & Sign Up
-   Split Screen, Minimal Matte Black styling
+   White & Golden Luxury Theme
    ============================================================ */
 
 .login-body {
@@ -8,9 +8,9 @@
   padding: 0;
   height: 100vh;
   overflow: hidden;
-  background: #050505;
+  background: #FAF8F5;
   font-family: 'Outfit', sans-serif;
-  color: #fff;
+  color: #1A1A1A;
 }
 
 .split-screen {
@@ -24,15 +24,14 @@
   flex: 1;
   position: relative;
   background: url('../images/temple-necklace.webp') center/cover no-repeat;
-  /* Add artistic blur and dark tint */
-  filter: sepia(30%) hue-rotate(340deg) contrast(120%);
+  filter: sepia(20%) contrast(110%);
 }
 
 .split-left::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(5,5,5,0.85) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(245, 240, 230, 0.88) 100%);
   backdrop-filter: blur(8px);
 }
 
@@ -53,25 +52,25 @@
 .quote h2 {
   font-family: var(--font-serif);
   font-size: 3rem;
-  color: var(--gold);
+  color: var(--gold-dark);
   margin-bottom: var(--space-sm);
   line-height: 1.1;
 }
 
 .quote p {
   font-size: 1.1rem;
-  color: var(--white-muted);
+  color: #4A4A4A;
   max-width: 80%;
 }
 
 /* --- Right Side Form --- */
 .split-right {
   flex: 0 0 500px;
-  background: #0a0a0a; /* Matte Black */
+  background: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: -10px 0 50px rgba(0,0,0,0.5);
+  box-shadow: -10px 0 50px rgba(0, 0, 0, 0.06);
   position: relative;
   z-index: 5;
 }
@@ -87,11 +86,11 @@
   font-size: 2.2rem;
   font-weight: 500;
   margin-bottom: var(--space-xs);
-  color: var(--white);
+  color: #1A1A1A;
 }
 
 .auth-subtitle {
-  color: var(--white-muted);
+  color: #666666;
   font-size: 0.95rem;
   margin-bottom: var(--space-2xl);
 }
@@ -104,10 +103,10 @@
   gap: 12px;
   width: 100%;
   padding: 14px;
-  background: transparent;
-  border: 1px solid var(--gold);
+  background: #FFFFFF;
+  border: 1.5px solid #DDD6C8;
   border-radius: var(--radius-sm);
-  color: var(--white);
+  color: #1A1A1A;
   font-family: 'Outfit', sans-serif;
   font-weight: 600;
   font-size: 0.95rem;
@@ -123,8 +122,9 @@
 }
 
 .btn-google:hover {
-  background: rgba(212, 175, 55, 0.1);
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+  border-color: var(--gold);
+  background: #FAF8F5;
+  box-shadow: 0 4px 15px rgba(197, 160, 40, 0.15);
 }
 
 /* --- Divider --- */
@@ -133,14 +133,14 @@
   align-items: center;
   text-align: center;
   margin-bottom: var(--space-lg);
-  color: var(--grey-light);
+  color: #888888;
   font-size: 0.85rem;
 }
 
 .divider::before, .divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid var(--grey-mid);
+  border-bottom: 1px solid #E5E0D6;
 }
 
 .divider span {
@@ -155,7 +155,7 @@
 .input-group label {
   display: block;
   font-size: 0.85rem;
-  color: var(--white-muted);
+  color: #555555;
   margin-bottom: var(--space-xs);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -163,11 +163,11 @@
 
 .input-group input {
   width: 100%;
-  background: transparent;
-  border: 1px solid rgba(212, 175, 55, 0.4); /* Thin gold border */
+  background: #FAF8F5;
+  border: 1px solid #DDD6C8;
   border-radius: var(--radius-sm);
   padding: 14px 16px;
-  color: var(--white);
+  color: #1A1A1A;
   font-family: inherit;
   font-size: 1rem;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
@@ -176,11 +176,12 @@
 .input-group input:focus {
   outline: none;
   border-color: var(--gold);
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+  background: #FFFFFF;
+  box-shadow: 0 0 8px rgba(197, 160, 40, 0.25);
 }
 
 .input-group input::placeholder {
-  color: #555;
+  color: #888888;
 }
 
 /* --- Form Options --- */

@@ -159,8 +159,10 @@ function renderProducts() {
   if (filteredProducts.length === 0) {
     grid.innerHTML = `
       <div class="no-results" style="text-align: center; padding: 4rem 1rem; width: 100%; grid-column: 1 / -1;">
-        <div class="icon" style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-        <h3 style="color: var(--gold); margin-bottom: 0.5rem;">No products found</h3>
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: #FAF8F5; border: 1px solid rgba(197, 160, 40, 0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; color: var(--gold-dark);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </div>
+        <h3 style="color: var(--gold); margin-bottom: 0.5rem; font-family: var(--font-serif); font-size: 1.5rem;">No products found</h3>
         <p style="color: var(--white-muted); margin-bottom: 1.5rem;">Try adjusting your filters or browse our full collection.</p>
         <button onclick="window.location.href='products.html'" class="btn btn-gold">Remove Filters</button>
       </div>

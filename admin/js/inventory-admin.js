@@ -149,7 +149,7 @@ function renderStockHistory() {
     <div class="timeline-item">
       <div class="time">${escapeHtml(h.date || '—')}</div>
       <div class="event">
-        <strong>${escapeHtml(h.product || '—')}</strong> — ${h.type === 'restock' ? '📦 Restocked' : h.type === 'sale' ? '🛒 Sold' : '🔧 Adjusted'}
+        <strong>${escapeHtml(h.product || '—')}</strong> — ${h.type === 'restock' ? 'Restocked' : h.type === 'sale' ? 'Sold' : 'Adjusted'}
         <span style="color:${change > 0 ? 'var(--green)' : 'var(--red)'};">${change > 0 ? '+' : ''}${change}</span>
         → Stock: ${Number(h.newStock) || 0}
       </div>

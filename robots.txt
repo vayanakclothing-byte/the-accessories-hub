@@ -1,0 +1,17 @@
+# Robots.txt for The Accessories Hub
+User-agent: *
+Allow: /
+Allow: /shop
+Allow: /collections/
+Allow: /products
+Allow: /images/
+
+# Disallow Private & Admin Routes
+Disallow: /admin/
+Disallow: /admin
+Disallow: /checkout
+Disallow: /login
+Disallow: /request-access
+
+# Sitemap Reference
+Sitemap: https://theaccessorieshub.com/sitemap.xml

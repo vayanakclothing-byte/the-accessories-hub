@@ -3,12 +3,19 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    { "source": "/shop", "destination": "/shop.html" },
+    { "source": "/collections/rings", "destination": "/collections/rings.html" },
+    { "source": "/collections/bracelets", "destination": "/collections/bracelets.html" },
+    { "source": "/collections/earrings", "destination": "/collections/earrings.html" },
+    { "source": "/collections/necklaces", "destination": "/collections/necklaces.html" },
     { "source": "/products", "destination": "/products.html" },
     { "source": "/product-detail", "destination": "/product-detail.html" },
     { "source": "/checkout", "destination": "/checkout.html" },
     { "source": "/login", "destination": "/login.html" },
+    { "source": "/admin/login", "destination": "/admin/login.html" },
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/admin/products", "destination": "/admin/products.html" },
+    { "source": "/admin/categories", "destination": "/admin/categories.html" },
     { "source": "/admin/inventory", "destination": "/admin/inventory.html" },
     { "source": "/admin/orders", "destination": "/admin/orders.html" },
     { "source": "/admin/customers", "destination": "/admin/customers.html" },
@@ -27,7 +34,7 @@
         { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
         }
       ]
     },

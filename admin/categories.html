@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categories — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@1.61.0"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="icon"><i data-lucide="gem" style="color: var(--gold);"></i></span>
+      <div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Main</div>
+        <a href="/admin/index.html" class="sidebar-link"><span class="link-icon"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i></span> Dashboard</a>
+        <a href="/admin/products.html" class="sidebar-link"><span class="link-icon"><i data-lucide="gem" style="width: 18px; height: 18px;"></i></span> Products</a>
+        <a href="/admin/categories.html" class="sidebar-link active"><span class="link-icon"><i data-lucide="folder-tree" style="width: 18px; height: 18px;"></i></span> Categories</a>
+        <a href="/admin/inventory.html" class="sidebar-link"><span class="link-icon"><i data-lucide="package" style="width: 18px; height: 18px;"></i></span> Inventory <span class="badge">0</span></a>
+        <a href="/admin/orders.html" class="sidebar-link"><span class="link-icon"><i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i></span> Sales <span class="badge">0</span></a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Management</div>
+        <a href="/admin/invoices.html" class="sidebar-link"><span class="link-icon"><i data-lucide="receipt" style="width: 18px; height: 18px;"></i></span> Invoices</a>
+        <a href="/admin/customers.html" class="sidebar-link"><span class="link-icon"><i data-lucide="users" style="width: 18px; height: 18px;"></i></span> Customers</a>
+        <a href="/admin/settings.html" class="sidebar-link"><span class="link-icon"><i data-lucide="settings" style="width: 18px; height: 18px;"></i></span> Settings</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/"><i data-lucide="globe" style="width: 16px; height: 16px; margin-right: 8px;"></i> View Storefront</a>
+      <a href="#" onclick="handleLogout()" style="margin-top: 10px; color: var(--red);"><i data-lucide="log-out" style="width: 16px; height: 16px; margin-right: 8px;"></i> Logout</a>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>Category Management</h1>
+          <div class="topbar-breadcrumb"><a href="index.html">Dashboard</a> / Categories</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- Category Quick Stats -->
+      <div class="stats-grid" style="margin-bottom: 24px;">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon gold"><i data-lucide="folder-tree" style="width: 20px; height: 20px;"></i></div>
+          </div>
+          <div class="stat-card-value" id="statTotalCategories">4</div>
+          <div class="stat-card-label">Total Categories</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon green"><i data-lucide="check-circle" style="width: 20px; height: 20px;"></i></div>
+          </div>
+          <div class="stat-card-value" id="statActiveCategories">4</div>
+          <div class="stat-card-label">Active & Public</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon blue"><i data-lucide="gem" style="width: 20px; height: 20px;"></i></div>
+          </div>
+          <div class="stat-card-value" id="statCategorizedProducts">12 / 12</div>
+          <div class="stat-card-label">Products Assigned</div>
+        </div>
+      </div>
+
+      <!-- Categories Table Card -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">
+            <i data-lucide="layers" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i>
+            Jewellery Categories
+          </div>
+          <div class="table-actions">
+            <button class="btn btn-gold" onclick="openAddCategory()">+ Add Category</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Category & Slug</th>
+                <th>Description</th>
+                <th>Products</th>
+                <th>Order</th>
+                <th>Status</th>
+                <th>SEO Title Override</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="categoriesBody">
+              <!-- Populated by categories-admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" onclick="closeAllModals()"></div>
+
+<!-- Add/Edit Category Modal -->
+<div class="modal wide" id="categoryModal">
+  <div class="modal-header">
+    <h3 id="categoryModalTitle">Edit Category</h3>
+    <span class="modal-close" onclick="closeAllModals()">✕</span>
+  </div>
+  <div class="modal-body">
+    <form id="categoryForm">
+      <div class="form-row">
+        <div class="form-group" style="flex:1;">
+          <label class="form-label">Category Name *</label>
+          <input class="form-input" id="catName" required placeholder="e.g. Rings">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label class="form-label">URL Slug *</label>
+          <input class="form-input" id="catSlug" required placeholder="e.g. rings" pattern="[a-z0-9-]+" title="lowercase letters, numbers and hyphens only">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Category Description</label>
+        <textarea class="form-textarea" id="catDescription" style="height:70px;" placeholder="Brief introduction to this collection shown on storefront..."></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="flex:2;">
+          <label class="form-label">Category Image Path / URL</label>
+          <input class="form-input" id="catImageUrl" placeholder="e.g. images/oxidized-ring.webp">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label class="form-label">Display Order</label>
+          <input class="form-input" type="number" id="catSortOrder" value="0">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">SEO Title Override</label>
+        <input class="form-input" id="catSeoTitle" placeholder="e.g. Rings for Men and Women | The Accessories Hub">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">SEO Meta Description</label>
+        <textarea class="form-textarea" id="catSeoDescription" style="height:60px;" placeholder="Search engine description snippet..."></textarea>
+      </div>
+
+      <div class="form-group" style="margin-top:12px;">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--white);">
+          <input type="checkbox" id="catActive" checked style="width:18px; height:18px;">
+          <span>Category is Active (Visible on storefront navigation & collections)</span>
+        </label>
+      </div>
+
+      <div class="modal-footer" style="padding:0; border:none; margin-top:24px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button type="submit" class="btn btn-gold">Save Category</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+
+<style>
+  .admin-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--black); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s ease; }
+  .spinner { width: 50px; height: 50px; border: 3px solid rgba(212, 175, 55, 0.1); border-top: 3px solid var(--gold); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+
+<div id="adminLoader" class="admin-loader">
+  <div class="spinner"></div>
+  <div style="color: var(--gold); letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem;">The Accessories Hub</div>
+</div>
+
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/categories-admin.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

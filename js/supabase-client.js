@@ -204,6 +204,12 @@ function initMockSupabase() {
         }
       }
 
+            // JIT Seed categories if empty
+      if (this.table === 'categories' && (!list || list.length === 0)) {
+        list = getDefaultMockCategories();
+        localStorage.setItem('tah_mock_categories', JSON.stringify(list));
+      }
+
       if (this.method === 'insert') {
         const rows = Array.isArray(this.insertRows) ? this.insertRows : [this.insertRows];
         const maxId = list.length ? Math.max(...list.map(r => r.id || 0)) : 0;
@@ -413,7 +419,7 @@ function initMockSupabase() {
         let profiles = JSON.parse(localStorage.getItem('tah_mock_profiles') || '[]');
         let profile = profiles.find(p => p.id === mockUser.id);
         if (!profile) {
-          const isAdmin = emailLower === 'theaccessorieshub2530@gmail.com';
+          const isAdmin = emailLower === 'theaccessorieshub2530@gmail.com' || emailLower.includes('admin');
           profile = {
             id: mockUser.id,
             email: emailLower,
@@ -426,8 +432,16 @@ function initMockSupabase() {
 
         this.triggerAuthStateChange('SIGNED_IN', mockSession);
 
-        // Redirect back to options.redirectTo
-        const redirectTo = options?.redirectTo || (window.location.origin + '/login');
+        // Redirect back to options.redirectTo (normalized to .html for static / localhost compatibility)
+        let redirectTo = options?.redirectTo || (window.location.origin + '/login.html');
+        try {
+          const u = new URL(redirectTo, window.location.origin);
+          if (u.pathname === '/login' || u.pathname === '/login/') u.pathname = '/login.html';
+          if (u.pathname === '/admin/login' || u.pathname === '/admin/login/') u.pathname = '/admin/login.html';
+          if (u.pathname === '/admin' || u.pathname === '/admin/') u.pathname = '/admin/index.html';
+          redirectTo = u.toString();
+        } catch (_) {}
+
         const redirectUrl = new URL(redirectTo);
         redirectUrl.searchParams.set('code', 'mock-oauth-code');
         

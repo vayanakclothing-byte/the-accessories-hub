@@ -45,9 +45,15 @@ function renderOrdersTable(filterStatus = '') {
       <td>${formatDate(o.date)}</td>
       <td>
         <div style="display:flex;gap:4px;">
-          <button class="btn btn-sm btn-ghost" onclick="viewOrder(${Number(o.id)})" title="View">👁️</button>
-          <button class="btn btn-sm btn-ghost" onclick="openStatusUpdate(${Number(o.id)})" title="Update Status">📝</button>
-          <button class="wa-btn" style="padding:5px 8px;font-size:0.7rem;" onclick="sendOrderWhatsApp(${Number(o.id)})" title="WhatsApp">💬</button>
+          <button class="btn btn-sm btn-ghost" onclick="viewOrder(${Number(o.id)})" title="View Order" aria-label="View order">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="btn btn-sm btn-ghost" onclick="openStatusUpdate(${Number(o.id)})" title="Update Status" aria-label="Update status">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="wa-btn" style="padding:5px 8px;display:inline-flex;align-items:center;justify-content:center;" onclick="sendOrderWhatsApp(${Number(o.id)})" title="WhatsApp Customer" aria-label="WhatsApp customer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+          </button>
         </div>
       </td>
     </tr>

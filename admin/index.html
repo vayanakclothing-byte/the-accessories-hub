@@ -17,6 +17,7 @@
       <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
         <a href="/admin/index.html" class="sidebar-link active"><span class="link-icon"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i></span> Dashboard</a>
         <a href="/admin/products.html" class="sidebar-link"><span class="link-icon"><i data-lucide="gem" style="width: 18px; height: 18px;"></i></span> Products</a>
+        <a href="/admin/categories.html" class="sidebar-link"><span class="link-icon"><i data-lucide="folder-tree" style="width: 18px; height: 18px;"></i></span> Categories</a>
         <a href="/admin/inventory.html" class="sidebar-link"><span class="link-icon"><i data-lucide="package" style="width: 18px; height: 18px;"></i></span> Inventory <span class="badge">0</span></a>
         <a href="/admin/orders.html" class="sidebar-link"><span class="link-icon"><i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i></span> Sales <span class="badge">0</span></a>
       </div>
@@ -73,25 +74,25 @@
 
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-card-header"><div class="chart-card-title">📈 Revenue Analysis</div></div>
+          <div class="chart-card-header"><div class="chart-card-title" style="display:flex;align-items:center;gap:8px;"><i data-lucide="trending-up" style="width:18px;height:18px;color:var(--gold);"></i> Revenue Analysis</div></div>
           <div class="chart-container"><canvas id="salesChart"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-card-header"><div class="chart-card-title">💎 Collection Split</div></div>
+          <div class="chart-card-header"><div class="chart-card-title" style="display:flex;align-items:center;gap:8px;"><i data-lucide="gem" style="width:18px;height:18px;color:var(--gold);"></i> Collection Split</div></div>
           <div class="chart-container"><canvas id="collectionChart"></canvas></div>
         </div>
       </div>
 
       <div class="chart-grid" style="grid-template-columns: 2fr 1fr;">
         <div class="table-card">
-          <div class="table-header"><div class="table-title">🛒 Recent Orders</div><a href="orders.html" class="btn btn-sm btn-outline">View All</a></div>
+          <div class="table-header"><div class="table-title" style="display:flex;align-items:center;gap:8px;"><i data-lucide="shopping-cart" style="width:18px;height:18px;color:var(--gold);"></i> Recent Orders</div><a href="orders.html" class="btn btn-sm btn-outline">View All</a></div>
           <table>
             <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
             <tbody id="recentOrdersBody"></tbody>
           </table>
         </div>
         <div class="chart-card">
-          <div class="chart-card-header"><div class="chart-card-title">⚠️ Low Stock Alerts</div></div>
+          <div class="chart-card-header"><div class="chart-card-title" style="display:flex;align-items:center;gap:8px;"><i data-lucide="alert-triangle" style="width:18px;height:18px;color:var(--red);"></i> Low Stock Alerts</div></div>
           <div id="lowStockAlerts" style="padding:0 16px 16px;"></div>
         </div>
       </div>
