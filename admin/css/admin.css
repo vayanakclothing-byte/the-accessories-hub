@@ -261,6 +261,24 @@ tbody tr:last-child td { border-bottom: none; }
 @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } .image-preview-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 480px) { .admin-content { padding: 16px; } .table-search input { width: 140px; } .image-preview-grid { grid-template-columns: repeat(2, 1fr); } }
 
+/* ===== ERP ENHANCEMENTS ===== */
+.filter-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; background: var(--grey-dark); padding: 14px 18px; border-radius: 10px; border: 1px solid rgba(197,160,40,0.12); }
+.filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.date-btn { padding: 6px 12px; font-size: 0.75rem; border-radius: 6px; border: 1px solid var(--grey-mid); background: var(--grey); color: var(--white-dim); font-weight: 500; transition: all 0.2s; cursor: pointer; }
+.date-btn:hover, .date-btn.active { background: var(--gold); color: #fff; border-color: var(--gold); }
+.tab-group { display: flex; gap: 8px; border-bottom: 1px solid var(--grey-mid); margin-bottom: 20px; }
+.tab-btn { padding: 10px 18px; font-size: 0.85rem; font-weight: 600; color: var(--white-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s; background: none; }
+.tab-btn:hover { color: var(--gold-dark); }
+.tab-btn.active { color: var(--gold-dark); border-bottom-color: var(--gold); }
+.state-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+.sidebar-section-title { font-size: 0.65rem; font-weight: 700; color: var(--white-muted); text-transform: uppercase; letter-spacing: 1.5px; padding: 10px 14px 4px; }
+.badge-gold { background: rgba(197,160,40,0.15); color: var(--gold-dark); }
+.badge-red { background: rgba(231,76,60,0.15); color: var(--red); }
+.badge-green { background: rgba(46,204,113,0.15); color: var(--green); }
+.badge-blue { background: rgba(52,152,219,0.15); color: var(--blue); }
+.badge-orange { background: rgba(243,156,18,0.15); color: var(--orange); }
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--black); }

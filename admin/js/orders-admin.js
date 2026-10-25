@@ -1,6 +1,8 @@
 /* ============================================================
    Orders Admin — Management & Tracking
    ============================================================ */
+let activeUpdatingOrderId = null;
+
 document.addEventListener('DOMContentLoaded', async () => {
   await loadData();
   renderOrderStats();
@@ -23,41 +25,45 @@ function renderOrdersTable(filterStatus = '') {
   if (!tbody) return;
 
   if (orders.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--white-muted);padding:24px;">No orders yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--white-muted);padding:24px;">No orders found.</td></tr>';
     return;
   }
 
   tbody.innerHTML = orders.map(o => `
     <tr>
-      <td><strong style="color:var(--gold)">#${escapeHtml(o.id)}</strong></td>
-      <td>${escapeHtml(o.customerName)}</td>
+      <td><strong style="color:var(--gold-dark)">#${escapeHtml(o.id)}</strong></td>
+      <td>
+        <div style="font-weight:600; color:var(--white);">${escapeHtml(o.customerName || 'Customer')}</div>
+        <div style="font-size:0.75rem; color:var(--white-muted);">${escapeHtml(o.shippingAddress || '—')}</div>
+      </td>
       <td>
         ${(o.items || []).map(i => `
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-            <div class="table-img" style="width:32px;height:32px;"><img src="${escapeHtml(i.image)}" alt="${escapeHtml(i.name)}"></div>
-            <span style="font-size:0.8rem;">${escapeHtml(i.name)} × ${Number(i.qty) || 0}</span>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+            <div class="table-img" style="width:28px;height:28px;"><img src="${escapeHtml(i.image)}" alt="${escapeHtml(i.name)}"></div>
+            <span style="font-size:0.8rem;">${escapeHtml(i.name)} × ${Number(i.qty) || 1}</span>
           </div>
         `).join('') || '<span style="color:var(--white-muted);font-size:0.8rem;">—</span>'}
       </td>
       <td><strong>${formatPrice(o.total)}</strong></td>
       <td>${statusBadge(o.status)}</td>
-      <td><span class="badge badge-gold">${escapeHtml(o.payment)}</span></td>
+      <td><span class="badge badge-gold">${escapeHtml(String(o.payment || 'cod').toUpperCase())}</span></td>
       <td>${formatDate(o.date)}</td>
       <td>
         <div style="display:flex;gap:4px;">
-          <button class="btn btn-sm btn-ghost" onclick="viewOrder(${Number(o.id)})" title="View Order" aria-label="View order">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <button class="btn btn-sm btn-ghost" onclick="viewOrder(${Number(o.id)})" title="View Order & Packing Slip">
+            <i data-lucide="eye" style="width:14px;height:14px;"></i>
           </button>
-          <button class="btn btn-sm btn-ghost" onclick="openStatusUpdate(${Number(o.id)})" title="Update Status" aria-label="Update status">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <button class="btn btn-sm btn-outline" onclick="openStatusUpdate(${Number(o.id)})" title="Update Status">
+            <i data-lucide="edit-3" style="width:14px;height:14px;"></i>
           </button>
-          <button class="wa-btn" style="padding:5px 8px;display:inline-flex;align-items:center;justify-content:center;" onclick="sendOrderWhatsApp(${Number(o.id)})" title="WhatsApp Customer" aria-label="WhatsApp customer">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+          <button class="wa-btn" style="padding:5px 8px;" onclick="sendOrderWhatsApp(${Number(o.id)})" title="WhatsApp Customer">
+            <i data-lucide="message-circle" style="width:13px;height:13px;"></i>
           </button>
         </div>
       </td>
     </tr>
   `).join('');
+  if (window.lucide) lucide.createIcons();
 }
 
 function viewOrder(id) {
@@ -66,28 +72,37 @@ function viewOrder(id) {
 
   const content = document.getElementById('orderDetailContent');
   content.innerHTML = `
-    <div class="detail-grid">
-      <div class="detail-item"><div class="label">Order ID</div><div class="value">#${escapeHtml(o.id)}</div></div>
-      <div class="detail-item"><div class="label">Date</div><div class="value">${formatDate(o.date)}</div></div>
-      <div class="detail-item"><div class="label">Customer</div><div class="value">${escapeHtml(o.customerName)}</div></div>
-      <div class="detail-item"><div class="label">Status</div><div class="value">${statusBadge(o.status)}</div></div>
-      <div class="detail-item"><div class="label">Payment</div><div class="value">${escapeHtml(String(o.payment || 'cod').toUpperCase())}</div></div>
-      <div class="detail-item"><div class="label">Tracking</div><div class="value">${escapeHtml(o.trackingId || 'Not assigned')}</div></div>
-      <div class="detail-item" style="grid-column:1/-1"><div class="label">Shipping Address</div><div class="value">${escapeHtml(o.shippingAddress || '—')}</div></div>
+    <div style="border-bottom:1px solid rgba(197,160,40,0.2); padding-bottom:14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <h3 style="margin:0; font-family:var(--font-serif); color:var(--gold-dark);">The Accessories Hub</h3>
+        <div style="font-size:0.75rem; color:var(--white-muted);">Official Jewellery Dispatch Packing Slip</div>
+      </div>
+      <div style="text-align:right;">
+        <strong style="color:var(--gold-dark); font-size:1.1rem;">ORDER #${escapeHtml(o.id)}</strong>
+        <div style="font-size:0.75rem; color:var(--white-muted);">${formatDate(o.date)}</div>
+      </div>
     </div>
-    <hr style="border-color:var(--grey-mid);margin:16px 0;">
-    <h4 style="color:var(--gold);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Order Items</h4>
+
+    <div class="detail-grid">
+      <div class="detail-item"><div class="label">Customer Name</div><div class="value">${escapeHtml(o.customerName)}</div></div>
+      <div class="detail-item"><div class="label">Payment Method</div><div class="value">${escapeHtml(String(o.payment || 'cod').toUpperCase())}</div></div>
+      <div class="detail-item"><div class="label">Order Status</div><div class="value">${statusBadge(o.status)}</div></div>
+      <div class="detail-item"><div class="label">Tracking Number</div><div class="value">${escapeHtml(o.trackingId || 'Not assigned')}</div></div>
+      <div class="detail-item" style="grid-column:1/-1"><div class="label">Delivery Address</div><div class="value">${escapeHtml(o.shippingAddress || '—')}</div></div>
+    </div>
+    <hr style="border-color:rgba(197,160,40,0.15);margin:16px 0;">
+    <h4 style="color:var(--gold-dark);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Enclosed Jewellery Items</h4>
     ${(o.items || []).map(i => `
-      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--grey-mid);">
-        <div class="table-img"><img src="${escapeHtml(i.image)}" alt="${escapeHtml(i.name)}"></div>
-        <div style="flex:1;"><div style="font-weight:500;">${escapeHtml(i.name)}</div><div style="font-size:0.75rem;color:var(--white-muted);">Qty: ${Number(i.qty) || 0}</div></div>
-        <div style="color:var(--gold);font-weight:600;">${formatPrice((Number(i.price) || 0) * (Number(i.qty) || 0))}</div>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+        <div class="table-img" style="width:36px;height:36px;"><img src="${escapeHtml(i.image)}" alt="${escapeHtml(i.name)}"></div>
+        <div style="flex:1;"><div style="font-weight:600;">${escapeHtml(i.name)}</div><div style="font-size:0.75rem;color:var(--white-muted);">Quantity: ${Number(i.qty) || 1}</div></div>
+        <div style="color:var(--gold-dark);font-weight:600;">${formatPrice((Number(i.price) || 0) * (Number(i.qty) || 1))}</div>
       </div>
     `).join('') || '<p style="color:var(--white-muted);">No line items recorded.</p>'}
     <div style="margin-top:16px;text-align:right;">
       <div style="font-size:0.85rem;color:var(--white-muted);margin-bottom:4px;">Subtotal: ${formatPrice(o.subtotal)}</div>
       <div style="font-size:0.85rem;color:var(--white-muted);margin-bottom:4px;">Shipping: ${o.shipping === 0 ? 'Free' : formatPrice(o.shipping)}</div>
-      <div style="font-size:1.1rem;font-weight:700;color:var(--gold);">Total: ${formatPrice(o.total)}</div>
+      <div style="font-size:1.15rem;font-weight:700;color:var(--gold-dark);">Total Amount: ${formatPrice(o.total)}</div>
     </div>
   `;
   openModal('orderDetailModal');
@@ -96,30 +111,46 @@ function viewOrder(id) {
 function openStatusUpdate(id) {
   const o = DB.orders().find(x => x.id === id);
   if (!o) return;
+  activeUpdatingOrderId = id;
   document.getElementById('statusOrderId').textContent = `#${o.id}`;
-  document.getElementById('statusSelect').value = o.status;
-  document.getElementById('trackingInput').value = o.trackingId || '';
-  document.getElementById('saveStatusBtn').onclick = () => updateOrderStatus(id);
+  document.getElementById('newStatus').value = o.status;
+  document.getElementById('trackingNumber').value = o.trackingId || '';
+  document.getElementById('trackingGroup').style.display = o.status === 'shipped' ? 'block' : 'none';
+
+  document.getElementById('newStatus').onchange = (e) => {
+    document.getElementById('trackingGroup').style.display = e.target.value === 'shipped' ? 'block' : 'none';
+  };
+
   openModal('statusModal');
 }
 
-async function updateOrderStatus(id) {
+async function saveOrderStatus() {
+  if (!activeUpdatingOrderId) return;
+  const id = activeUpdatingOrderId;
   const o = DB.orders().find(x => x.id === id);
   if (!o) return;
-  const status = String(document.getElementById('statusSelect').value).toLowerCase();
-  const trackingId = document.getElementById('trackingInput').value || o.trackingId;
 
-  const { error } = await supabase.from('orders').update({ status, tracking_id: trackingId }).eq('id', id);
+  const status = document.getElementById('newStatus').value;
+  const trackingId = document.getElementById('trackingNumber').value.trim() || o.trackingId;
+
+  showToast(`Updating order #${id}...`, 'info');
+
+  const { error } = await supabase.from('orders').update({
+    status,
+    tracking_id: trackingId
+  }).eq('id', id);
+
   if (error) {
-    showToast('Could not update the order: ' + error.message, 'error');
+    showToast('Could not update order: ' + error.message, 'error');
     return;
   }
 
-  await DB.reload();
+  await DB.logAudit('ORDER_STATUS_CHANGE', 'orders', id, `Status updated to ${status}`);
+  showToast(`Order #${id} marked as ${status}!`);
   closeAllModals();
+  await DB.reload();
   renderOrdersTable();
   renderOrderStats();
-  showToast(`Order #${id} status updated to ${status}`);
 }
 
 function sendOrderWhatsApp(id) {
@@ -127,21 +158,23 @@ function sendOrderWhatsApp(id) {
   if (!o) return;
   const settings = DB.settings();
   const customer = DB.customers().find(c => c.id === o.customerId);
-  if (!customer) { showToast('Customer not found', 'error'); return; }
+
+  const phone = (customer && customer.phone) || o.phone || '9805659501';
+  const name = (customer && customer.name) || o.customerName || 'Valued Customer';
 
   const templates = settings.whatsappTemplates || {};
   let template = '';
-  if (o.status === 'shipped') template = templates.shipped || '';
-  else if (o.status === 'delivered') template = templates.delivered || '';
-  else template = templates.orderConfirm || '';
+  if (o.status === 'shipped') template = templates.shipped || 'Hi {name}! Your order #{orderId} has been shipped (Tracking: {tracking}).';
+  else if (o.status === 'delivered') template = templates.delivered || 'Hello {name}! Your order #{orderId} has been delivered!';
+  else template = templates.orderConfirm || 'Hello {name}! Your order #{orderId} is confirmed. Total: Rs. {total}.';
 
   const message = template
-    .replace('{name}', customer.name)
-    .replace('{orderId}', o.id)
-    .replace('{total}', Number(o.total).toLocaleString())
-    .replace('{tracking}', o.trackingId || 'N/A');
+    .replace(/{name}/g, name)
+    .replace(/{orderId}/g, o.id)
+    .replace(/{total}/g, Number(o.total).toLocaleString())
+    .replace(/{tracking}/g, o.trackingId || 'N/A');
 
-  sendWhatsApp(customer.phone, message);
+  sendWhatsApp(phone, message);
 }
 
 function filterOrders(status, evt) {
@@ -149,4 +182,19 @@ function filterOrders(status, evt) {
   document.querySelectorAll('.order-filter-btn').forEach(b => b.classList.remove('active'));
   clicked?.classList.add('active');
   renderOrdersTable(status);
+}
+
+function exportOrdersCSV() {
+  const orders = DB.orders();
+  exportTableToCSV(`orders_report_${new Date().toISOString().split('T')[0]}`, orders, {
+    id: 'Order ID',
+    customerName: 'Customer',
+    date: 'Date',
+    payment: 'Payment Method',
+    status: 'Status',
+    subtotal: 'Subtotal (Rs.)',
+    shipping: 'Shipping (Rs.)',
+    total: 'Total (Rs.)',
+    shippingAddress: 'Address'
+  });
 }

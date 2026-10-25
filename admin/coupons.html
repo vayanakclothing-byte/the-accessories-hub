@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discounts & Coupons — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@1.61.0"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>Discounts & Coupons</h1>
+          <div class="topbar-breadcrumb">Growth & Feedback / Promotional Vouchers & Redemption Rules</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- Coupon KPIs -->
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon gold"><i data-lucide="tag" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statActiveCoupons">0</div>
+          <div class="stat-card-label">Active Promotion Codes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon blue"><i data-lucide="users" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statRedemptionsCount">0</div>
+          <div class="stat-card-label">Total Redemptions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon red"><i data-lucide="percent" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statDiscountsGiven">Rs. 0</div>
+          <div class="stat-card-label">Total Discount Value Given</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon green"><i data-lucide="trending-up" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statAttributedSales">Rs. 0</div>
+          <div class="stat-card-label">Campaign Attributed Sales</div>
+        </div>
+      </div>
+
+      <!-- Coupons Table -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">
+            <i data-lucide="tag" style="width:18px;height:18px;margin-right:8px;vertical-align:middle;"></i>
+            Discount Coupons
+          </div>
+          <div class="table-actions">
+            <div class="table-search">
+              <i data-lucide="search" style="width:16px;height:16px;color:var(--white-muted);"></i>
+              <input type="text" placeholder="Search coupon code..." id="couponSearch" oninput="filterCoupons()">
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="exportCouponsCSV()"><i data-lucide="download" style="width:14px;height:14px;"></i> Export</button>
+            <button class="btn btn-gold btn-sm" onclick="openCouponModal()">+ Create Coupon</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Coupon Code</th>
+                <th>Discount</th>
+                <th>Min. Spend</th>
+                <th>Usage / Limit</th>
+                <th>Expires</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="couponsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" onclick="closeAllModals()"></div>
+
+<!-- Add/Edit Coupon Modal -->
+<div class="modal" id="couponModal" style="width:480px;">
+  <div class="modal-header">
+    <h3 id="couponModalTitle">Create Promotional Coupon</h3>
+    <span class="modal-close" onclick="closeAllModals()">✕</span>
+  </div>
+  <div class="modal-body">
+    <form id="couponForm" onsubmit="saveCoupon(event)">
+      <input type="hidden" id="coupId">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Coupon Code *</label>
+          <input class="form-input" id="coupCode" required placeholder="e.g. JEWEL10" style="text-transform:uppercase;font-weight:700;letter-spacing:1px;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Discount Type *</label>
+          <select class="form-select" id="coupType" required>
+            <option value="percentage">Percentage (%)</option>
+            <option value="fixed">Fixed Amount (Rs.)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Discount Value *</label>
+          <input class="form-input" type="number" id="coupValue" required min="1" placeholder="10">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Min. Order Amount (Rs.)</label>
+          <input class="form-input" type="number" id="coupMinSpend" value="1000">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Usage Limit</label>
+          <input class="form-input" type="number" id="coupLimit" value="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expiry Date</label>
+          <input class="form-input" type="date" id="coupExpires">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description / Campaign Purpose</label>
+        <input class="form-input" id="coupDesc" placeholder="e.g. 10% off for first-time jewellery orders">
+      </div>
+
+      <div class="modal-footer" style="padding:0; border:none; margin-top:20px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button type="submit" class="btn btn-gold">Save Coupon</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/coupons-admin.js"></script>
+</body>
+</html>

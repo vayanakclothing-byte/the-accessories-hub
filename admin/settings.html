@@ -3,54 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Settings — Admin | The Accessories Hub</title>
+  <title>Settings — Admin ERP | The Accessories Hub</title>
   <link rel="stylesheet" href="/admin/css/admin.css">
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <script src="https://unpkg.com/lucide@1.61.0"></script>
 </head>
 <body>
 <div class="admin-layout">
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><span class="icon"><i data-lucide="gem" style="color: var(--gold);"></i></span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
-    <nav class="sidebar-nav">
-      <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
-        <a href="/admin/index.html" class="sidebar-link"><span class="link-icon"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i></span> Dashboard</a>
-        <a href="/admin/products.html" class="sidebar-link"><span class="link-icon"><i data-lucide="gem" style="width: 18px; height: 18px;"></i></span> Products</a>
-        <a href="/admin/categories.html" class="sidebar-link"><span class="link-icon"><i data-lucide="folder-tree" style="width: 18px; height: 18px;"></i></span> Categories</a>
-        <a href="/admin/inventory.html" class="sidebar-link"><span class="link-icon"><i data-lucide="package" style="width: 18px; height: 18px;"></i></span> Inventory <span class="badge">0</span></a>
-        <a href="/admin/orders.html" class="sidebar-link"><span class="link-icon"><i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i></span> Sales <span class="badge">0</span></a>
-      </div>
-      <div class="sidebar-section"><div class="sidebar-section-title">Management</div>
-        <a href="/admin/invoices.html" class="sidebar-link"><span class="link-icon"><i data-lucide="receipt" style="width: 18px; height: 18px;"></i></span> Invoices</a>
-        <a href="/admin/customers.html" class="sidebar-link"><span class="link-icon"><i data-lucide="users" style="width: 18px; height: 18px;"></i></span> Customers</a>
-        <a href="/admin/settings.html" class="sidebar-link active"><span class="link-icon"><i data-lucide="settings" style="width: 18px; height: 18px;"></i></span> Settings</a>
-      </div>
-    </nav>
-    <div class="sidebar-footer">
-        <a href="/"><i data-lucide="globe" style="width: 16px; height: 16px; margin-right: 8px;"></i> View Storefront</a>
-        <a href="#" onclick="handleLogout()" style="margin-top: 10px; color: var(--red);"><i data-lucide="log-out" style="width: 16px; height: 16px; margin-right: 8px;"></i> Logout</a>
-    </div>
-  </aside>
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay" onclick="document.getElementById('sidebar').classList.remove('open')"></div>
 
   <main class="admin-main">
     <div class="topbar">
       <div class="topbar-left">
         <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i data-lucide="menu"></i></button>
-        <div><h1>Settings</h1><div class="topbar-breadcrumb"><a href="index.html">Dashboard</a> / Settings</div></div>
+        <div>
+          <h1>System Settings</h1>
+          <div class="topbar-breadcrumb"><a href="index.html">ERP</a> / System & Admin / Settings</div>
+        </div>
       </div>
       <div class="topbar-right">
-          <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
-              <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
-              <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
-          </div>
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
       </div>
     </div>
 
     <div class="admin-content">
+      <!-- Financial & ERP Settings -->
+      <div class="settings-section">
+        <h3><i data-lucide="dollar-sign" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"></i> Financial & Currency Settings</h3>
+        <div class="subtitle">Tax rates, currency symbols, and valuation defaults across the ERP</div>
+        <form id="financeForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Currency Symbol</label>
+              <input class="form-input" id="cfgCurrencySymbol" placeholder="Rs.">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Currency Code</label>
+              <input class="form-input" id="cfgCurrencyCode" placeholder="NPR">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Default VAT / Tax Rate (%)</label>
+              <input class="form-input" type="number" step="0.1" id="cfgTaxRate" placeholder="13">
+              <div class="form-help">Applied to billing & invoice calculations (e.g. 13% Nepal VAT)</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Low Stock Alert Threshold</label>
+              <input class="form-input" type="number" id="cfgLowStockLimit" placeholder="5">
+              <div class="form-help">Items with stock &le; this number trigger ERP restock warnings</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Invoice Number Prefix</label>
+            <input class="form-input" id="cfgInvoicePrefix" placeholder="INV-">
+          </div>
+          <button type="submit" class="btn btn-gold" style="margin-top:8px;"><i data-lucide="save" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Save Financial Settings</button>
+        </form>
+      </div>
+
       <!-- Business Information -->
       <div class="settings-section">
         <h3><i data-lucide="building-2" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"></i> Business Information</h3>
-        <div class="subtitle">Used in invoices and order communications</div>
+        <div class="subtitle">Used in tax invoices, customer receipts, and order communications</div>
         <form id="businessForm">
           <div class="form-row">
             <div class="form-group"><label class="form-label">Business Name</label><input class="form-input" id="bizName" placeholder="The Accessories Hub"></div>
@@ -64,10 +83,10 @@
         </form>
       </div>
 
-      <!-- WhatsApp -->
+      <!-- WhatsApp Notifications -->
       <div class="settings-section">
         <h3><i data-lucide="message-circle" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"></i> WhatsApp Notifications</h3>
-        <div class="subtitle">Configure WhatsApp message templates for order lifecycle</div>
+        <div class="subtitle">Configure automated WhatsApp message templates for order lifecycle</div>
         <form id="whatsappForm">
           <div class="form-group">
             <label class="form-label">WhatsApp Business Number</label>
@@ -98,17 +117,20 @@
 
       <!-- Shipping Providers -->
       <div class="settings-section">
-        <h3><i data-lucide="truck" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"></i> Shipping Providers</h3>
-        <div class="subtitle">Manage local shipping providers and rates</div>
+        <h3><i data-lucide="truck" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"></i> Shipping Providers & Couriers</h3>
+        <div class="subtitle">Manage local shipping providers, delivery rates, and free shipping rules</div>
         <div id="shippingProviders"></div>
         <button class="btn btn-outline" onclick="addShippingProvider()" style="margin-top:12px;">+ Add Provider</button>
       </div>
 
-      <!-- Danger Zone -->
-      <div class="settings-section" style="border-color:rgba(231,76,60,0.3);">
-        <h3 style="color:var(--red);"><i data-lucide="alert-octagon" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"></i> Danger Zone</h3>
-        <div class="subtitle">Irreversible actions</div>
-        <button class="btn btn-danger" onclick="resetData()"><i data-lucide="trash-2" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Reset All Data to Defaults</button>
+      <!-- Data Backup & Safety -->
+      <div class="settings-section">
+        <h3><i data-lucide="database" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"></i> Database & State Management</h3>
+        <div class="subtitle">Export complete ERP backup snapshot or refresh synced caches</div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn btn-outline" onclick="exportDataBackup()"><i data-lucide="download" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Export ERP JSON Backup</button>
+          <button class="btn btn-ghost" onclick="refreshAdminData()"><i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Sync & Refresh Local Cache</button>
+        </div>
       </div>
     </div>
   </main>

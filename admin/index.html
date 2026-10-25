@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — Admin | The Accessories Hub</title>
+  <title>ERP Overview — Admin | The Accessories Hub</title>
   <link rel="stylesheet" href="/admin/css/admin.css">
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1"></script>
@@ -11,88 +11,183 @@
 </head>
 <body>
 <div class="admin-layout">
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><span class="icon"><i data-lucide="gem" style="color: var(--gold);"></i></span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
-    <nav class="sidebar-nav">
-      <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
-        <a href="/admin/index.html" class="sidebar-link active"><span class="link-icon"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i></span> Dashboard</a>
-        <a href="/admin/products.html" class="sidebar-link"><span class="link-icon"><i data-lucide="gem" style="width: 18px; height: 18px;"></i></span> Products</a>
-        <a href="/admin/categories.html" class="sidebar-link"><span class="link-icon"><i data-lucide="folder-tree" style="width: 18px; height: 18px;"></i></span> Categories</a>
-        <a href="/admin/inventory.html" class="sidebar-link"><span class="link-icon"><i data-lucide="package" style="width: 18px; height: 18px;"></i></span> Inventory <span class="badge">0</span></a>
-        <a href="/admin/orders.html" class="sidebar-link"><span class="link-icon"><i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i></span> Sales <span class="badge">0</span></a>
-      </div>
-      <div class="sidebar-section"><div class="sidebar-section-title">Management</div>
-        <a href="/admin/invoices.html" class="sidebar-link"><span class="link-icon"><i data-lucide="receipt" style="width: 18px; height: 18px;"></i></span> Invoices</a>
-        <a href="/admin/customers.html" class="sidebar-link"><span class="link-icon"><i data-lucide="users" style="width: 18px; height: 18px;"></i></span> Customers</a>
-        <a href="/admin/settings.html" class="sidebar-link"><span class="link-icon"><i data-lucide="settings" style="width: 18px; height: 18px;"></i></span> Settings</a>
-      </div>
-    </nav>
-    <div class="sidebar-footer">
-        <a href="/"><i data-lucide="globe" style="width: 16px; height: 16px; margin-right: 8px;"></i> View Storefront</a>
-        <a href="#" onclick="handleLogout()" style="margin-top: 10px; color: var(--red);"><i data-lucide="log-out" style="width: 16px; height: 16px; margin-right: 8px;"></i> Logout</a>
-    </div>
-  </aside>
-  <div class="sidebar-overlay" onclick="document.getElementById('sidebar').classList.remove('open')"></div>
+  <aside class="sidebar" id="sidebar"></aside>
 
   <main class="admin-main">
     <div class="topbar">
       <div class="topbar-left">
-        <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i data-lucide="menu"></i></button>
-        <div><h1>Dashboard Overview</h1><div class="topbar-breadcrumb">Welcome back, Admin</div></div>
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>ERP Overview</h1>
+          <div class="topbar-breadcrumb">The Accessories Hub / Real-time Business Intelligence</div>
+        </div>
       </div>
       <div class="topbar-right">
-          <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
-              <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
-              <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
-          </div>
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
       </div>
     </div>
 
     <div class="admin-content">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-card-header"><div class="stat-card-icon gold"><i data-lucide="banknote" style="width: 20px; height: 20px;"></i></div><span class="stat-card-trend up"><i data-lucide="arrow-up-right" style="width: 12px; height: 12px;"></i> 12%</span></div>
-          <div class="stat-card-value" id="statRevenue">Rs. 0</div>
-          <div class="stat-card-label">Total Revenue</div>
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <span style="font-size:0.8rem; font-weight:600; color:var(--white-muted); text-transform:uppercase; letter-spacing:0.5px;">Period:</span>
+          <button class="date-btn" data-period="today" onclick="setDashboardPeriod('today')">Today</button>
+          <button class="date-btn" data-period="7d" onclick="setDashboardPeriod('7d')">7 Days</button>
+          <button class="date-btn active" data-period="30d" onclick="setDashboardPeriod('30d')">30 Days</button>
+          <button class="date-btn" data-period="year" onclick="setDashboardPeriod('year')">This Year</button>
+          <button class="date-btn" data-period="all" onclick="setDashboardPeriod('all')">All Time</button>
         </div>
+        <div class="filter-group">
+          <button class="btn btn-sm btn-outline" onclick="DB.reload().then(() => { renderDashboard(); showToast('Refreshed latest database metrics'); })">
+            <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Refresh
+          </button>
+          <button class="btn btn-sm btn-gold" onclick="exportDashboardSummary()">
+            <i data-lucide="download" style="width:14px;height:14px;"></i> Export Summary
+          </button>
+        </div>
+      </div>
+
+      <!-- Primary Financial KPIs (6-col grid) -->
+      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 20px;">
         <div class="stat-card">
-          <div class="stat-card-header"><div class="stat-card-icon blue"><i data-lucide="shopping-cart" style="width: 20px; height: 20px;"></i></div><span class="stat-card-trend up"><i data-lucide="arrow-up-right" style="width: 12px; height: 12px;"></i> 5%</span></div>
-          <div class="stat-card-value" id="statOrders">0</div>
+          <div class="stat-card-header">
+            <div class="stat-card-icon gold"><i data-lucide="banknote" style="width: 20px; height: 20px;"></i></div>
+            <span class="stat-card-change up" id="grossTrend">Gross Sales</span>
+          </div>
+          <div class="stat-card-value" id="statGrossSales">Rs. 0</div>
+          <div class="stat-card-label">Merchandise Volume</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon green"><i data-lucide="dollar-sign" style="width: 20px; height: 20px;"></i></div>
+            <span class="badge badge-green">Net Sales</span>
+          </div>
+          <div class="stat-card-value" id="statNetSales">Rs. 0</div>
+          <div class="stat-card-label">Gross − Discounts & Returns</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon blue"><i data-lucide="trending-up" style="width: 20px; height: 20px;"></i></div>
+            <span class="badge badge-blue">Profitability</span>
+          </div>
+          <div class="stat-card-value" id="statGrossProfit">Rs. 0</div>
+          <div class="stat-card-label">Gross Profit (Net − COGS)</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon purple"><i data-lucide="wallet" style="width: 20px; height: 20px;"></i></div>
+            <span class="badge badge-gold">Net Profit</span>
+          </div>
+          <div class="stat-card-value" id="statNetProfit">Rs. 0</div>
+          <div class="stat-card-label">Gross Profit − Operating Exp.</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon orange"><i data-lucide="credit-card" style="width: 20px; height: 20px;"></i></div>
+            <span class="badge badge-orange">Expenses</span>
+          </div>
+          <div class="stat-card-value" id="statExpenses">Rs. 0</div>
+          <div class="stat-card-label">Operating Expenses</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon blue"><i data-lucide="shopping-bag" style="width: 20px; height: 20px;"></i></div>
+            <span class="badge badge-blue">Orders</span>
+          </div>
+          <div class="stat-card-value" id="statTotalOrders">0</div>
           <div class="stat-card-label">Orders Received</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-card-header"><div class="stat-card-icon purple"><i data-lucide="users" style="width: 20px; height: 20px;"></i></div><span class="stat-card-trend up"><i data-lucide="arrow-up-right" style="width: 12px; height: 12px;"></i> 8%</span></div>
-          <div class="stat-card-value" id="statCustomers">0</div>
-          <div class="stat-card-label">Total Customers</div>
+      </div>
+
+      <!-- Secondary Operational KPIs (4-col grid) -->
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+        <div class="stat-card" style="padding:16px;">
+          <div style="font-size:0.75rem; color:var(--white-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Collected Revenue</div>
+          <div style="font-size:1.3rem; font-weight:700; color:var(--white);" id="statRevenueCollected">Rs. 0</div>
+          <div style="font-size:0.75rem; color:var(--green); margin-top:4px;">Verified Payments</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-card-header"><div class="stat-card-icon green"><i data-lucide="check-circle" style="width: 20px; height: 20px;"></i></div></div>
-          <div class="stat-card-value" id="statProducts">0</div>
-          <div class="stat-card-label">Active Products</div>
+        <div class="stat-card" style="padding:16px;">
+          <div style="font-size:0.75rem; color:var(--white-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Inventory Valuation</div>
+          <div style="font-size:1.3rem; font-weight:700; color:var(--white);" id="statInventoryValuation">Rs. 0</div>
+          <div style="font-size:0.75rem; color:var(--gold); margin-top:4px;" id="statTotalStockUnits">0 total units on-hand</div>
+        </div>
+        <div class="stat-card" style="padding:16px;">
+          <div style="font-size:0.75rem; color:var(--white-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Low-Stock Warnings</div>
+          <div style="font-size:1.3rem; font-weight:700; color:var(--red);" id="statLowStockCount">0</div>
+          <div style="font-size:0.75rem; color:var(--white-muted); margin-top:4px;">Items at or below reorder level</div>
+        </div>
+        <div class="stat-card" style="padding:16px;">
+          <div style="font-size:0.75rem; color:var(--white-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Average Order Value (AOV)</div>
+          <div style="font-size:1.3rem; font-weight:700; color:var(--white);" id="statAOV">Rs. 0</div>
+          <div style="font-size:0.75rem; color:var(--blue); margin-top:4px;" id="statTotalCustomers">0 Customers</div>
         </div>
       </div>
 
+      <!-- Charts Grid -->
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-card-header"><div class="chart-card-title" style="display:flex;align-items:center;gap:8px;"><i data-lucide="trending-up" style="width:18px;height:18px;color:var(--gold);"></i> Revenue Analysis</div></div>
-          <div class="chart-container"><canvas id="salesChart"></canvas></div>
+          <div class="chart-card-header">
+            <div class="chart-card-title" style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="trending-up" style="width:18px;height:18px;color:var(--gold);"></i> Revenue & Orders Trend
+            </div>
+            <div style="font-size:0.75rem; color:var(--white-muted);" id="chartPeriodLabel">Daily Performance</div>
+          </div>
+          <div class="chart-container" style="position:relative; height:280px;"><canvas id="salesChart"></canvas></div>
         </div>
+
         <div class="chart-card">
-          <div class="chart-card-header"><div class="chart-card-title" style="display:flex;align-items:center;gap:8px;"><i data-lucide="gem" style="width:18px;height:18px;color:var(--gold);"></i> Collection Split</div></div>
-          <div class="chart-container"><canvas id="collectionChart"></canvas></div>
+          <div class="chart-card-header">
+            <div class="chart-card-title" style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="pie-chart" style="width:18px;height:18px;color:var(--gold);"></i> Payment Method Split
+            </div>
+          </div>
+          <div class="chart-container" style="position:relative; height:280px;"><canvas id="paymentChart"></canvas></div>
         </div>
       </div>
 
+      <!-- Recent Orders & Low Stock Alerts -->
       <div class="chart-grid" style="grid-template-columns: 2fr 1fr;">
         <div class="table-card">
-          <div class="table-header"><div class="table-title" style="display:flex;align-items:center;gap:8px;"><i data-lucide="shopping-cart" style="width:18px;height:18px;color:var(--gold);"></i> Recent Orders</div><a href="orders.html" class="btn btn-sm btn-outline">View All</a></div>
-          <table>
-            <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
-            <tbody id="recentOrdersBody"></tbody>
-          </table>
+          <div class="table-header">
+            <div class="table-title" style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="shopping-cart" style="width:18px;height:18px;color:var(--gold);"></i> Recent Orders
+            </div>
+            <a href="orders.html" class="btn btn-sm btn-outline">View All Orders</a>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrdersBody"></tbody>
+            </table>
+          </div>
         </div>
+
         <div class="chart-card">
-          <div class="chart-card-header"><div class="chart-card-title" style="display:flex;align-items:center;gap:8px;"><i data-lucide="alert-triangle" style="width:18px;height:18px;color:var(--red);"></i> Low Stock Alerts</div></div>
+          <div class="chart-card-header">
+            <div class="chart-card-title" style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="alert-triangle" style="width:18px;height:18px;color:var(--red);"></i> Critical Stock Alerts
+            </div>
+            <a href="inventory.html" class="btn btn-sm btn-ghost" style="font-size:0.75rem;">Manage</a>
+          </div>
           <div id="lowStockAlerts" style="padding:0 16px 16px;"></div>
         </div>
       </div>
@@ -102,79 +197,19 @@
 
 <div class="modal-overlay" onclick="closeAllModals()"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/supabase-client.js"></script>
-  <script src="/js/admin-guard.js"></script>
-  
-  <style>
-    /* Gold Accented Loading Spinner */
-    .admin-loader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--black);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease;
-    }
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 3px solid rgba(212, 175, 55, 0.1);
-      border-top: 3px solid var(--gold);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-      box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    
-    /* Flashing Icon for Out of Stock */
-    .flash-alert {
-      animation: alert-pulse 1.5s infinite;
-      color: var(--red);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-weight: 600;
-      font-size: 0.75rem;
-    }
-    @keyframes alert-pulse {
-      0% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.1); color: var(--gold); }
-      100% { opacity: 1; transform: scale(1); }
-    }
+<!-- Gold Accented Loading Spinner -->
+<div id="adminLoader" class="admin-loader">
+  <div class="spinner"></div>
+  <div style="color: var(--gold); letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem;">The Accessories Hub ERP</div>
+</div>
 
-    .quick-action-btn {
-        padding: 4px 8px;
-        font-size: 0.7rem;
-        border-radius: 4px;
-        background: rgba(212, 175, 55, 0.1);
-        color: var(--gold);
-        border: 1px solid var(--gold);
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .quick-action-btn:hover {
-        background: var(--gold);
-        color: var(--black);
-    }
-  </style>
-
-  <div id="adminLoader" class="admin-loader">
-    <div class="spinner"></div>
-    <div style="color: var(--gold); letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem;">The Accessories Hub</div>
-  </div>
-
-  <script src="/admin/js/admin-app.js"></script>
-  <script src="/admin/js/dashboard.js"></script>
-  <script>
-    lucide.createIcons();
-  </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/dashboard.js"></script>
+<script>
+  if (window.lucide) lucide.createIcons();
+</script>
 </body>
 </html>

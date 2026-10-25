@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales & Revenue — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1"></script>
+  <script src="https://unpkg.com/lucide@1.61.0"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>Sales & Revenue Analytics</h1>
+          <div class="topbar-breadcrumb">Finance & Commerce / Gross & Net Sales, Margin & Profitability</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <span style="font-size:0.8rem; font-weight:600; color:var(--white-muted); text-transform:uppercase;">Timeframe:</span>
+          <button class="date-btn" data-range="7d" onclick="setSalesRange('7d')">7 Days</button>
+          <button class="date-btn active" data-range="30d" onclick="setSalesRange('30d')">30 Days</button>
+          <button class="date-btn" data-range="year" onclick="setSalesRange('year')">This Year</button>
+          <button class="date-btn" data-range="all" onclick="setSalesRange('all')">All Time</button>
+        </div>
+        <div class="filter-group">
+          <button class="btn btn-outline btn-sm" onclick="exportSalesCSV()"><i data-lucide="download" style="width:14px;height:14px;"></i> Export Detailed Sales CSV</button>
+        </div>
+      </div>
+
+      <!-- Financial Metrics Grid -->
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon gold"><i data-lucide="banknote" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statGrossRevenue">Rs. 0</div>
+          <div class="stat-card-label">Gross Merchandise Value</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon green"><i data-lucide="trending-up" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statNetRevenue">Rs. 0</div>
+          <div class="stat-card-label">Net Sales (Realized)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon blue"><i data-lucide="pie-chart" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statEstimatedMargin">0%</div>
+          <div class="stat-card-label">Gross Margin %</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon purple"><i data-lucide="shopping-bag" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statUnitsSold">0</div>
+          <div class="stat-card-label">Jewellery Units Sold</div>
+        </div>
+      </div>
+
+      <!-- Visual Charts -->
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title"><i data-lucide="bar-chart-2" style="width:18px;height:18px;color:var(--gold);"></i> Sales by Jewellery Category</div>
+          </div>
+          <div class="chart-container" style="position:relative; height:280px;"><canvas id="categorySalesChart"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title"><i data-lucide="credit-card" style="width:18px;height:18px;color:var(--gold);"></i> Revenue by Payment Method</div>
+          </div>
+          <div class="chart-container" style="position:relative; height:280px;"><canvas id="paymentMethodsChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Product Profitability Table -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">
+            <i data-lucide="gem" style="width:18px;height:18px;margin-right:8px;vertical-align:middle;"></i>
+            Product Performance & Profitability
+          </div>
+          <div class="table-actions">
+            <div class="table-search">
+              <i data-lucide="search" style="width:16px;height:16px;color:var(--white-muted);"></i>
+              <input type="text" placeholder="Search product..." id="prodPerfSearch" oninput="filterProductPerformance()">
+            </div>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Selling Price</th>
+                <th>Est. Unit Cost</th>
+                <th>Units Sold</th>
+                <th>Gross Revenue</th>
+                <th>Est. Gross Profit</th>
+                <th>Margin</th>
+              </tr>
+            </thead>
+            <tbody id="productPerfTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/sales-admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications & Tasks — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@1.61.0"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>Notifications & Business Tasks</h1>
+          <div class="topbar-breadcrumb">System & Administration / Actionable Real-time Operational Alerts</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- Notification Action Bar -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <span style="font-size:0.85rem; font-weight:600; color:var(--white);">Active Operational Feed</span>
+        </div>
+        <div class="filter-group">
+          <button class="btn btn-outline btn-sm" onclick="markAllNotificationsRead()">
+            <i data-lucide="check-check" style="width:14px;height:14px;"></i> Mark All as Read
+          </button>
+        </div>
+      </div>
+
+      <!-- Feed Container -->
+      <div class="table-card" style="padding:24px;">
+        <div id="notificationsFeedContainer"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/notifications-admin.js"></script>
+</body>
+</html>

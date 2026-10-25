@@ -3,57 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Customers — Admin | The Accessories Hub</title>
+  <title>Customers & CRM — Admin | The Accessories Hub</title>
   <link rel="stylesheet" href="/admin/css/admin.css">
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <script src="https://unpkg.com/lucide@1.61.0"></script>
 </head>
 <body>
 <div class="admin-layout">
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><span class="icon"><i data-lucide="gem" style="color: var(--gold);"></i></span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
-    <nav class="sidebar-nav">
-      <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
-        <a href="/admin/index.html" class="sidebar-link"><span class="link-icon"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i></span> Dashboard</a>
-        <a href="/admin/products.html" class="sidebar-link"><span class="link-icon"><i data-lucide="gem" style="width: 18px; height: 18px;"></i></span> Products</a>
-        <a href="/admin/categories.html" class="sidebar-link"><span class="link-icon"><i data-lucide="folder-tree" style="width: 18px; height: 18px;"></i></span> Categories</a>
-        <a href="/admin/inventory.html" class="sidebar-link"><span class="link-icon"><i data-lucide="package" style="width: 18px; height: 18px;"></i></span> Inventory <span class="badge">0</span></a>
-        <a href="/admin/orders.html" class="sidebar-link"><span class="link-icon"><i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i></span> Sales <span class="badge">0</span></a>
-      </div>
-      <div class="sidebar-section"><div class="sidebar-section-title">Management</div>
-        <a href="/admin/invoices.html" class="sidebar-link"><span class="link-icon"><i data-lucide="receipt" style="width: 18px; height: 18px;"></i></span> Invoices</a>
-        <a href="/admin/customers.html" class="sidebar-link active"><span class="link-icon"><i data-lucide="users" style="width: 18px; height: 18px;"></i></span> Customers</a>
-        <a href="/admin/settings.html" class="sidebar-link"><span class="link-icon"><i data-lucide="settings" style="width: 18px; height: 18px;"></i></span> Settings</a>
-      </div>
-    </nav>
-    <div class="sidebar-footer">
-        <a href="/"><i data-lucide="globe" style="width: 16px; height: 16px; margin-right: 8px;"></i> View Storefront</a>
-        <a href="#" onclick="handleLogout()" style="margin-top: 10px; color: var(--red);"><i data-lucide="log-out" style="width: 16px; height: 16px; margin-right: 8px;"></i> Logout</a>
-    </div>
-  </aside>
-  <div class="sidebar-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;opacity:0;pointer-events:none;transition:opacity 0.3s;"></div>
+  <aside class="sidebar" id="sidebar"></aside>
 
   <main class="admin-main">
     <div class="topbar">
       <div class="topbar-left">
-        <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i data-lucide="menu"></i></button>
-        <div><h1>Customers</h1><div class="topbar-breadcrumb"><a href="index.html">Dashboard</a> / Customers</div></div>
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div><h1>Customers & CRM</h1><div class="topbar-breadcrumb">Finance & Commerce / Customer Directory & Purchase Profiles</div></div>
       </div>
       <div class="topbar-right">
-          <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
-              <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
-              <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
-          </div>
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
       </div>
     </div>
 
     <div class="admin-content">
       <div class="table-card">
         <div class="table-header">
-          <div class="table-title"><i data-lucide="users" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i> Customer CRM</div>
+          <div class="table-title"><i data-lucide="users" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i> Customer Directory</div>
           <div class="table-actions">
-            <div class="table-search"><i data-lucide="search" style="width: 16px; height: 16px; margin-right: 8px; color: var(--white-muted);"></i><input type="text" placeholder="Search by name, email..." id="customerSearch" oninput="searchCustomers()"></div>
-            <button class="btn btn-gold" onclick="openAddCustomer()">+ Add Customer</button>
+            <div class="table-search"><i data-lucide="search" style="width: 16px; height: 16px; margin-right: 8px; color: var(--white-muted);"></i><input type="text" placeholder="Search name, phone..." id="customerSearch" oninput="searchCustomers()"></div>
+            <button class="btn btn-outline btn-sm" onclick="exportCustomersCSV()"><i data-lucide="download" style="width:14px;height:14px;"></i> Export CSV</button>
+            <button class="btn btn-gold btn-sm" onclick="openAddCustomer()">+ Add Customer</button>
           </div>
         </div>
         <div style="overflow-x:auto;">
@@ -71,22 +51,23 @@
 
 <!-- Customer Detail Modal -->
 <div class="modal wide" id="customerDetailModal">
-  <div class="modal-header"><h3>Customer Details</h3><span class="modal-close" onclick="closeAllModals()">✕</span></div>
+  <div class="modal-header"><h3>Customer Profile & Order History</h3><span class="modal-close" onclick="closeAllModals()">✕</span></div>
   <div class="modal-body" id="customerDetailContent"></div>
 </div>
 
 <!-- Add/Edit Customer Modal -->
-<div class="modal" id="customerModal">
+<div class="modal" id="customerModal" style="width:480px;">
   <div class="modal-header"><h3 id="customerModalTitle">Add Customer</h3><span class="modal-close" onclick="closeAllModals()">✕</span></div>
   <div class="modal-body">
     <form id="customerForm" onsubmit="saveCustomer(event)">
+      <input type="hidden" id="cId">
       <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="cName" required placeholder="e.g. Priya Sharma"></div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Email *</label><input class="form-input" type="email" id="cEmail" required placeholder="email@example.com"></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="cEmail" placeholder="email@example.com"></div>
         <div class="form-group"><label class="form-label">Phone *</label><input class="form-input" id="cPhone" required placeholder="+977 98XXXXXXXX"></div>
       </div>
-      <div class="form-group"><label class="form-label">Address</label><input class="form-input" id="cAddress" placeholder="City, Area"></div>
-      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="cNotes" placeholder="Internal notes about this customer..."></textarea></div>
+      <div class="form-group"><label class="form-label">Address</label><input class="form-input" id="cAddress" placeholder="City, Area, Landmark"></div>
+      <div class="form-group"><label class="form-label">Internal Support Notes</label><textarea class="form-textarea" id="cNotes" placeholder="Preferences, special packaging requests..."></textarea></div>
       <div class="modal-footer" style="padding:0;border:none;margin-top:18px;">
         <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
         <button type="submit" class="btn btn-gold">Save Customer</button>
@@ -95,11 +76,11 @@
   </div>
 </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/supabase-client.js"></script>
-  <script src="/js/admin-guard.js"></script>
-  <script src="/admin/js/admin-app.js"></script>
-  <script src="/admin/js/customers-admin.js"></script>
-  <script>lucide.createIcons();</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/customers-admin.js"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shipping & Delivery — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@1.61.0"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>Shipping & Delivery Logistics</h1>
+          <div class="topbar-breadcrumb">Core Operations / Courier Assignments & Package Tracking</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- Shipment KPIs -->
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon orange"><i data-lucide="clock" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statPendingDispatch">0</div>
+          <div class="stat-card-label">Awaiting Dispatch</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon blue"><i data-lucide="truck" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statInTransit">0</div>
+          <div class="stat-card-label">In Transit / Out for Delivery</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon green"><i data-lucide="check-circle" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statDeliveredShipments">0</div>
+          <div class="stat-card-label">Successfully Delivered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon red"><i data-lucide="alert-triangle" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statReturnedShipments">0</div>
+          <div class="stat-card-label">Delivery Exceptions / RTO</div>
+        </div>
+      </div>
+
+      <!-- Shipments Table Card -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">
+            <i data-lucide="package" style="width:18px;height:18px;margin-right:8px;vertical-align:middle;"></i>
+            Consignments & Courier Dispatches
+          </div>
+          <div class="table-actions">
+            <select class="form-select" id="shipmentStatusFilter" onchange="filterShipments()" style="padding:6px 12px;font-size:0.85rem;width:160px;">
+              <option value="">All Statuses</option>
+              <option value="pending">Awaiting Dispatch</option>
+              <option value="picked_up">Picked Up</option>
+              <option value="in_transit">In Transit</option>
+              <option value="delivered">Delivered</option>
+              <option value="failed">Failed Delivery</option>
+              <option value="returned">Returned to Origin</option>
+            </select>
+            <div class="table-search">
+              <i data-lucide="search" style="width:16px;height:16px;color:var(--white-muted);"></i>
+              <input type="text" placeholder="Search tracking #, customer..." id="shipmentSearch" oninput="filterShipments()">
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="exportShipmentsCSV()"><i data-lucide="download" style="width:14px;height:14px;"></i> Export</button>
+            <button class="btn btn-gold btn-sm" onclick="openCreateShipmentModal()">+ Dispatch Order</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Destination Address</th>
+                <th>Courier</th>
+                <th>Tracking #</th>
+                <th>Dispatched Date</th>
+                <th>Delivery Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="shipmentsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" onclick="closeAllModals()"></div>
+
+<!-- Dispatch / Shipment Modal -->
+<div class="modal" id="shipmentModal" style="width:520px;">
+  <div class="modal-header">
+    <h3 id="shipmentModalTitle">Dispatch Package</h3>
+    <span class="modal-close" onclick="closeAllModals()">✕</span>
+  </div>
+  <div class="modal-body">
+    <form id="shipmentForm" onsubmit="saveShipment(event)">
+      <input type="hidden" id="shipId">
+      <div class="form-group">
+        <label class="form-label">Select Order to Dispatch *</label>
+        <select class="form-select" id="shipOrderSelect" required onchange="onShipOrderSelect()">
+          <option value="">Choose an order...</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Courier Partner *</label>
+          <select class="form-select" id="shipCourier" required>
+            <option value="Nepal Post">Nepal Post</option>
+            <option value="Pathao Courier">Pathao Courier</option>
+            <option value="Birgunj City Express">Birgunj City Express (Local)</option>
+            <option value="Sundarban Courier">Sundarban Courier</option>
+            <option value="Self Pickup">Storefront Pickup</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tracking Number / AWB *</label>
+          <input class="form-input" id="shipTracking" required placeholder="e.g. NP-98234710">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Shipping Cost Paid (Rs.)</label>
+          <input class="form-input" type="number" id="shipCost" value="150">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current Status</label>
+          <select class="form-select" id="shipStatus">
+            <option value="in_transit" selected>In Transit</option>
+            <option value="picked_up">Picked Up by Courier</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Delivery Notes / Landmark</label>
+        <input class="form-input" id="shipNotes" placeholder="Optional courier instructions">
+      </div>
+
+      <div class="modal-footer" style="padding:0; border:none; margin-top:20px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button type="submit" class="btn btn-gold">Confirm Dispatch & Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/shipping-admin.js"></script>
+</body>
+</html>

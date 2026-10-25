@@ -10,27 +10,7 @@
 </head>
 <body>
 <div class="admin-layout">
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><span class="icon"><i data-lucide="gem" style="color: var(--gold);"></i></span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
-    <nav class="sidebar-nav">
-      <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
-        <a href="/admin/index.html" class="sidebar-link"><span class="link-icon"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i></span> Dashboard</a>
-        <a href="/admin/products.html" class="sidebar-link active"><span class="link-icon"><i data-lucide="gem" style="width: 18px; height: 18px;"></i></span> Products</a>
-        <a href="/admin/categories.html" class="sidebar-link"><span class="link-icon"><i data-lucide="folder-tree" style="width: 18px; height: 18px;"></i></span> Categories</a>
-        <a href="/admin/inventory.html" class="sidebar-link"><span class="link-icon"><i data-lucide="package" style="width: 18px; height: 18px;"></i></span> Inventory <span class="badge">0</span></a>
-        <a href="/admin/orders.html" class="sidebar-link"><span class="link-icon"><i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i></span> Sales <span class="badge">0</span></a>
-      </div>
-      <div class="sidebar-section"><div class="sidebar-section-title">Management</div>
-        <a href="/admin/invoices.html" class="sidebar-link"><span class="link-icon"><i data-lucide="receipt" style="width: 18px; height: 18px;"></i></span> Invoices</a>
-        <a href="/admin/customers.html" class="sidebar-link"><span class="link-icon"><i data-lucide="users" style="width: 18px; height: 18px;"></i></span> Customers</a>
-        <a href="/admin/settings.html" class="sidebar-link"><span class="link-icon"><i data-lucide="settings" style="width: 18px; height: 18px;"></i></span> Settings</a>
-      </div>
-    </nav>
-    <div class="sidebar-footer">
-        <a href="/"><i data-lucide="globe" style="width: 16px; height: 16px; margin-right: 8px;"></i> View Storefront</a>
-        <a href="#" onclick="handleLogout()" style="margin-top: 10px; color: var(--red);"><i data-lucide="log-out" style="width: 16px; height: 16px; margin-right: 8px;"></i> Logout</a>
-    </div>
-  </aside>
+  <aside class="sidebar" id="sidebar"></aside>
 
   <main class="admin-main">
     <div class="topbar">
@@ -59,6 +39,7 @@
               <option value="necklaces">Necklaces</option>
             </select>
             <div class="table-search"><i data-lucide="search" style="width: 16px; height: 16px; margin-right: 8px; color: var(--white-muted);"></i><input type="text" placeholder="Search products..." id="productSearch" oninput="searchProducts()"></div>
+            <button class="btn btn-outline btn-sm" onclick="exportProductsCSV()"><i data-lucide="download" style="width:14px;height:14px;"></i> Export</button>
             <button class="btn btn-gold" onclick="openAddProduct()">+ Add Product</button>
           </div>
         </div>
@@ -82,7 +63,8 @@
     <form id="productForm">
       <div class="form-row">
         <div class="form-group" style="flex:2;"><label class="form-label">Product Name *</label><input class="form-input" id="pName" required placeholder="e.g. Elegant Temple Necklace"></div>
-        <div class="form-group"><label class="form-label">Price (Rs.) *</label><input class="form-input" type="number" id="pPrice" required placeholder="2500"></div>
+        <div class="form-group"><label class="form-label">Selling Price (Rs.) *</label><input class="form-input" type="number" id="pPrice" required placeholder="2500"></div>
+        <div class="form-group"><label class="form-label">Cost Price (Rs.)</label><input class="form-input" type="number" id="pCostPrice" placeholder="1200"></div>
         <div class="form-group"><label class="form-label">Original Price</label><input class="form-input" type="number" id="pOriginalPrice" placeholder="3000"></div>
       </div>
       <div class="form-row">

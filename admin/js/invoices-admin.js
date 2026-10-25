@@ -1,5 +1,5 @@
 /* ============================================================
-   Invoice Generator — jsPDF
+   Invoice Generator — jsPDF & Billing ERP
    ============================================================ */
 document.addEventListener('DOMContentLoaded', async () => {
   await loadData();
@@ -12,7 +12,7 @@ function renderInvoicesTable() {
   if (!tbody) return;
 
   if (invoices.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--white-muted);padding:24px;">No invoices yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--white-muted);padding:24px;">No invoices generated yet.</td></tr>';
     return;
   }
 
@@ -70,12 +70,37 @@ async function generateInvoice() {
   };
   invoices.push(newInv);
   await DB.saveInvoices(invoices);
+
+  // Audit log
+  if (typeof DB.logAudit === 'function') {
+    DB.logAudit('create', 'invoice', invId, { orderId: order.id, customer: order.customerName, amount: order.total });
+  }
+
   closeAllModals();
   renderInvoicesTable();
   showToast(`Invoice ${invId} generated!`);
 
   // Auto-download PDF
   setTimeout(() => downloadInvoice(invId), 500);
+}
+
+function exportInvoicesCSV() {
+  const invoices = DB.invoices();
+  if (!invoices.length) {
+    showToast('No invoices to export', 'error');
+    return;
+  }
+  const headers = ['Invoice ID', 'Order ID', 'Customer Name', 'Amount (Rs)', 'Date', 'Status'];
+  const rows = invoices.map(i => [
+    i.id,
+    '#' + i.orderId,
+    i.customerName,
+    i.amount,
+    i.date,
+    i.status
+  ]);
+  exportTableToCSV(`invoices_export_${new Date().toISOString().split('T')[0]}.csv`, rows, headers);
+  showToast('Invoices exported to CSV');
 }
 
 function downloadInvoice(invId) {
@@ -180,7 +205,7 @@ function downloadInvoice(invId) {
   doc.setTextColor(150, 150, 150);
   doc.setFont('helvetica', 'normal');
   doc.text('Thank you for shopping with The Accessories Hub! 💎', 105, footerY, { align: 'center' });
-  doc.text(`${settings.businessAddress} | ${settings.businessPhone} | ${settings.businessEmail}`, 105, footerY + 6, { align: 'center' });
+  doc.text(`${settings.businessAddress || 'Kathmandu, Nepal'} | ${settings.businessPhone || '+977'} | ${settings.businessEmail || ''}`, 105, footerY + 6, { align: 'center' });
 
   // Payment badge
   doc.setFillColor(212, 175, 55);

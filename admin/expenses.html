@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expenses & Finance — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1"></script>
+  <script src="https://unpkg.com/lucide@1.61.0"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>Expenses & Operational Finance</h1>
+          <div class="topbar-breadcrumb">Finance & Commerce / Operating Expenses & Cash Outflow</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- KPI Stats -->
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon orange"><i data-lucide="credit-card" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statTotalExpenses">Rs. 0</div>
+          <div class="stat-card-label">Total Recorded Expenses</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon green"><i data-lucide="check-circle" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statPaidExpenses">Rs. 0</div>
+          <div class="stat-card-label">Paid Out</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon red"><i data-lucide="clock" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statPendingExpenses">Rs. 0</div>
+          <div class="stat-card-label">Pending / Unpaid Payables</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon blue"><i data-lucide="calendar" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statMonthExpenses">Rs. 0</div>
+          <div class="stat-card-label">Current Month Expenses</div>
+        </div>
+      </div>
+
+      <!-- Expense Category Chart & Quick Summary -->
+      <div class="chart-grid">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">
+              <i data-lucide="receipt" style="width:18px;height:18px;margin-right:8px;vertical-align:middle;"></i>
+              Expense Ledger
+            </div>
+            <div class="table-actions">
+              <select class="form-select" id="expenseCategoryFilter" onchange="filterExpenses()" style="padding:6px 12px;font-size:0.85rem;width:160px;">
+                <option value="">All Categories</option>
+                <option value="Inventory">Inventory Purchases</option>
+                <option value="Packaging">Packaging</option>
+                <option value="Shipping">Shipping & Courier</option>
+                <option value="Marketing">Advertising & Marketing</option>
+                <option value="Software">Software & Subscriptions</option>
+                <option value="Salaries">Salaries & Wages</option>
+                <option value="Rent">Rent & Facilities</option>
+                <option value="Utilities">Utilities & Phone</option>
+                <option value="Office">Office & Admin</option>
+                <option value="Other">Other Expenses</option>
+              </select>
+              <div class="table-search">
+                <i data-lucide="search" style="width:16px;height:16px;color:var(--white-muted);"></i>
+                <input type="text" placeholder="Search expenses..." id="expenseSearch" oninput="filterExpenses()">
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="exportExpensesCSV()"><i data-lucide="download" style="width:14px;height:14px;"></i> Export</button>
+              <button class="btn btn-gold btn-sm" onclick="openExpenseModal()">+ Record Expense</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ref #</th>
+                  <th>Date</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Payee</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="expensesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title"><i data-lucide="pie-chart" style="width:18px;height:18px;color:var(--gold);"></i> Expenses by Category</div>
+          </div>
+          <div class="chart-container" style="position:relative; height:300px;"><canvas id="expenseCategoryChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" onclick="closeAllModals()"></div>
+
+<!-- Add Expense Modal -->
+<div class="modal" id="expenseModal" style="width:520px;">
+  <div class="modal-header">
+    <h3 id="expenseModalTitle">Record Operating Expense</h3>
+    <span class="modal-close" onclick="closeAllModals()">✕</span>
+  </div>
+  <div class="modal-body">
+    <form id="expenseForm" onsubmit="saveExpense(event)">
+      <input type="hidden" id="expId">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select class="form-select" id="expCategory" required>
+            <option value="Packaging">Packaging & Boxes</option>
+            <option value="Shipping">Shipping & Courier Fees</option>
+            <option value="Marketing">Advertising & Social Media</option>
+            <option value="Software">Software & Subscriptions</option>
+            <option value="Inventory">Raw Materials / Restocking</option>
+            <option value="Salaries">Salaries & Contractor Fees</option>
+            <option value="Rent">Showroom / Warehouse Rent</option>
+            <option value="Utilities">Electricity & Internet</option>
+            <option value="Office">Office Supplies & Stationery</option>
+            <option value="Other">Other Miscellaneous</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date *</label>
+          <input class="form-input" type="date" id="expDate" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description *</label>
+        <input class="form-input" id="expDescription" required placeholder="e.g. Velvet jewellery gift boxes batch #10">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Amount (Rs.) *</label>
+          <input class="form-input" type="number" id="expAmount" min="1" step="any" required placeholder="3500">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payee / Vendor</label>
+          <input class="form-input" id="expPayee" placeholder="e.g. Nepal Packaging Hub">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select class="form-select" id="expPaymentMethod">
+            <option value="Cash">Cash</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="eSewa">eSewa</option>
+            <option value="Khalti">Khalti</option>
+            <option value="Card">Debit/Credit Card</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Status</label>
+          <select class="form-select" id="expPaymentStatus">
+            <option value="paid" selected>Paid</option>
+            <option value="pending">Pending</option>
+            <option value="unpaid">Unpaid Payable</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding:0; border:none; margin-top:20px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button type="submit" class="btn btn-gold">Save Expense</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/expenses-admin.js"></script>
+</body>
+</html>

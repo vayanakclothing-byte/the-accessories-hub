@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketing & Promotions — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@1.61.0"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>Marketing & Store Promotions</h1>
+          <div class="topbar-breadcrumb">Growth & Feedback / Storefront Popups, Banners & Announcements</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- Marketing Quick Stats -->
+      <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon gold"><i data-lucide="megaphone" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statPopupStatus">Enabled</div>
+          <div class="stat-card-label">Storefront Promotional Popup</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon blue"><i data-lucide="tag" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statPromoCode">TAH10</div>
+          <div class="stat-card-label">Active Featured Promo Code</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon green"><i data-lucide="trending-up" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statMarketingRevenue">Rs. 0</div>
+          <div class="stat-card-label">Total Attributed Promotional Sales</div>
+        </div>
+      </div>
+
+      <!-- Settings Cards -->
+      <div class="chart-grid">
+        <!-- Storefront Promotional Popup Configuration -->
+        <div class="table-card" style="padding:24px;">
+          <h3 style="font-family:var(--font-serif); font-size:1.1rem; color:var(--gold-dark); margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+            <i data-lucide="sparkles" style="width:18px;height:18px;"></i> Storefront Welcome Popup
+          </h3>
+          <p style="font-size:0.8rem; color:var(--white-muted); margin-bottom:20px;">
+            Configure the modal that appears to first-time jewellery shoppers to drive email conversions and immediate purchases.
+          </p>
+
+          <form id="popupConfigForm" onsubmit="savePopupConfig(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Popup Enabled</label>
+                <select class="form-select" id="popupEnabled">
+                  <option value="true">Enabled (Visible to visitors)</option>
+                  <option value="false">Disabled (Hidden)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Delay before showing (seconds)</label>
+                <input class="form-input" type="number" id="popupDelay" value="5" min="1" max="60">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Popup Headline *</label>
+              <input class="form-input" id="popupHeadline" value="Get 10% Off Your First Order" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Subtext / Value Proposition</label>
+              <textarea class="form-textarea" id="popupSubtext" rows="2">Enjoy handcrafted rings, necklaces & earrings with free Birgunj delivery on orders above Rs. 2,000.</textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Discount Code to Copy</label>
+                <input class="form-input" id="popupCouponCode" value="TAH10" style="text-transform:uppercase; font-weight:700;">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Show Again Frequency</label>
+                <select class="form-select" id="popupFrequency">
+                  <option value="session">Once per session</option>
+                  <option value="7days" selected>Once every 7 days</option>
+                  <option value="always">Every page visit (testing)</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-gold" style="margin-top:8px;">
+              <i data-lucide="save" style="width:15px;height:15px;"></i> Save Popup Settings
+            </button>
+          </form>
+        </div>
+
+        <!-- Storefront Announcement Bar Configuration -->
+        <div class="table-card" style="padding:24px;">
+          <h3 style="font-family:var(--font-serif); font-size:1.1rem; color:var(--gold-dark); margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+            <i data-lucide="bell" style="width:18px;height:18px;"></i> Header Announcement Bar
+          </h3>
+          <p style="font-size:0.8rem; color:var(--white-muted); margin-bottom:20px;">
+            Broadcast flash sales, shipping announcements, or festive offers at the top of the storefront.
+          </p>
+
+          <form id="bannerConfigForm" onsubmit="saveBannerConfig(event)">
+            <div class="form-group">
+              <label class="form-label">Banner Status</label>
+              <select class="form-select" id="bannerEnabled">
+                <option value="true">Active (Show at top of website)</option>
+                <option value="false">Hidden</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Announcement Message *</label>
+              <textarea class="form-textarea" id="bannerMessage" rows="3" required>✨ Free Delivery on Orders Above Rs. 2,000 across Nepal! Express Delivery inside Birgunj.</textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Call to Action Link (Optional)</label>
+              <input class="form-input" id="bannerLink" placeholder="/products.html?collection=korean">
+            </div>
+
+            <button type="submit" class="btn btn-gold" style="margin-top:8px;">
+              <i data-lucide="save" style="width:15px;height:15px;"></i> Save Announcement
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/marketing-admin.js"></script>
+</body>
+</html>

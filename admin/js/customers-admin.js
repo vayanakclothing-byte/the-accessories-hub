@@ -158,6 +158,7 @@ async function saveCustomer(e) {
     return;
   }
 
+  await DB.logAudit(editingCustomerId ? 'UPDATE_CUSTOMER' : 'CREATE_CUSTOMER', 'customers', editingCustomerId || data.phone, `Customer ${data.name}`);
   showToast(editingCustomerId ? 'Customer updated!' : 'Customer added!');
   await DB.reload();
   closeAllModals();
@@ -173,4 +174,18 @@ function sendCustomerWhatsApp(id) {
 function searchCustomers() {
   const q = document.getElementById('customerSearch')?.value || '';
   renderCustomersTable(q);
+}
+
+function exportCustomersCSV() {
+  const customers = DB.customers();
+  exportTableToCSV(`customers_directory_${new Date().toISOString().split('T')[0]}`, customers, {
+    id: 'ID',
+    name: 'Customer Name',
+    phone: 'Phone',
+    email: 'Email',
+    address: 'Address',
+    totalOrders: 'Total Orders',
+    totalSpent: 'Total Spent (Rs.)',
+    joinDate: 'Joined Date'
+  });
 }

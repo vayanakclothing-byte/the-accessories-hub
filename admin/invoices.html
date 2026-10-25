@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoices — Admin | The Accessories Hub</title>
+  <title>Billing & Invoices — Admin ERP | The Accessories Hub</title>
   <link rel="stylesheet" href="/admin/css/admin.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
@@ -12,54 +12,40 @@
 </head>
 <body>
 <div class="admin-layout">
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><span class="icon"><i data-lucide="gem" style="color: var(--gold);"></i></span><div><span class="brand">The Accessories Hub</span><span class="sub">Admin Panel</span></div></div>
-    <nav class="sidebar-nav">
-      <div class="sidebar-section"><div class="sidebar-section-title">Main</div>
-        <a href="/admin/index.html" class="sidebar-link"><span class="link-icon"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i></span> Dashboard</a>
-        <a href="/admin/products.html" class="sidebar-link"><span class="link-icon"><i data-lucide="gem" style="width: 18px; height: 18px;"></i></span> Products</a>
-        <a href="/admin/categories.html" class="sidebar-link"><span class="link-icon"><i data-lucide="folder-tree" style="width: 18px; height: 18px;"></i></span> Categories</a>
-        <a href="/admin/inventory.html" class="sidebar-link"><span class="link-icon"><i data-lucide="package" style="width: 18px; height: 18px;"></i></span> Inventory <span class="badge">0</span></a>
-        <a href="/admin/orders.html" class="sidebar-link"><span class="link-icon"><i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i></span> Sales <span class="badge">0</span></a>
-      </div>
-      <div class="sidebar-section"><div class="sidebar-section-title">Management</div>
-        <a href="/admin/invoices.html" class="sidebar-link active"><span class="link-icon"><i data-lucide="receipt" style="width: 18px; height: 18px;"></i></span> Invoices</a>
-        <a href="/admin/customers.html" class="sidebar-link"><span class="link-icon"><i data-lucide="users" style="width: 18px; height: 18px;"></i></span> Customers</a>
-        <a href="/admin/settings.html" class="sidebar-link"><span class="link-icon"><i data-lucide="settings" style="width: 18px; height: 18px;"></i></span> Settings</a>
-      </div>
-    </nav>
-    <div class="sidebar-footer">
-        <a href="/"><i data-lucide="globe" style="width: 16px; height: 16px; margin-right: 8px;"></i> View Storefront</a>
-        <a href="#" onclick="handleLogout()" style="margin-top: 10px; color: var(--red);"><i data-lucide="log-out" style="width: 16px; height: 16px; margin-right: 8px;"></i> Logout</a>
-    </div>
-  </aside>
-  <div class="sidebar-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;opacity:0;pointer-events:none;transition:opacity 0.3s;"></div>
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay" onclick="document.getElementById('sidebar').classList.remove('open')"></div>
 
   <main class="admin-main">
     <div class="topbar">
       <div class="topbar-left">
         <button class="admin-hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i data-lucide="menu"></i></button>
-        <div><h1>Invoices</h1><div class="topbar-breadcrumb"><a href="index.html">Dashboard</a> / Invoices</div></div>
+        <div>
+          <h1>Billing & Invoices</h1>
+          <div class="topbar-breadcrumb"><a href="index.html">ERP</a> / Finance & Commerce / Invoices</div>
+        </div>
       </div>
       <div class="topbar-right">
-          <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
-              <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
-              <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
-          </div>
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
       </div>
     </div>
 
     <div class="admin-content">
       <div class="table-card">
         <div class="table-header">
-          <div class="table-title"><i data-lucide="receipt" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i> All Invoices</div>
-          <button class="btn btn-gold" onclick="openGenerateInvoice()">+ Generate Invoice</button>
+          <div class="table-title"><i data-lucide="receipt" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i> All Tax & Sales Invoices</div>
+          <div class="table-actions">
+            <button class="btn btn-outline" onclick="exportInvoicesCSV()"><i data-lucide="download" style="width: 14px; height: 14px; margin-right: 6px;"></i> Export CSV</button>
+            <button class="btn btn-gold" onclick="openGenerateInvoice()">+ Generate Invoice</button>
+          </div>
         </div>
         <div style="overflow-x:auto;">
-        <table>
-          <thead><tr><th>Invoice #</th><th>Order</th><th>Customer</th><th>Amount</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="invoicesBody"></tbody>
-        </table>
+          <table>
+            <thead><tr><th>Invoice #</th><th>Order</th><th>Customer</th><th>Amount</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="invoicesBody"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -72,7 +58,7 @@
 <div class="modal" id="generateModal" style="width:480px;">
   <div class="modal-header"><h3>Generate Invoice</h3><span class="modal-close" onclick="closeAllModals()">✕</span></div>
   <div class="modal-body">
-    <div class="alert alert-info"><i data-lucide="info" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Select an order to generate a branded PDF invoice.</div>
+    <div class="alert alert-info"><i data-lucide="info" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Select an order to generate a branded PDF tax invoice.</div>
     <div class="form-group">
       <label class="form-label">Select Order</label>
       <select class="form-select" id="invoiceOrderSelect"><option value="">Select an order...</option></select>

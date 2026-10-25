@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff & Permissions — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@1.61.0"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>Staff, Roles & Permissions</h1>
+          <div class="topbar-breadcrumb">System & Administration / Role-Based Access Control (RBAC)</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- Role Cards -->
+      <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon gold"><i data-lucide="shield-check" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statAdminCount">0</div>
+          <div class="stat-card-label">Super Administrators</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon blue"><i data-lucide="user-check" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statStaffCount">0</div>
+          <div class="stat-card-label">Staff / Store Operators</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon purple"><i data-lucide="users" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statUserCount">0</div>
+          <div class="stat-card-label">Registered Customer Accounts</div>
+        </div>
+      </div>
+
+      <!-- Staff Profiles Table -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">
+            <i data-lucide="shield" style="width:18px;height:18px;margin-right:8px;vertical-align:middle;"></i>
+            User Authorization Directory
+          </div>
+          <div class="table-actions">
+            <div class="table-search">
+              <i data-lucide="search" style="width:16px;height:16px;color:var(--white-muted);"></i>
+              <input type="text" placeholder="Search email, role..." id="staffSearch" oninput="filterStaff()">
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="exportStaffCSV()"><i data-lucide="download" style="width:14px;height:14px;"></i> Export</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Email Address</th>
+                <th>Role</th>
+                <th>Access Level</th>
+                <th>Account Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staffTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" onclick="closeAllModals()"></div>
+
+<!-- Change Role Modal -->
+<div class="modal" id="roleModal" style="width:400px;">
+  <div class="modal-header">
+    <h3>Update User Role</h3>
+    <span class="modal-close" onclick="closeAllModals()">✕</span>
+  </div>
+  <div class="modal-body">
+    <form id="roleForm" onsubmit="saveUserRole(event)">
+      <input type="hidden" id="roleUserId">
+      <div class="form-group">
+        <label class="form-label">User Email</label>
+        <input class="form-input" id="roleUserEmail" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Assign Role *</label>
+        <select class="form-select" id="roleSelect" required>
+          <option value="admin">Administrator (Full ERP & Financial Access)</option>
+          <option value="manager">Operations Manager (Orders & Inventory)</option>
+          <option value="staff">Staff (Orders & Fulfilment)</option>
+          <option value="user">Customer / Standard User</option>
+        </select>
+      </div>
+      <div class="modal-footer" style="padding:0; border:none; margin-top:20px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button type="submit" class="btn btn-gold">Update Role</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/staff-admin.js"></script>
+</body>
+</html>

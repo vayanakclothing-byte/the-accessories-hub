@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports & Analytics — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@1.61.0"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>Enterprise Reports & Business Intelligence</h1>
+          <div class="topbar-breadcrumb">Intelligence / Real-time Ledger Reports & Exportable Datasets</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- Report Selection Tabs -->
+      <div class="tab-group" style="overflow-x:auto;">
+        <button class="tab-btn active" id="tabBtnSales" onclick="switchReportTab('sales')">Sales Performance</button>
+        <button class="tab-btn" id="tabBtnInventory" onclick="switchReportTab('inventory')">Inventory Valuation</button>
+        <button class="tab-btn" id="tabBtnProfit" onclick="switchReportTab('profit')">Product Margins</button>
+        <button class="tab-btn" id="tabBtnCustomers" onclick="switchReportTab('customers')">Customer Retention</button>
+        <button class="tab-btn" id="tabBtnExpenses" onclick="switchReportTab('expenses')">Operating Expenses</button>
+        <button class="tab-btn" id="tabBtnTax" onclick="switchReportTab('tax')">Tax & Billing Summary</button>
+      </div>
+
+      <!-- Report Card Container -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title" id="reportTitle">
+            <i data-lucide="file-spreadsheet" style="width:18px;height:18px;margin-right:8px;vertical-align:middle;"></i>
+            Detailed Dataset
+          </div>
+          <div class="table-actions">
+            <button class="btn btn-gold btn-sm" onclick="exportCurrentReport()">
+              <i data-lucide="download" style="width:14px;height:14px;"></i> Export Report to CSV
+            </button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto; min-height:360px;">
+          <table>
+            <thead id="reportTableHead"></thead>
+            <tbody id="reportTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/reports-admin.js"></script>
+</body>
+</html>

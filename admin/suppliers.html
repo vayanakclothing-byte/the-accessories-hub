@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suppliers & Purchasing — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@1.61.0"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>Suppliers & Purchasing</h1>
+          <div class="topbar-breadcrumb">Finance & Commerce / Purchase Orders & Vendor Management</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- KPI Cards -->
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon gold"><i data-lucide="factory" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statSupplierCount">0</div>
+          <div class="stat-card-label">Active Suppliers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon blue"><i data-lucide="clipboard-list" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statActivePOCount">0</div>
+          <div class="stat-card-label">Open Purchase Orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon green"><i data-lucide="check-circle" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statReceivedPOCount">0</div>
+          <div class="stat-card-label">Received Orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon orange"><i data-lucide="credit-card" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statTotalProcured">Rs. 0</div>
+          <div class="stat-card-label">Total Procured Value</div>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tab-group">
+        <button class="tab-btn active" id="tabBtnPOs" onclick="switchTab('pos')">Purchase Orders</button>
+        <button class="tab-btn" id="tabBtnSuppliers" onclick="switchTab('suppliers')">Suppliers Directory</button>
+      </div>
+
+      <!-- Tab 1: Purchase Orders View -->
+      <div id="tabContentPOs">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">
+              <i data-lucide="shopping-cart" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i>
+              Purchase Orders <span id="poCountBadge" style="font-size:0.8rem; color:var(--white-muted); font-weight:normal;"></span>
+            </div>
+            <div class="table-actions">
+              <div class="table-search">
+                <i data-lucide="search" style="width: 16px; height: 16px; color: var(--white-muted);"></i>
+                <input type="text" placeholder="Search PO #, supplier..." id="poSearch" oninput="searchPOs()">
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="exportPOsCSV()"><i data-lucide="download" style="width:14px;height:14px;"></i> Export</button>
+              <button class="btn btn-gold btn-sm" onclick="openCreatePOModal()">+ Create Purchase Order</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>PO Number</th>
+                  <th>Supplier</th>
+                  <th>Order Date</th>
+                  <th>Expected</th>
+                  <th>Total Cost</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="poTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Suppliers Directory View -->
+      <div id="tabContentSuppliers" style="display:none;">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">
+              <i data-lucide="factory" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"></i>
+              Approved Suppliers
+            </div>
+            <div class="table-actions">
+              <div class="table-search">
+                <i data-lucide="search" style="width: 16px; height: 16px; color: var(--white-muted);"></i>
+                <input type="text" placeholder="Search suppliers..." id="supplierSearch" oninput="searchSuppliers()">
+              </div>
+              <button class="btn btn-gold btn-sm" onclick="openSupplierModal()">+ Add Supplier</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Supplier Name</th>
+                  <th>Contact Person</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Payment Terms</th>
+                  <th>Lead Time</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="suppliersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" onclick="closeAllModals()"></div>
+
+<!-- Add/Edit Supplier Modal -->
+<div class="modal" id="supplierModal" style="width: 520px;">
+  <div class="modal-header">
+    <h3 id="supplierModalTitle">Add Supplier</h3>
+    <span class="modal-close" onclick="closeAllModals()">✕</span>
+  </div>
+  <div class="modal-body">
+    <form id="supplierForm" onsubmit="saveSupplier(event)">
+      <input type="hidden" id="suppId">
+      <div class="form-group">
+        <label class="form-label">Company / Supplier Name *</label>
+        <input class="form-input" id="suppName" required placeholder="e.g. Birgunj Artisan Gems Ltd.">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Contact Person</label>
+          <input class="form-input" id="suppContact" placeholder="e.g. Ramesh Shrestha">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone *</label>
+          <input class="form-input" id="suppPhone" required placeholder="+977 98XXXXXXXX">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="suppEmail" placeholder="supplier@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Terms</label>
+          <select class="form-select" id="suppTerms">
+            <option value="Net 15">Net 15</option>
+            <option value="Net 30" selected>Net 30</option>
+            <option value="Advance">Advance Payment</option>
+            <option value="COD">Cash on Delivery</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input class="form-input" id="suppAddress" placeholder="Street, City, Country">
+      </div>
+      <div class="modal-footer" style="padding:0; border:none; margin-top:16px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button type="submit" class="btn btn-gold">Save Supplier</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Create Purchase Order Modal -->
+<div class="modal wide" id="poModal">
+  <div class="modal-header">
+    <h3>Create Purchase Order</h3>
+    <span class="modal-close" onclick="closeAllModals()">✕</span>
+  </div>
+  <div class="modal-body">
+    <form id="poForm" onsubmit="savePurchaseOrder(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Supplier *</label>
+          <select class="form-select" id="poSupplierSelect" required onchange="onPOSupplierChange()">
+            <option value="">Select Supplier...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expected Delivery Date</label>
+          <input class="form-input" type="date" id="poExpectedDate">
+        </div>
+      </div>
+
+      <div style="margin: 16px 0 8px 0; font-weight:600; font-size:0.85rem; color:var(--white);">Items to Order</div>
+      <div id="poItemsContainer">
+        <!-- Dynamically added rows -->
+      </div>
+      <button type="button" class="btn btn-sm btn-outline" style="margin-top:8px;" onclick="addPOItemRow()">+ Add Item</button>
+
+      <div class="form-row" style="margin-top:16px;">
+        <div class="form-group">
+          <label class="form-label">Shipping / Freight (Rs.)</label>
+          <input class="form-input" type="number" id="poShippingCost" value="0" oninput="calculatePOTotal()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input class="form-input" id="poNotes" placeholder="Order instructions or batch tracking">
+        </div>
+      </div>
+
+      <div style="text-align:right; font-size:1.1rem; font-weight:700; color:var(--gold-dark); margin-top:12px;">
+        Total: <span id="poTotalDisplay">Rs. 0</span>
+      </div>
+
+      <div class="modal-footer" style="padding:0; border:none; margin-top:20px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button type="submit" class="btn btn-gold">Issue Purchase Order</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/suppliers-admin.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 /* ============================================================
-   Inventory Admin — Stock Management
+   Inventory Admin — Stock Management & Ledger
    ============================================================ */
 document.addEventListener('DOMContentLoaded', async () => {
   await loadData();
@@ -13,9 +13,19 @@ function renderInventoryStats() {
   const inStock = products.filter(p => Number(p.stock) > Number(p.reorderLevel)).length;
   const lowStock = products.filter(p => Number(p.stock) > 0 && Number(p.stock) <= Number(p.reorderLevel)).length;
   const outOfStock = products.filter(p => Number(p.stock) === 0).length;
+
+  let totalAsset = 0;
+  products.forEach(p => {
+    const cost = p.costPrice > 0 ? p.costPrice : p.price * 0.45;
+    totalAsset += (Number(p.stock) || 0) * cost;
+  });
+
   document.getElementById('inStockCount').textContent = inStock;
   document.getElementById('lowStockCount').textContent = lowStock;
   document.getElementById('outStockCount').textContent = outOfStock;
+  if (document.getElementById('totalAssetValue')) {
+    document.getElementById('totalAssetValue').textContent = formatPrice(totalAsset);
+  }
 }
 
 function renderInventoryTable(filter = '') {
@@ -27,13 +37,14 @@ function renderInventoryTable(filter = '') {
   if (!tbody) return;
 
   if (products.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--white-muted);padding:24px;">No products match this filter.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--white-muted);padding:24px;">No products match this filter.</td></tr>';
     return;
   }
 
   tbody.innerHTML = products.map(p => {
     const stock = Number(p.stock) || 0;
     const reorder = Number(p.reorderLevel) || 0;
+    const cost = p.costPrice > 0 ? p.costPrice : p.price * 0.45;
     const status = stock === 0 ? 'out' : stock <= reorder ? 'low' : 'ok';
     const badge = status === 'out'
       ? '<span class="badge badge-red">Out of Stock</span>'
@@ -46,9 +57,13 @@ function renderInventoryTable(filter = '') {
         <td>
           <div class="table-product">
             <div class="table-img"><img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}"></div>
-            <div><div class="table-product-name">${escapeHtml(p.name)}</div><div class="table-product-sub">${escapeHtml(p.sku || '—')}</div></div>
+            <div>
+              <div class="table-product-name">${escapeHtml(p.name)}</div>
+              <div class="table-product-sub">${escapeHtml(p.sku || 'SKU-' + p.id)}</div>
+            </div>
           </div>
         </td>
+        <td><strong>${formatPrice(cost)}</strong></td>
         <td>
           <div class="stock-inline">
             <strong>${stock}</strong>
@@ -62,7 +77,7 @@ function renderInventoryTable(filter = '') {
             <button class="btn btn-sm btn-ghost" onclick="adjustStock(${Number(p.id)}, -1)" ${stock === 0 ? 'disabled' : ''}>−</button>
             <input type="number" value="${stock}" min="0" style="width:60px;text-align:center;background:var(--grey);border:1px solid var(--grey-mid);border-radius:6px;color:var(--white);padding:6px;font-size:0.85rem;" onchange="setStock(${Number(p.id)}, this.value)">
             <button class="btn btn-sm btn-ghost" onclick="adjustStock(${Number(p.id)}, 1)">+</button>
-            <button class="btn btn-sm btn-outline" onclick="restockProduct(${Number(p.id)})">Restock</button>
+            <button class="btn btn-sm btn-outline" onclick="restockProduct(${Number(p.id)})">+20</button>
           </div>
         </td>
       </tr>
@@ -79,6 +94,7 @@ async function adjustStock(id, delta) {
   if (error) { showToast('Could not update stock: ' + error.message, 'error'); return; }
 
   await logStockChange(p.name, delta > 0 ? 'restock' : 'adjustment', delta, newStock);
+  await DB.logAudit('ADJUST_STOCK', 'inventory', id, `${p.name}: ${delta > 0 ? '+' : ''}${delta} units`);
   await DB.reload();
   renderInventoryTable();
   renderInventoryStats();
@@ -95,7 +111,9 @@ async function setStock(id, value) {
   const { error } = await supabase.from('products').update({ stock: newStock, in_stock: newStock > 0 }).eq('id', id);
   if (error) { showToast('Could not update stock: ' + error.message, 'error'); return; }
 
-  await logStockChange(p.name, 'adjustment', newStock - oldStock, newStock);
+  const diff = newStock - oldStock;
+  await logStockChange(p.name, 'adjustment', diff, newStock);
+  await DB.logAudit('SET_STOCK', 'inventory', id, `${p.name}: manual set to ${newStock} (${diff > 0 ? '+' : ''}${diff})`);
   await DB.reload();
   renderInventoryTable();
   renderInventoryStats();
@@ -113,6 +131,7 @@ async function restockProduct(id) {
   if (error) { showToast('Could not restock: ' + error.message, 'error'); return; }
 
   await logStockChange(p.name, 'restock', amount, newStock);
+  await DB.logAudit('RESTOCK_PRODUCT', 'inventory', id, `${p.name}: restocked +${amount} units`);
   await DB.reload();
   renderInventoryTable();
   renderInventoryStats();
@@ -134,12 +153,12 @@ async function logStockChange(product, type, change, newStock) {
 }
 
 function renderStockHistory() {
-  const history = DB.stockHistory().slice(0, 8);
+  const history = DB.stockHistory().slice(0, 10);
   const container = document.getElementById('stockTimeline');
   if (!container) return;
 
   if (history.length === 0) {
-    container.innerHTML = '<p style="color:var(--white-muted);font-size:0.85rem;">No stock movements yet.</p>';
+    container.innerHTML = '<p style="color:var(--white-muted);font-size:0.85rem;">No stock movements recorded yet.</p>';
     return;
   }
 
@@ -149,9 +168,9 @@ function renderStockHistory() {
     <div class="timeline-item">
       <div class="time">${escapeHtml(h.date || '—')}</div>
       <div class="event">
-        <strong>${escapeHtml(h.product || '—')}</strong> — ${h.type === 'restock' ? 'Restocked' : h.type === 'sale' ? 'Sold' : 'Adjusted'}
-        <span style="color:${change > 0 ? 'var(--green)' : 'var(--red)'};">${change > 0 ? '+' : ''}${change}</span>
-        → Stock: ${Number(h.newStock) || 0}
+        <strong>${escapeHtml(h.product || '—')}</strong> — ${escapeHtml(h.type || 'Movement')}
+        <span style="color:${change > 0 ? 'var(--green)' : 'var(--red)'}; font-weight:600;">${change > 0 ? '+' : ''}${change}</span>
+        → On-Hand: <strong>${Number(h.newStock) || 0}</strong>
       </div>
     </div>
   `;
@@ -163,4 +182,18 @@ function filterInventory(type, evt) {
   document.querySelectorAll('.inv-filter-btn').forEach(b => b.classList.remove('active'));
   clicked?.classList.add('active');
   renderInventoryTable(type);
+}
+
+function exportInventoryCSV() {
+  const products = DB.products();
+  exportTableToCSV(`inventory_ledger_${new Date().toISOString().split('T')[0]}`, products, {
+    sku: 'SKU',
+    name: 'Product Name',
+    category: 'Category',
+    stock: 'Stock On-Hand',
+    reorderLevel: 'Reorder Level',
+    price: 'Retail Price (Rs.)',
+    costPrice: 'Unit Cost (Rs.)',
+    inStock: 'In Stock'
+  });
 }

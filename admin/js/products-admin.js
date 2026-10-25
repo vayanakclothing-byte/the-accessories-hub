@@ -98,6 +98,7 @@ function editProduct(id) {
   document.getElementById('modalTitle').textContent = 'Edit Product';
   document.getElementById('pName').value = p.name || '';
   document.getElementById('pPrice').value = p.price ?? '';
+  document.getElementById('pCostPrice').value = p.costPrice ?? (p.cost_price ?? '');
   document.getElementById('pOriginalPrice').value = p.originalPrice ?? '';
   document.getElementById('pCollection').value = p.collection || '';
   document.getElementById('pCategory').value = p.category || '';
@@ -123,11 +124,13 @@ async function saveProduct(e) {
 
   const stock = Math.max(0, parseInt(document.getElementById('pStock').value, 10) || 0);
   const originalPriceRaw = document.getElementById('pOriginalPrice').value;
+  const costPriceRaw = document.getElementById('pCostPrice')?.value;
   const images = uploadedImages.length ? uploadedImages : [FALLBACK_IMAGE];
 
   const data = {
     name,
     price,
+    cost_price: costPriceRaw ? Number(costPriceRaw) : 0,
     original_price: originalPriceRaw ? Number(originalPriceRaw) : null,
     collection: document.getElementById('pCollection').value.trim(),
     category: document.getElementById('pCategory').value.trim().toLowerCase(),
@@ -159,10 +162,26 @@ async function saveProduct(e) {
     return;
   }
 
+  await DB.logAudit(editingProductId ? 'UPDATE_PRODUCT' : 'CREATE_PRODUCT', 'products', editingProductId || data.sku, `Saved product "${name}" (Price: Rs. ${price})`);
   showToast(editingProductId ? 'Product updated successfully!' : 'Product added successfully!');
   await DB.reload();
   closeAllModals();
   renderProductsTable();
+}
+
+function exportProductsCSV() {
+  const products = DB.products();
+  exportTableToCSV(`catalogue_products_${new Date().toISOString().split('T')[0]}`, products, {
+    id: 'Product ID',
+    sku: 'SKU',
+    name: 'Product Name',
+    category: 'Category',
+    collection: 'Collection',
+    price: 'Selling Price (Rs.)',
+    costPrice: 'Cost Price (Rs.)',
+    stock: 'Stock On-Hand',
+    inStock: 'In Stock'
+  });
 }
 
 function confirmDeleteProduct(id) {

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Returns & Refunds — Admin | The Accessories Hub</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <script src="https://unpkg.com/lucide@1.61.0"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="admin-hamburger"><i data-lucide="menu"></i></button>
+        <div>
+          <h1>Returns, Exchanges & Refunds</h1>
+          <div class="topbar-breadcrumb">Core Operations / Quality Control, Restocking & Refunds</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+          <div id="adminName" style="font-size: 0.85rem; font-weight: 500; color: var(--gold);">Admin</div>
+          <div class="admin-avatar" id="adminAvatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--grey-dark); border: 1px solid var(--gold);">A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- Return KPIs -->
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon orange"><i data-lucide="rotate-ccw" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statPendingReturns">0</div>
+          <div class="stat-card-label">Pending Approval</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon green"><i data-lucide="package-check" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statRestockedCount">0</div>
+          <div class="stat-card-label">Restocked Items</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon red"><i data-lucide="dollar-sign" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statTotalRefunded">Rs. 0</div>
+          <div class="stat-card-label">Total Amount Refunded</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header"><div class="stat-card-icon blue"><i data-lucide="shield-alert" style="width:20px;height:20px;"></i></div></div>
+          <div class="stat-card-value" id="statReturnRate">0%</div>
+          <div class="stat-card-label">Overall Return Rate</div>
+        </div>
+      </div>
+
+      <!-- Table Card -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">
+            <i data-lucide="rotate-ccw" style="width:18px;height:18px;margin-right:8px;vertical-align:middle;"></i>
+            Return & Refund Requests
+          </div>
+          <div class="table-actions">
+            <select class="form-select" id="returnStatusFilter" onchange="filterReturns()" style="padding:6px 12px;font-size:0.85rem;width:160px;">
+              <option value="">All Statuses</option>
+              <option value="requested">Requested</option>
+              <option value="approved">Approved</option>
+              <option value="received">Received for Inspection</option>
+              <option value="refunded">Refunded</option>
+              <option value="restocked">Restocked</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <div class="table-search">
+              <i data-lucide="search" style="width:16px;height:16px;color:var(--white-muted);"></i>
+              <input type="text" placeholder="Search return #, order..." id="returnSearch" oninput="filterReturns()">
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="exportReturnsCSV()"><i data-lucide="download" style="width:14px;height:14px;"></i> Export</button>
+            <button class="btn btn-gold btn-sm" onclick="openNewReturnModal()">+ Log Return Request</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Return #</th>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Type</th>
+                <th>Reason</th>
+                <th>Condition</th>
+                <th>Refund Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="returnsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" onclick="closeAllModals()"></div>
+
+<!-- Log Return Modal -->
+<div class="modal" id="returnModal" style="width:540px;">
+  <div class="modal-header">
+    <h3 id="returnModalTitle">Log Return / Refund Request</h3>
+    <span class="modal-close" onclick="closeAllModals()">✕</span>
+  </div>
+  <div class="modal-body">
+    <form id="returnForm" onsubmit="saveReturn(event)">
+      <input type="hidden" id="retId">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Order Number *</label>
+          <select class="form-select" id="retOrderSelect" required onchange="onReturnOrderSelect()">
+            <option value="">Select Order...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Request Type</label>
+          <select class="form-select" id="retType">
+            <option value="return">Product Return & Refund</option>
+            <option value="exchange">Exchange for Another Size/Piece</option>
+            <option value="refund">Goodwill / Cancellation Refund</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Customer Name</label>
+          <input class="form-input" id="retCustomerName" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Customer Phone</label>
+          <input class="form-input" id="retCustomerPhone" readonly>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Reason for Return *</label>
+          <select class="form-select" id="retReason" required>
+            <option value="Wrong size / measurement">Wrong size / measurement</option>
+            <option value="Defective / Damaged in transit">Defective / Damaged in transit</option>
+            <option value="Different from pictures">Different from pictures</option>
+            <option value="Changed mind">Customer changed mind</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Inspected Condition</label>
+          <select class="form-select" id="retCondition">
+            <option value="unopened">Unopened (Factory seal intact)</option>
+            <option value="good" selected>Good / Resalable</option>
+            <option value="damaged">Damaged (Cannot restock)</option>
+            <option value="defective">Defective</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Refund Amount (Rs.) *</label>
+          <input class="form-input" type="number" id="retAmount" required min="0" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Refund Method</label>
+          <select class="form-select" id="retMethod">
+            <option value="bank_transfer">Bank Transfer / FonePay</option>
+            <option value="esewa">eSewa Wallet</option>
+            <option value="khalti">Khalti Wallet</option>
+            <option value="store_credit">Store Credit Coupon</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+        <input type="checkbox" id="retRestock" style="width:18px;height:18px;accent-color:var(--gold);">
+        <label for="retRestock" style="font-size:0.85rem;color:var(--white);cursor:pointer;">
+          Safely restock items back into active inventory ledger upon approval
+        </label>
+      </div>
+
+      <div class="modal-footer" style="padding:0; border:none; margin-top:20px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button type="submit" class="btn btn-gold">Save Return Request</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-guard.js"></script>
+<script src="/admin/js/admin-app.js"></script>
+<script src="/admin/js/returns-admin.js"></script>
+</body>
+</html>
